@@ -195,14 +195,15 @@ def offending_driver_weather_data(file_path: str = "data/교통사고/TAAS_기�
 
 # 4번 안됨
 # 4. TAAS_노인운전자 사고유형별 및 시간대별 교통사고.xlsx
-def offending_driver_type_time_data(file_path: str = "data/교통사고/TAAS_노인운전자 사고유형별 및 시간대별 교통사고.xlsx") -> pd.DataFrame:
-    
-    # 1. 엑셀 불러오기
+def offending_driver_type_time_data(
+    file_path: str = "data/교통사고/TAAS_노인운전자 사고유형별 및 시간대별 교통사고.xlsx"
+) -> pd.DataFrame:
+
     df = pd.read_excel(file_path, header=None)
 
-    # 2. 헤더 정보 추출
-    # 0행 : 연도
-    # 1행 : 시간대
+    # -----------------------------
+    # 1. 연도 / 시간대 헤더 처리
+    # -----------------------------
     years = (
         df.iloc[0]
         .replace("", None)
@@ -219,10 +220,12 @@ def offending_driver_type_time_data(file_path: str = "data/교통사고/TAAS_노
         .str.strip()
     )
 
-    # 3. 데이터 영역
+    # -----------------------------
+    # 2. 실제 데이터 영역
+    # -----------------------------
     data_df = df.iloc[2:].copy()
 
-    # 병합된 사고유형 / 세부유형 채우기
+    # A열: 대분류
     data_df[0] = (
         data_df[0]
         .replace("", None)
@@ -232,6 +235,7 @@ def offending_driver_type_time_data(file_path: str = "data/교통사고/TAAS_노
         .str.strip()
     )
 
+    # B열: 중분류
     data_df[1] = (
         data_df[1]
         .replace("", None)
@@ -241,48 +245,58 @@ def offending_driver_type_time_data(file_path: str = "data/교통사고/TAAS_노
         .str.strip()
     )
 
-    # 4. 사고 건수 행만 선택
+    # C열: 소분류
+    data_df[2] = (
+        data_df[2]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+    # D열: 사고[건] / 사망[명] / 부상[명]
+    data_df[3] = (
+        data_df[3]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+    # -----------------------------
+    # 3. 사고 건수만 추출
+    # -----------------------------
     accident_df = data_df[
-        (data_df[2].astype(str).str.strip() == "사고[건]") &
+        (data_df[3].str.contains("사고", na=False)) &
         (~data_df[0].isin(["합계", "", "nan", "None"])) &
         (~data_df[1].isin(["합계", "", "nan", "None"]))
     ].copy()
 
-    # 5. 제외할 시간대
-    invalid_time_slots = {
-        "합계",
-        "구분",
-        "사고유형",
-        "시간대",
-        "",
-        "nan",
-        "None"
-    }
-
     records = []
 
-    # 6. 데이터 추출
+    # -----------------------------
+    # 4. 행별 데이터 추출
+    # -----------------------------
     for _, row in accident_df.iterrows():
 
         main_type = row[0]
-        sub_type = row[1]
+        middle_type = row[1]
+        sub_type = row[2]
 
-        for col_idx in range(3, len(df.columns)):
+        # E열(4)은 합계이므로
+        # F열(5)부터 시간대 데이터
+        for col_idx in range(5, len(df.columns)):
 
             year_val = years.iloc[col_idx]
             time_val = time_slots.iloc[col_idx]
 
-            # 연도 추출
+            # 2021 ~ 2025
             year_match = re.search(r"202[1-5]", year_val)
 
             if not year_match:
                 continue
 
-            # 합계 및 잘못된 시간대 제외
-            if time_val in invalid_time_slots:
+            # 시간대가 없는 열 제외
+            if time_val in ["", "합계", "nan", "None"]:
                 continue
 
-            # 사고 건수
             val = row[col_idx]
 
             if pd.isna(val):
@@ -293,20 +307,18 @@ def offending_driver_type_time_data(file_path: str = "data/교통사고/TAAS_노
                 try:
                     accidents = int(float(val))
                 except (ValueError, TypeError):
-                    continue
+                    accidents = 0
 
             records.append({
                 "accident_type_main": main_type,
+                "accident_type_middle": middle_type,
                 "accident_type_sub": sub_type,
                 "year": int(year_match.group()),
                 "time_slot": time_val,
                 "accidents": accidents
             })
 
-    # 7. DataFrame 변환
-    result_df = pd.DataFrame(records)
-
-    return result_df.reset_index(drop=True)
+    return pd.DataFrame(records).reset_index(drop=True)
 
 
 # 5. TAAS_노인운전자 월별 및 시간대별 교통사고.xlsx
@@ -554,3 +566,23 @@ def accident_region_total(file_path:str = "data/교통사고/TAAS_지역별 전�
                 
     result_df = pd.DataFrame(records)
     return result_df.reset_index(drop=True)
+
+if __name__ == "__main__":
+    file_path = "data/교통사고/TAAS_노인운전자 사고유형별 및 시간대별 교통사고.xlsx"
+
+    df = pd.read_excel(file_path, header=None)
+
+    print("=== 크기 ===")
+    print(df.shape)
+
+    print("\n=== 앞 15행 ===")
+    print(df.head(15).to_string())
+
+    print("\n=== 0행 ===")
+    print(df.iloc[0].tolist())
+
+    print("\n=== 1행 ===")
+    print(df.iloc[1].tolist())
+
+    print("\n=== 2열 값 ===")
+    print(df.iloc[:, 2].dropna().unique())
