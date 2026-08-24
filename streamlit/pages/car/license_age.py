@@ -1598,7 +1598,7 @@ with st.container(
 
                     textfont=dict(
                         color="#F4F6FA",
-                        size=14,
+                        size=16,
                     ),
 
                     cliponaxis=False,
@@ -1651,7 +1651,7 @@ with st.container(
 
                     textfont=dict(
                         color="#F4F6FA",
-                        size=14,
+                        size=16,
                     ),
 
                     cliponaxis=False,
@@ -1707,7 +1707,7 @@ with st.container(
 
                     annotation_font=dict(
                         color="#F0B95C",
-                        size=13,
+                        size=15,
                     ),
                 )
 
@@ -1734,10 +1734,10 @@ with st.container(
 
             fig.update_layout(
 
-                # 연령이 많으면 차트 높이 자동 증가
+                # 연령이 많으면 차트 높이 자동 증가 (세로 길이 축소)
                 height=max(
-                    620,
-                    37 * len(
+                    500,
+                    29 * len(
                         chart_df
                     ),
                 ),
@@ -1755,7 +1755,7 @@ with st.container(
 
                 font=dict(
                     color="#E6EAF1",
-                    size=13,
+                    size=15,
                 ),
 
                 barmode="overlay",
@@ -1783,7 +1783,7 @@ with st.container(
 
                     font=dict(
                         color="#E8EBF1",
-                        size=13,
+                        size=15,
                     ),
 
                     bgcolor="rgba(0,0,0,0)",
@@ -1804,7 +1804,7 @@ with st.container(
 
                         font=dict(
                             color="#D8DEE8",
-                            size=14,
+                            size=16,
                         ),
                     ),
 
@@ -1820,7 +1820,7 @@ with st.container(
 
                     tickfont=dict(
                         color="#C2C9D5",
-                        size=12,
+                        size=14,
                     ),
 
                     range=[
@@ -1855,7 +1855,7 @@ with st.container(
 
                     tickfont=dict(
                         color="#F0F2F6",
-                        size=13,
+                        size=15,
                     ),
 
                     showgrid=False,
@@ -1983,3 +1983,4 @@ with st.container(
                         ),
                 },
             )
+

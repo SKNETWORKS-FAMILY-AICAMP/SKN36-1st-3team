@@ -531,6 +531,19 @@ div[role="radiogroup"] label p {
 }
 
 
+/* SECTION TITLE */
+
+.section-title {
+    color: #FFFFFF;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-top: 34px;
+    margin-bottom: 4px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #D6A348;
+}
+
 /* KPI */
 
 .kpi {
@@ -1185,6 +1198,16 @@ with st.container(
 
         selected_label = selected_sido
 
+
+    # ========================================================
+    # ANALYSIS SECTION
+    # ========================================================
+
+    st.html(
+        '''
+        <div class="section-title">분석</div>
+        '''
+    )
 
     # ========================================================
     # KPI
@@ -1866,6 +1889,16 @@ with st.container(
                 }
             )
 
+
+    # ========================================================
+    # PREDICTION SECTION
+    # ========================================================
+
+    st.html(
+        '''
+        <div class="section-title">예측</div>
+        '''
+    )
 
     # ========================================================
     # FUTURE PREDICTION

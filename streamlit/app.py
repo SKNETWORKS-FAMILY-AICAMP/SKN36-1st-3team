@@ -1,8 +1,3 @@
-# ============================================================
-# streamlit/app.py
-# SAFER - Main Navigation
-# ============================================================
-
 import streamlit as st
 
 
@@ -12,7 +7,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="SAFER",
-    page_icon="🚘",
+    page_icon="🚗",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -26,11 +21,12 @@ main_page = st.Page(
     "main.py",
     title="SAFER",
     url_path="main",
+    default=True,
 )
 
 
 # ============================================================
-# PEOPLE
+# PEOPLE MAIN
 # ============================================================
 
 people_page = st.Page(
@@ -40,17 +36,21 @@ people_page = st.Page(
 )
 
 
+# ============================================================
+# PEOPLE SUB
+# ============================================================
+
 local_population_page = st.Page(
     "pages/people/local_population.py",
     title="지역별 인구 현황",
-    url_path="local_population",
+    url_path="local-population",
 )
 
 
 resident_population_monthly_page = st.Page(
     "pages/people/resident_population_monthly.py",
-    title="주민등록 인구 현황",
-    url_path="resident_population_monthly",
+    title="주민등록 인구 및 세대 현황",
+    url_path="resident-population-monthly",
 )
 
 
@@ -71,47 +71,22 @@ car_page = st.Page(
 
 license_gender_page = st.Page(
     "pages/car/license_gender.py",
-    title="성별 운전면허 소지자 현황",
-    url_path="license_gender",
+    title="성별 운전면허 현황",
+    url_path="license-gender",
 )
 
 
 license_age_page = st.Page(
     "pages/car/license_age.py",
-    title="연령별 운전면허 소지자 현황",
-    url_path="license_age",
+    title="연령별 운전면허 현황",
+    url_path="license-age",
 )
 
 
 license_region_page = st.Page(
     "pages/car/license_region.py",
-    title="지역별 운전면허 소지자 현황",
-    url_path="license_region",
-)
-
-
-# ============================================================
-# CAR - RETURN LICENSE
-# ============================================================
-
-return_2023_page = st.Page(
-    "pages/car/return_2023.py",
-    title="2023 운전면허 자진반납",
-    url_path="return_2023",
-)
-
-
-return_2025_page = st.Page(
-    "pages/car/return_2025.py",
-    title="2025 운전면허 자진반납",
-    url_path="return_2025",
-)
-
-
-return_compare_page = st.Page(
-    "pages/car/return_compare.py",
-    title="2023·2025 자진반납 비교",
-    url_path="return_compare",
+    title="지역별 운전면허 현황",
+    url_path="license-region",
 )
 
 
@@ -121,22 +96,22 @@ return_compare_page = st.Page(
 
 total_car_page = st.Page(
     "pages/car/total_car.py",
-    title="전체 자동차 등록 현황",
-    url_path="total_car",
+    title="자동차 등록 현황",
+    url_path="total-car",
 )
 
 
 registration_year_page = st.Page(
     "pages/car/registration_year.py",
-    title="연도별 자동차 등록 현황",
-    url_path="registration_year",
+    title="연도별 자동차 등록",
+    url_path="registration-year",
 )
 
 
 registration_region_page = st.Page(
     "pages/car/registration_region.py",
-    title="지역별 자동차 등록 현황",
-    url_path="registration_region",
+    title="지역별 자동차 등록",
+    url_path="registration-region",
 )
 
 
@@ -152,101 +127,125 @@ accident_page = st.Page(
 
 
 # ============================================================
-# ACCIDENT - AGE TOTAL
+# ACCIDENT SUB
 # ============================================================
 
 age_total_page = st.Page(
     "pages/accident/age_total.py",
-    title="연령별 교통사고 분석",
-    url_path="age_total",
+    title="연령별 교통사고",
+    url_path="age-total",
 )
 
-
-# ============================================================
-# ACCIDENT - DRIVER AGE
-# ============================================================
 
 driver_age_page = st.Page(
     "pages/accident/driver_age.py",
     title="가해운전자 연령대별 사고",
-    url_path="driver_age",
+    url_path="driver-age",
 )
 
-
-# ============================================================
-# ACCIDENT - DRIVER AGE TIME
-# ============================================================
 
 driver_age_time_page = st.Page(
     "pages/accident/driver_age_time.py",
     title="가해운전자 연령대·시간대 사고",
-    url_path="driver_age_time",
+    url_path="driver-age-time",
 )
 
-
-# ============================================================
-# ACCIDENT - REGION TOTAL
-# ============================================================
 
 region_total_page = st.Page(
     "pages/accident/region_total.py",
-    title="지역별 교통사고 분석",
-    url_path="region_total",
+    title="지역별 교통사고",
+    url_path="region-total",
 )
 
-
-# ============================================================
-# ACCIDENT - SENIOR MONTH TIME
-# ============================================================
 
 senior_month_time_page = st.Page(
     "pages/accident/senior_month_time.py",
     title="고령운전자 월별·시간대 사고",
-    url_path="senior_month_time",
+    url_path="senior-month-time",
 )
 
-
-# ============================================================
-# ACCIDENT - SENIOR REGION MONTH
-# ============================================================
 
 senior_region_month_page = st.Page(
     "pages/accident/senior_region_month.py",
     title="고령운전자 지역별·월별 사고",
-    url_path="senior_region_month",
+    url_path="senior-region-month",
 )
 
-
-# ============================================================
-# ACCIDENT - SENIOR TYPE TIME
-# ============================================================
 
 senior_type_time_page = st.Page(
     "pages/accident/senior_type_time.py",
-    title="고령운전자 사고유형·시간대 분석",
-    url_path="senior_type_time",
+    title="고령운전자 사고유형·시간대",
+    url_path="senior-type-time",
 )
 
-
-# ============================================================
-# ACCIDENT - WEATHER
-# ============================================================
 
 weather_page = st.Page(
     "pages/accident/weather.py",
-    title="기상상태별 교통사고 분석",
-    url_path="accident_weather",
+    title="기상상태별 교통사고",
+    url_path="weather",
 )
 
 
 # ============================================================
-# POLICY
+# POLICY MAIN
 # ============================================================
 
 policy_page = st.Page(
     "pages/policy.py",
-    title="제도 분석",
+    title="정책·제도",
     url_path="policy",
+)
+
+
+# ============================================================
+# POLICY SUB
+# 실제 폴더명: streamlit/pages/poli/
+# ============================================================
+
+senior_education_page = st.Page(
+    "pages/poli/senior_education.py",
+    title="고령운전자 교통안전교육",
+    url_path="senior-education",
+)
+
+
+senior_policy_page = st.Page(
+    "pages/poli/senior_policy.py",
+    title="전국 고령운전자 정책",
+    url_path="senior-policy",
+)
+
+
+senior_safety_policy_page = st.Page(
+    "pages/poli/senior_safety_policy.py",
+    title="지역 특화 고령운전자 안전정책",
+    url_path="senior-safety-policy",
+)
+
+
+license_return_policy_page = st.Page(
+    "pages/poli/license_return_policy.py",
+    title="운전면허 자진반납 지원정책",
+    url_path="license-return-policy",
+)
+
+
+license_return_guide_page = st.Page(
+    "pages/poli/license_return_guide.py",
+    title="운전면허 자진반납 방법",
+    url_path="license-return-guide",
+)
+
+
+# ============================================================
+# POLICY - LICENSE RETURN COMPARE
+# 자동차 → 제도 영역으로 이동
+# ============================================================
+
+return_compare_page = st.Page(
+    "pages/poli/return_compare.py",
+    title="운전면허 자진반납 비교",
+    url_path="return-compare",
 )
 
 
@@ -282,13 +281,9 @@ pg = st.navigation(
         # ====================================================
 
         "인구": [
-
             people_page,
-
             local_population_page,
-
             resident_population_monthly_page,
-
         ],
 
 
@@ -297,28 +292,17 @@ pg = st.navigation(
         # ====================================================
 
         "자동차": [
-
-            # 자동차 메인
             car_page,
-
 
             # 운전면허
             license_gender_page,
             license_age_page,
             license_region_page,
 
-
-            # 자진반납
-            return_2023_page,
-            return_2025_page,
-            return_compare_page,
-
-
             # 자동차 등록
             total_car_page,
             registration_year_page,
             registration_region_page,
-
         ],
 
 
@@ -327,30 +311,19 @@ pg = st.navigation(
         # ====================================================
 
         "교통사고": [
-
-            # 메인
             accident_page,
 
-
-            # 연령
             age_total_page,
             driver_age_page,
             driver_age_time_page,
 
-
-            # 지역
             region_total_page,
 
-
-            # 고령운전자
             senior_month_time_page,
             senior_region_month_page,
             senior_type_time_page,
 
-
-            # 기상
             weather_page,
-
         ],
 
 
@@ -358,8 +331,19 @@ pg = st.navigation(
         # POLICY
         # ====================================================
 
-        "제도": [
+        "정책·제도": [
             policy_page,
+
+            license_return_guide_page,
+
+            senior_education_page,
+
+            senior_policy_page,
+            senior_safety_policy_page,
+
+            license_return_policy_page,
+
+            return_compare_page,
         ],
 
 
@@ -370,7 +354,6 @@ pg = st.navigation(
         "FAQ": [
             faq_page,
         ],
-
     },
 
     position="hidden",

@@ -797,7 +797,7 @@ div[data-baseweb="select"] span {
 
 
 .st-key-trend_panel {
-    min-height: auto;
+    min-height: 480px;
 }
 
 
@@ -1355,12 +1355,12 @@ with st.container(
 
 
     # ========================================================
-    # BAR + DONUT
+    # DONUT + YEARLY TREND
     # ========================================================
 
     chart_left, chart_right = st.columns(
         [
-            1.7,
+            1,
             1,
         ],
         gap="medium",
@@ -1368,218 +1368,10 @@ with st.container(
 
 
     # ========================================================
-    # LEFT BAR CHART
+    # LEFT DONUT
     # ========================================================
 
     with chart_left:
-
-        with st.container(
-            key="gender_panel"
-        ):
-
-            st.html(
-                """
-                <div class="panel-title">
-                    성별 운전면허 소지자 현황
-                </div>
-
-                <div class="panel-sub">
-                    X축: 운전면허 소지자 수(명) ·
-                    Y축: 성별 ·
-                    실제 면허 소지자 규모를 비교합니다.
-                </div>
-                """
-            )
-
-
-            if gender_df.empty:
-
-                st.warning(
-                    "선택한 조건에 해당하는 데이터가 없습니다."
-                )
-
-
-            else:
-
-                bar_df = gender_df[
-                    gender_df[
-                        "gender_name"
-                    ].isin(
-                        [
-                            "남성",
-                            "여성",
-                        ]
-                    )
-                ].copy()
-
-
-                colors = []
-
-                for gender in bar_df[
-                    "gender_name"
-                ]:
-
-                    if gender == "남성":
-
-                        colors.append(
-                            "#69A7C4"
-                        )
-
-                    else:
-
-                        colors.append(
-                            "#D8A64F"
-                        )
-
-
-                max_count = float(
-                    bar_df[
-                        count_col
-                    ].max()
-                )
-
-
-                if max_count <= 0:
-
-                    max_count = 1
-
-
-                fig_bar = go.Figure(
-                    go.Bar(
-
-                        x=bar_df[
-                            count_col
-                        ],
-
-                        y=bar_df[
-                            "gender_name"
-                        ],
-
-                        orientation="h",
-
-                        marker=dict(
-                            color=colors,
-                        ),
-
-                        text=[
-                            f"{int(value):,}명"
-                            for value
-                            in bar_df[
-                                count_col
-                            ]
-                        ],
-
-                        textposition="outside",
-
-                        textfont=dict(
-                            color="#F4F6FA",
-                            size=15,
-                        ),
-
-                        cliponaxis=False,
-
-                        hovertemplate=(
-                            "<b>%{y}</b>"
-                            "<br>"
-                            "면허 소지자: %{x:,}명"
-                            "<extra></extra>"
-                        ),
-                    )
-                )
-
-
-                fig_bar.update_layout(
-
-                    height=380,
-
-                    margin=dict(
-                        l=80,
-                        r=170,
-                        t=35,
-                        b=70,
-                    ),
-
-                    paper_bgcolor="#182035",
-
-                    plot_bgcolor="#182035",
-
-                    showlegend=False,
-
-                    font=dict(
-                        color="#E6EAF1",
-                        size=14,
-                    ),
-
-                    bargap=.38,
-
-                    xaxis=dict(
-
-                        title=dict(
-                            text="운전면허 소지자 수(명)",
-
-                            font=dict(
-                                color="#D8DEE8",
-                                size=14,
-                            ),
-                        ),
-
-                        showgrid=True,
-
-                        gridcolor="#35405A",
-
-                        zeroline=False,
-
-                        tickformat=",",
-
-                        tickfont=dict(
-                            color="#C2C9D5",
-                            size=12,
-                        ),
-
-                        range=[
-                            0,
-                            max_count * 1.25,
-                        ],
-                    ),
-
-                    yaxis=dict(
-
-                        title=None,
-
-                        showgrid=False,
-
-                        tickfont=dict(
-                            color="#F0F2F6",
-                            size=16,
-                        ),
-
-                        categoryorder="array",
-
-                        categoryarray=[
-                            "남성",
-                            "여성",
-                        ],
-
-                        autorange="reversed",
-                    ),
-                )
-
-
-                st.plotly_chart(
-                    fig_bar,
-                    use_container_width=True,
-
-                    config={
-                        "displayModeBar": False,
-                    },
-                )
-
-
-    # ========================================================
-    # RIGHT DONUT
-    # ========================================================
-
-    with chart_right:
 
         with st.container(
             key="gender_ratio_panel"
@@ -1764,267 +1556,269 @@ with st.container(
     # YEARLY TREND
     # ========================================================
 
-    if year_col is not None:
+    with chart_right:
 
-        available_year_count = (
-            df[
-                year_col
-            ]
-            .dropna()
-            .nunique()
-        )
+        if year_col is not None:
 
-
-        if available_year_count >= 2:
-
-            with st.container(
-                key="trend_panel"
-            ):
-
-                st.html(
-                    """
-                    <div class="panel-title">
-                        연도별 성별 운전면허 소지자 추세
-                    </div>
-
-                    <div class="panel-sub">
-                        남성과 여성의 운전면허 소지자 수가
-                        연도별로 어떻게 변화했는지 비교합니다.
-                    </div>
-                    """
-                )
+            available_year_count = (
+                df[
+                    year_col
+                ]
+                .dropna()
+                .nunique()
+            )
 
 
-                trend_source = df.copy()
+            if available_year_count >= 2:
 
-
-                # 면허 대분류 필터 유지
-                if (
-                    license_main_col is not None
-                    and selected_main != "전체"
+                with st.container(
+                    key="trend_panel"
                 ):
 
-                    trend_source = trend_source[
-                        trend_source[
-                            license_main_col
-                        ].astype(str)
-                        == selected_main
-                    ]
+                    st.html(
+                        """
+                        <div class="panel-title">
+                            연도별 성별 운전면허 소지자 추세
+                        </div>
 
-
-                # 면허 세부 필터 유지
-                if (
-                    license_sub_col is not None
-                    and selected_sub != "전체"
-                ):
-
-                    trend_source = trend_source[
-                        trend_source[
-                            license_sub_col
-                        ].astype(str)
-                        == selected_sub
-                    ]
-
-
-                trend_df = (
-                    trend_source
-
-                    .groupby(
-                        [
-                            year_col,
-                            "gender_name",
-                        ],
-                        as_index=False,
-                    )[count_col]
-
-                    .sum()
-                )
-
-
-                male_trend = trend_df[
-                    trend_df[
-                        "gender_name"
-                    ] == "남성"
-                ]
-
-
-                female_trend = trend_df[
-                    trend_df[
-                        "gender_name"
-                    ] == "여성"
-                ]
-
-
-                fig_trend = go.Figure()
-
-
-                # =================================================
-                # MALE
-                # =================================================
-
-                if not male_trend.empty:
-
-                    fig_trend.add_trace(
-                        go.Scatter(
-
-                            x=male_trend[
-                                year_col
-                            ],
-
-                            y=male_trend[
-                                count_col
-                            ],
-
-                            mode="lines+markers",
-
-                            name="남성",
-
-                            line=dict(
-                                color="#69A7C4",
-                                width=4,
-                            ),
-
-                            marker=dict(
-                                size=9,
-                            ),
-
-                            hovertemplate=(
-                                "%{x}년"
-                                "<br>"
-                                "남성: %{y:,}명"
-                                "<extra></extra>"
-                            ),
-                        )
+                        <div class="panel-sub">
+                            남성과 여성의 운전면허 소지자 수가
+                            연도별로 어떻게 변화했는지 비교합니다.
+                        </div>
+                        """
                     )
 
 
-                # =================================================
-                # FEMALE
-                # =================================================
+                    trend_source = df.copy()
 
-                if not female_trend.empty:
 
-                    fig_trend.add_trace(
-                        go.Scatter(
+                    # 면허 대분류 필터 유지
+                    if (
+                        license_main_col is not None
+                        and selected_main != "전체"
+                    ):
 
-                            x=female_trend[
-                                year_col
+                        trend_source = trend_source[
+                            trend_source[
+                                license_main_col
+                            ].astype(str)
+                            == selected_main
+                        ]
+
+
+                    # 면허 세부 필터 유지
+                    if (
+                        license_sub_col is not None
+                        and selected_sub != "전체"
+                    ):
+
+                        trend_source = trend_source[
+                            trend_source[
+                                license_sub_col
+                            ].astype(str)
+                            == selected_sub
+                        ]
+
+
+                    trend_df = (
+                        trend_source
+
+                        .groupby(
+                            [
+                                year_col,
+                                "gender_name",
                             ],
+                            as_index=False,
+                        )[count_col]
 
-                            y=female_trend[
-                                count_col
-                            ],
-
-                            mode="lines+markers",
-
-                            name="여성",
-
-                            line=dict(
-                                color="#D8A64F",
-                                width=4,
-                            ),
-
-                            marker=dict(
-                                size=9,
-                            ),
-
-                            hovertemplate=(
-                                "%{x}년"
-                                "<br>"
-                                "여성: %{y:,}명"
-                                "<extra></extra>"
-                            ),
-                        )
+                        .sum()
                     )
 
 
-                fig_trend.update_layout(
+                    male_trend = trend_df[
+                        trend_df[
+                            "gender_name"
+                        ] == "남성"
+                    ]
 
-                    height=430,
 
-                    margin=dict(
-                        l=95,
-                        r=40,
-                        t=40,
-                        b=70,
-                    ),
+                    female_trend = trend_df[
+                        trend_df[
+                            "gender_name"
+                        ] == "여성"
+                    ]
 
-                    paper_bgcolor="#182035",
 
-                    plot_bgcolor="#182035",
+                    fig_trend = go.Figure()
 
-                    font=dict(
-                        color="#E6EAF1",
-                        size=13,
-                    ),
 
-                    hovermode="x unified",
+                    # =================================================
+                    # MALE
+                    # =================================================
 
-                    legend=dict(
+                    if not male_trend.empty:
 
-                        orientation="h",
+                        fig_trend.add_trace(
+                            go.Scatter(
 
-                        yanchor="bottom",
+                                x=male_trend[
+                                    year_col
+                                ],
 
-                        y=1.02,
+                                y=male_trend[
+                                    count_col
+                                ],
 
-                        xanchor="right",
+                                mode="lines+markers",
 
-                        x=1,
+                                name="남성",
+
+                                line=dict(
+                                    color="#69A7C4",
+                                    width=4,
+                                ),
+
+                                marker=dict(
+                                    size=9,
+                                ),
+
+                                hovertemplate=(
+                                    "%{x}년"
+                                    "<br>"
+                                    "남성: %{y:,}명"
+                                    "<extra></extra>"
+                                ),
+                            )
+                        )
+
+
+                    # =================================================
+                    # FEMALE
+                    # =================================================
+
+                    if not female_trend.empty:
+
+                        fig_trend.add_trace(
+                            go.Scatter(
+
+                                x=female_trend[
+                                    year_col
+                                ],
+
+                                y=female_trend[
+                                    count_col
+                                ],
+
+                                mode="lines+markers",
+
+                                name="여성",
+
+                                line=dict(
+                                    color="#D8A64F",
+                                    width=4,
+                                ),
+
+                                marker=dict(
+                                    size=9,
+                                ),
+
+                                hovertemplate=(
+                                    "%{x}년"
+                                    "<br>"
+                                    "여성: %{y:,}명"
+                                    "<extra></extra>"
+                                ),
+                            )
+                        )
+
+
+                    fig_trend.update_layout(
+
+                        height=430,
+
+                        margin=dict(
+                            l=95,
+                            r=40,
+                            t=40,
+                            b=70,
+                        ),
+
+                        paper_bgcolor="#182035",
+
+                        plot_bgcolor="#182035",
 
                         font=dict(
                             color="#E6EAF1",
                             size=13,
                         ),
-                    ),
 
-                    xaxis=dict(
+                        hovermode="x unified",
 
-                        title="연도",
+                        legend=dict(
 
-                        showgrid=False,
+                            orientation="h",
 
-                        dtick=1,
+                            yanchor="bottom",
 
-                        tickformat=".0f",
+                            y=1.02,
 
-                        tickfont=dict(
-                            color="#C6CDD9",
-                            size=13,
+                            xanchor="right",
+
+                            x=1,
+
+                            font=dict(
+                                color="#E6EAF1",
+                                size=13,
+                            ),
                         ),
-                    ),
 
-                    yaxis=dict(
+                        xaxis=dict(
 
-                        title="운전면허 소지자 수(명)",
+                            title="연도",
 
-                        showgrid=True,
+                            showgrid=False,
 
-                        gridcolor="#35405A",
+                            dtick=1,
 
-                        zeroline=False,
+                            tickformat=".0f",
 
-                        tickformat=",",
-
-                        tickfont=dict(
-                            color="#C6CDD9",
-                            size=13,
+                            tickfont=dict(
+                                color="#C6CDD9",
+                                size=13,
+                            ),
                         ),
-                    ),
-                )
+
+                        yaxis=dict(
+
+                            title="운전면허 소지자 수(명)",
+
+                            showgrid=True,
+
+                            gridcolor="#35405A",
+
+                            zeroline=False,
+
+                            tickformat=",",
+
+                            tickfont=dict(
+                                color="#C6CDD9",
+                                size=13,
+                            ),
+                        ),
+                    )
 
 
-                st.plotly_chart(
-                    fig_trend,
-                    use_container_width=True,
+                    st.plotly_chart(
+                        fig_trend,
+                        use_container_width=True,
 
-                    config={
-                        "displayModeBar": False,
-                    },
-                )
+                        config={
+                            "displayModeBar": False,
+                        },
+                    )
 
 
-    # ========================================================
+        # ========================================================
     # DETAIL DATA
     # ========================================================
 
@@ -2119,3 +1913,4 @@ with st.container(
                     ),
             },
         )
+

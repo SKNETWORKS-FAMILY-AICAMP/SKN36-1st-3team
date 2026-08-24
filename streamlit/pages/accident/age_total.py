@@ -199,6 +199,8 @@ INVALID_AGES = [
     "합계",
     "총계",
     "전체",
+    "불명",
+    "미상",
 ]
 
 
@@ -1260,6 +1262,41 @@ div[role="radiogroup"] label p {
         14px;
 }
 
+/* ==========================================================
+   ANALYSIS / PREDICTION SECTION
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
+
+.section-divider {
+    height: 1px;
+    margin: 42px 0 4px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
+}
+
 </style>
 """
 )
@@ -1719,6 +1756,13 @@ with st.container(
         )
 
 
+    st.html(
+        """
+        <div class="section-heading">분석</div>
+        """
+    )
+
+
     # ========================================================
     # ROW 1
     # ========================================================
@@ -1784,7 +1828,10 @@ with st.container(
 
             bar_colors = [
 
-                "#E17663"
+                "#4F8F78"
+                if age_sort_key(age) >= 60
+
+                else "#E17663"
                 if age == selected_age
 
                 else "#D9A64A"
@@ -1839,6 +1886,28 @@ with st.container(
                     ),
                 )
             )
+
+
+            # 60세 이상 구간을 금색 점선으로 구분
+            senior_bar_count = sum(
+                age_sort_key(age) >= 60
+                for age in bar_df["age_group"]
+            )
+
+            if 0 < senior_bar_count < len(bar_df):
+
+                fig_age.add_hline(
+                    y=senior_bar_count - 0.5,
+                    line_dash="dot",
+                    line_color="#F0B95C",
+                    line_width=3,
+                    annotation_text="60세 이상",
+                    annotation_position="top right",
+                    annotation_font=dict(
+                        color="#F0B95C",
+                        size=13,
+                    ),
+                )
 
 
             max_accident = (
@@ -2141,6 +2210,22 @@ with st.container(
         }
 
 
+        # 60세 이상 연령대는 연도 구분을 유지하면서
+        # 기존 색상보다 한 단계 진한 톤으로 강조
+        SENIOR_YEAR_COLORS = {
+
+            2021: "#526A99",
+
+            2022: "#71869F",
+
+            2023: "#719781",
+
+            2024: "#9E8B56",
+
+            2025: "#B88632",
+        }
+
+
         fig_driver = go.Figure()
 
 
@@ -2186,10 +2271,20 @@ with st.container(
                     ],
 
                     marker=dict(
-                        color=YEAR_COLORS.get(
-                            year,
-                            "#8FA0B8"
-                        )
+                        color=[
+                            SENIOR_YEAR_COLORS.get(
+                                year,
+                                "#4F8F78"
+                            )
+                            if age_sort_key(age) >= 60
+                            else YEAR_COLORS.get(
+                                year,
+                                "#8FA0B8"
+                            )
+                            for age in temp_df[
+                                "age_group"
+                            ]
+                        ]
                     ),
 
                     hovertemplate=(
@@ -2201,6 +2296,29 @@ with st.container(
                         "<extra></extra>"
                     ),
                 )
+            )
+
+
+        # 60세 이상 구간을 금색 점선으로 구분
+        senior_start_positions = [
+            index
+            for index, age in enumerate(driver_age_groups)
+            if age_sort_key(age) >= 60
+        ]
+
+        if senior_start_positions:
+
+            fig_driver.add_vline(
+                x=min(senior_start_positions) - 0.5,
+                line_dash="dot",
+                line_color="#F0B95C",
+                line_width=3,
+                annotation_text="60세 이상",
+                annotation_position="top right",
+                annotation_font=dict(
+                    color="#F0B95C",
+                    size=13,
+                ),
             )
 
 
@@ -2293,6 +2411,14 @@ with st.container(
                 "displayModeBar": False
             }
         )
+
+
+    st.html(
+        """
+        <div class="section-divider"></div>
+        <div class="section-heading">예측</div>
+        """
+    )
 
 
     # ========================================================

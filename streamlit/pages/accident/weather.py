@@ -10,7 +10,7 @@ from sqlalchemy import text
 
 # ============================================================
 # PROJECT ROOT
-# SAFE/streamlit/pages/accident/senior_type_time.py
+# SAFE/streamlit/pages/accident/weather.py
 # ============================================================
 
 ROOT_DIR = Path(__file__).resolve().parents[3]
@@ -55,7 +55,7 @@ def go_faq():
 # ============================================================
 
 @st.cache_data(ttl=600)
-def load_senior_type_time():
+def load_weather_accident():
 
     engine = get_engine()
 
@@ -63,24 +63,20 @@ def load_senior_type_time():
         """
         SELECT
             id,
-            accident_type_main,
-            accident_type_middle,
-            accident_type_sub,
+            age_group,
             year,
-            time_slot,
+            weather,
             accidents
-        FROM senior_accident_type_time
-        ORDER BY
-            year,
-            accident_type_main,
-            accident_type_middle,
-            accident_type_sub,
-            time_slot
+        FROM driver_weather_accident
+        ORDER BY year, age_group, weather
         """
     )
 
     with engine.connect() as conn:
-        return pd.read_sql(query, conn)
+        return pd.read_sql(
+            query,
+            conn
+        )
 
 
 # ============================================================
@@ -89,12 +85,12 @@ def load_senior_type_time():
 
 try:
 
-    df = load_senior_type_time()
+    df = load_weather_accident()
 
 except Exception as e:
 
     st.error(
-        f"MySQL 데이터 조회 실패\n\n{e}"
+        f"MySQL 기상별 교통사고 데이터 조회 실패\n\n{e}"
     )
 
     st.stop()
@@ -104,22 +100,20 @@ except Exception as e:
 # CLEAN
 # ============================================================
 
-TEXT_COLUMNS = [
-    "accident_type_main",
-    "accident_type_middle",
-    "accident_type_sub",
-    "time_slot",
-]
+df["age_group"] = (
+    df["age_group"]
+    .fillna("")
+    .astype(str)
+    .str.strip()
+)
 
 
-for column in TEXT_COLUMNS:
-
-    df[column] = (
-        df[column]
-        .fillna("")
-        .astype(str)
-        .str.strip()
-    )
+df["weather"] = (
+    df["weather"]
+    .fillna("")
+    .astype(str)
+    .str.strip()
+)
 
 
 df["year"] = pd.to_numeric(
@@ -149,7 +143,7 @@ df["year"] = (
 
 
 # ============================================================
-# REMOVE TOTAL / INVALID
+# INVALID
 # ============================================================
 
 INVALID_VALUES = [
@@ -158,15 +152,12 @@ INVALID_VALUES = [
     "합계",
     "총계",
     "전체",
-    "불명",
-    "미상",
 ]
 
 
-# 시간대에서만 합계 제거
 df = (
     df[
-        ~df["time_slot"].isin(
+        ~df["weather"].isin(
             INVALID_VALUES
         )
     ]
@@ -175,106 +166,163 @@ df = (
 
 
 # ============================================================
-# TIME NORMALIZE
+# AGE NORMALIZE
 # ============================================================
 
-TIME_REPLACE = {
+AGE_REPLACE = {
 
-    "00~02": "00~02시",
-    "00~02시": "00~02시",
-    "0~2": "00~02시",
-    "0~2시": "00~02시",
+    "19세이하": "19세 이하",
+    "19세 이하": "19세 이하",
 
-    "02~04": "02~04시",
-    "02~04시": "02~04시",
-    "2~4": "02~04시",
-    "2~4시": "02~04시",
+    "20-29세": "20~29세",
+    "20~29세": "20~29세",
 
-    "04~06": "04~06시",
-    "04~06시": "04~06시",
-    "4~6": "04~06시",
-    "4~6시": "04~06시",
+    "30-39세": "30~39세",
+    "30~39세": "30~39세",
 
-    "06~08": "06~08시",
-    "06~08시": "06~08시",
-    "6~8": "06~08시",
-    "6~8시": "06~08시",
+    "40-49세": "40~49세",
+    "40~49세": "40~49세",
 
-    "08~10": "08~10시",
-    "08~10시": "08~10시",
-    "8~10": "08~10시",
-    "8~10시": "08~10시",
+    "50-59세": "50~59세",
+    "50~59세": "50~59세",
 
-    "10~12": "10~12시",
-    "10~12시": "10~12시",
+    "60-64세": "60~64세",
+    "60~64세": "60~64세",
 
-    "12~14": "12~14시",
-    "12~14시": "12~14시",
+    "65세이상": "65세 이상",
+    "65세 이상": "65세 이상",
 
-    "14~16": "14~16시",
-    "14~16시": "14~16시",
-
-    "16~18": "16~18시",
-    "16~18시": "16~18시",
-
-    "18~20": "18~20시",
-    "18~20시": "18~20시",
-
-    "20~22": "20~22시",
-    "20~22시": "20~22시",
-
-    "22~24": "22~24시",
-    "22~24시": "22~24시",
+    "불명": "불명",
 }
 
 
-TIME_ORDER = [
-    "00~02시",
-    "02~04시",
-    "04~06시",
-    "06~08시",
-    "08~10시",
-    "10~12시",
-    "12~14시",
-    "14~16시",
-    "16~18시",
-    "18~20시",
-    "20~22시",
-    "22~24시",
-]
-
-
-def normalize_time(value):
+def normalize_age(value):
 
     value = str(value).strip()
 
-    return TIME_REPLACE.get(
+    return AGE_REPLACE.get(
         value,
         value
     )
 
 
-df["time_slot"] = (
-    df["time_slot"]
+df["age_group"] = (
+    df["age_group"]
     .apply(
-        normalize_time
+        normalize_age
     )
 )
 
 
 # ============================================================
-# GROUP DUPLICATES
+# AGE SORT
+# ============================================================
+
+def age_sort_key(value):
+
+    value = str(value)
+
+    if "불명" in value:
+        return 9999
+
+    temp = (
+        value
+        .replace("세", "")
+        .replace("이상", "")
+        .replace("이하", "")
+        .replace("~", " ")
+        .replace("-", " ")
+    )
+
+    for item in temp.split():
+
+        try:
+            return int(item)
+
+        except ValueError:
+            continue
+
+    return 9998
+
+
+# ============================================================
+# WEATHER NORMALIZE
+# ============================================================
+
+WEATHER_REPLACE = {
+
+    "맑음": "맑음",
+    "맑음 ": "맑음",
+
+    "흐림": "흐림",
+
+    "비": "비",
+    "우천": "비",
+
+    "눈": "눈",
+    "강설": "눈",
+
+    "안개": "안개",
+
+    "기타": "기타",
+
+    "불명": "불명",
+    "미상": "불명",
+}
+
+
+def normalize_weather(value):
+
+    value = str(value).strip()
+
+    return WEATHER_REPLACE.get(
+        value,
+        value
+    )
+
+
+WEATHER_ICONS = {
+    "전체": "🌦️",
+    "맑음": "☀️",
+    "흐림": "☁️",
+    "비": "🌧️",
+    "눈": "❄️",
+    "안개": "🌫️",
+    "기타": "🌤️",
+}
+
+
+def weather_with_icon(value):
+
+    value = str(value)
+
+    if value in ["", "-"]:
+        return value
+
+    icon = WEATHER_ICONS.get(value, "🌡️")
+
+    return f"{value} {icon}"
+
+
+df["weather"] = (
+    df["weather"]
+    .apply(
+        normalize_weather
+    )
+)
+
+
+# ============================================================
+# GROUP DUPLICATE
 # ============================================================
 
 df = (
     df
     .groupby(
         [
-            "accident_type_main",
-            "accident_type_middle",
-            "accident_type_sub",
+            "age_group",
             "year",
-            "time_slot",
+            "weather",
         ],
         as_index=False
     )["accidents"]
@@ -288,29 +336,34 @@ df = (
 
 years = sorted(
     df["year"]
+    .dropna()
     .unique()
     .tolist(),
     reverse=True
 )
 
 
-main_types = sorted(
-    [
-        value
-        for value
-        in df["accident_type_main"]
-        .dropna()
-        .unique()
-        .tolist()
-        if value not in INVALID_VALUES
-    ]
+age_groups = sorted(
+    df["age_group"]
+    .dropna()
+    .unique()
+    .tolist(),
+    key=age_sort_key
+)
+
+
+weather_list = sorted(
+    df["weather"]
+    .dropna()
+    .unique()
+    .tolist()
 )
 
 
 if not years:
 
     st.warning(
-        "고령운전자 사고유형·시간대 데이터가 없습니다."
+        "기상상태별 교통사고 데이터가 없습니다."
     )
 
     st.stop()
@@ -348,7 +401,6 @@ header[data-testid="stHeader"],
 section[data-testid="stSidebar"],
 #MainMenu,
 footer {
-
     display: none;
 }
 
@@ -434,7 +486,7 @@ footer {
    PAGE
 ========================================================== */
 
-.st-key-senior_type_time_page {
+.st-key-weather_page {
 
     background: #101625;
 
@@ -599,43 +651,12 @@ div[role="radiogroup"] label p {
 
 
 /* ==========================================================
-   SECTION HEADING
+   PANELS
 ========================================================== */
 
-.section-heading {
-
-    color: #FFFFFF;
-
-    font-size: 27px;
-
-    font-weight: 900;
-
-    margin-top: 34px;
-
-    margin-bottom: 6px;
-}
-
-.section-heading-sub {
-
-    color: #AEB8C8;
-
-    font-size: 14px;
-
-    line-height: 1.7;
-
-    margin-bottom: 10px;
-}
-
-
-/* ==========================================================
-   PANEL
-========================================================== */
-
-.st-key-type_rank_panel,
-.st-key-time_panel,
-.st-key-heatmap_panel,
+.st-key-weather_rank_panel,
+.st-key-age_panel,
 .st-key-trend_panel,
-.st-key-subtype_panel,
 .st-key-predict_panel,
 .st-key-model_compare_panel {
 
@@ -898,6 +919,41 @@ div[role="radiogroup"] label p {
     fill: #E8EDF5 !important;
 }
 
+/* ==========================================================
+   ANALYSIS / PREDICTION SECTION
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
+
+.section-divider {
+    height: 1px;
+    margin: 42px 0 4px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
+}
+
 </style>
 """
 )
@@ -1003,7 +1059,7 @@ with st.container(
 # ============================================================
 
 with st.container(
-    key="senior_type_time_page"
+    key="weather_page"
 ):
 
     # ========================================================
@@ -1021,17 +1077,16 @@ with st.container(
         st.html(
             """
             <div class="page-path">
-                교통사고 &gt; 고령운전자 사고유형·시간대
+                교통사고 &gt; 기상상태별 사고
             </div>
 
             <div class="page-title">
-                고령운전자 사고유형·시간대 분석
+                기상상태별 교통사고 분석
             </div>
 
             <div class="page-sub">
-                고령운전자 교통사고를 사고유형과 시간대 기준으로 분석하여
-                사고가 집중되는 유형과 시간 구간을 파악하고,
-                과거 연도별 사고 추세를 기반으로 향후 사고 규모를 예측합니다.
+                가해운전자 연령대와 기상상태에 따른 교통사고 발생 규모를 비교하고,
+                연도별 사고 추세를 기반으로 향후 사고 규모를 예측합니다.
             </div>
             """
         )
@@ -1047,16 +1102,15 @@ with st.container(
                 "← 교통사고 분석",
                 use_container_width=True
             ):
-
                 go_accident()
 
 
     # ========================================================
-    # FILTER 1
+    # FILTER
     # ========================================================
 
     f1, f2, f3, empty = st.columns(
-        [1, 1.3, 1.3, 1.4]
+        [1, 1, 1, 2]
     )
 
 
@@ -1065,190 +1119,85 @@ with st.container(
         selected_year = st.selectbox(
             "기준 연도",
             years,
-            key="senior_type_year"
+            key="weather_year"
         )
 
 
     with f2:
 
-        selected_main = st.selectbox(
-            "사고유형 대분류",
-            ["전체"] + main_types,
-            key="senior_type_main"
+        selected_age = st.selectbox(
+            "연령대",
+            ["전체"] + age_groups,
+            key="weather_age"
         )
-
-
-    # ========================================================
-    # MIDDLE OPTIONS
-    # ========================================================
-
-    if selected_main == "전체":
-
-        middle_source = df
-
-    else:
-
-        middle_source = df[
-            df[
-                "accident_type_main"
-            ] == selected_main
-        ]
-
-
-    middle_types = sorted(
-        [
-            value
-            for value
-            in middle_source[
-                "accident_type_middle"
-            ]
-            .dropna()
-            .unique()
-            .tolist()
-            if value not in INVALID_VALUES
-        ]
-    )
 
 
     with f3:
 
-        selected_middle = st.selectbox(
-            "중분류",
-            ["전체"] + middle_types,
-            key="senior_type_middle"
+        selected_weather = st.selectbox(
+            "기상상태",
+            ["전체"] + weather_list,
+            format_func=weather_with_icon,
+            key="weather_type"
         )
 
 
     # ========================================================
-    # SUB OPTIONS
+    # FILTER DATA
     # ========================================================
 
-    sub_source = middle_source.copy()
-
-
-    if selected_middle != "전체":
-
-        sub_source = sub_source[
-            sub_source[
-                "accident_type_middle"
-            ] == selected_middle
-        ]
-
-
-    sub_types = sorted(
-        [
-            value
-            for value
-            in sub_source[
-                "accident_type_sub"
-            ]
-            .dropna()
-            .unique()
-            .tolist()
-            if value not in INVALID_VALUES
-        ]
+    filtered_df = (
+        df.copy()
     )
 
 
-    f4, empty2 = st.columns(
-        [1, 4]
-    )
-
-
-    with f4:
-
-        selected_sub = st.selectbox(
-            "소분류",
-            ["전체"] + sub_types,
-            key="senior_type_sub"
-        )
-
-
-    # ========================================================
-    # FILTER FUNCTION
-    # ========================================================
-
-    filtered_df = df.copy()
-
-
-    if selected_main != "전체":
+    if selected_age != "전체":
 
         filtered_df = filtered_df[
             filtered_df[
-                "accident_type_main"
-            ] == selected_main
+                "age_group"
+            ] == selected_age
         ]
 
 
-    if selected_middle != "전체":
+    if selected_weather != "전체":
 
         filtered_df = filtered_df[
             filtered_df[
-                "accident_type_middle"
-            ] == selected_middle
+                "weather"
+            ] == selected_weather
         ]
 
 
-    if selected_sub != "전체":
-
-        filtered_df = filtered_df[
-            filtered_df[
-                "accident_type_sub"
-            ] == selected_sub
-        ]
-
-
-    year_df = filtered_df[
+    year_filtered_df = filtered_df[
         filtered_df[
             "year"
         ] == selected_year
     ].copy()
 
 
-    # ========================================================
-    # TYPE LABEL
-    # ========================================================
-
-    if selected_sub != "전체":
-
-        selected_type_label = (
-            selected_sub
-        )
-
-    elif selected_middle != "전체":
-
-        selected_type_label = (
-            selected_middle
-        )
-
-    elif selected_main != "전체":
-
-        selected_type_label = (
-            selected_main
-        )
-
-    else:
-
-        selected_type_label = (
-            "전체 사고유형"
-        )
+    year_all_df = df[
+        df[
+            "year"
+        ] == selected_year
+    ].copy()
 
 
     # ========================================================
     # KPI
     # ========================================================
 
-    total_accidents = int(
-        year_df[
+    selected_accidents = int(
+        year_filtered_df[
             "accidents"
         ].sum()
     )
 
 
-    time_summary = (
-        year_df
+    weather_summary = (
+        year_all_df
         .groupby(
-            "time_slot",
+            "weather",
             as_index=False
         )["accidents"]
         .sum()
@@ -1259,85 +1208,74 @@ with st.container(
     )
 
 
-    if not time_summary.empty:
+    if not weather_summary.empty:
 
-        top_time = str(
-            time_summary.iloc[0][
-                "time_slot"
+        top_weather = str(
+            weather_summary.iloc[0][
+                "weather"
             ]
         )
 
-        top_time_accidents = int(
-            time_summary.iloc[0][
+
+        top_weather_accidents = int(
+            weather_summary.iloc[0][
                 "accidents"
             ]
         )
 
     else:
 
-        top_time = "-"
-        top_time_accidents = 0
+        top_weather = "-"
+        top_weather_accidents = 0
 
 
-    # ========================================================
-    # MAIN TYPE SUMMARY
-    # ========================================================
-
-    year_all_df = (
-        df[
-            df[
-                "year"
-            ] == selected_year
-        ]
-        .copy()
+    age_summary = (
+        year_all_df
+        .groupby(
+            "age_group",
+            as_index=False
+        )["accidents"]
+        .sum()
+        .sort_values(
+            "accidents",
+            ascending=False
+        )
     )
 
 
-    main_summary = (
+    if not age_summary.empty:
+
+        top_age = str(
+            age_summary.iloc[0][
+                "age_group"
+            ]
+        )
+
+
+        top_age_accidents = int(
+            age_summary.iloc[0][
+                "accidents"
+            ]
+        )
+
+    else:
+
+        top_age = "-"
+        top_age_accidents = 0
+
+
+    annual_total = int(
         year_all_df[
-            ~year_all_df[
-                "accident_type_main"
-            ].isin(
-                INVALID_VALUES
-            )
-        ]
-        .groupby(
-            "accident_type_main",
-            as_index=False
-        )["accidents"]
-        .sum()
-        .sort_values(
-            "accidents",
-            ascending=False
-        )
+            "accidents"
+        ].sum()
     )
 
 
-    if not main_summary.empty:
-
-        top_type = str(
-            main_summary.iloc[0][
-                "accident_type_main"
-            ]
-        )
-
-        top_type_accidents = int(
-            main_summary.iloc[0][
-                "accidents"
-            ]
-        )
-
-    else:
-
-        top_type = "-"
-        top_type_accidents = 0
-
-
-    top_time_share = (
-        top_time_accidents
-        / total_accidents
+    selected_share = (
+        selected_accidents
+        / annual_total
         * 100
-        if total_accidents > 0
+        if annual_total > 0
         else 0
     )
 
@@ -1361,11 +1299,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    {selected_year}년 선택 유형 사고
+                    {selected_year}년 전체 사고
                 </div>
 
                 <div class="kpi-value">
-                    {total_accidents:,}건
+                    {annual_total:,}건
                 </div>
 
             </div>
@@ -1380,11 +1318,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    사고 최다 시간대
+                    사고 최다 기상상태
                 </div>
 
                 <div class="kpi-value">
-                    {top_time}
+                    {weather_with_icon(top_weather)}
                 </div>
 
             </div>
@@ -1399,11 +1337,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    최다 사고 대분류
+                    사고 최다 연령대
                 </div>
 
                 <div class="kpi-value">
-                    {top_type}
+                    {top_age}
                 </div>
 
             </div>
@@ -1418,11 +1356,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    최다 시간대 사고 비중
+                    현재 조건 사고 비중
                 </div>
 
                 <div class="kpi-value">
-                    {top_time_share:.1f}%
+                    {selected_share:.1f}%
                 </div>
 
             </div>
@@ -1430,25 +1368,15 @@ with st.container(
         )
 
 
-    # ========================================================
-    # ANALYSIS SECTION
-    # ========================================================
-
     st.html(
         """
-        <div class="section-heading">
-            분석
-        </div>
-
-        <div class="section-heading-sub">
-            선택한 연도와 사고유형을 기준으로 사고 규모, 시간대, 세부유형과 연도별 추이를 분석합니다.
-        </div>
+        <div class="section-heading">분석</div>
         """
     )
 
 
     # ========================================================
-    # TYPE RANK + TIME
+    # WEATHER RANK + AGE RANK
     # ========================================================
 
     left, right = st.columns(
@@ -1458,30 +1386,30 @@ with st.container(
 
 
     # ========================================================
-    # TYPE RANK
+    # WEATHER RANK
     # ========================================================
 
     with left:
 
         with st.container(
-            key="type_rank_panel"
+            key="weather_rank_panel"
         ):
 
             st.html(
                 f"""
                 <div class="panel-title">
-                    {selected_year}년 사고유형별 규모
+                    {selected_year}년 기상상태별 사고
                 </div>
 
                 <div class="panel-sub">
-                    고령운전자 사고 대분류별 사고 발생 건수를 비교합니다.
+                    기상상태별 교통사고 발생 규모를 비교합니다.
                 </div>
                 """
             )
 
 
-            type_rank_df = (
-                main_summary
+            weather_plot = (
+                weather_summary
                 .sort_values(
                     "accidents",
                     ascending=True
@@ -1490,49 +1418,55 @@ with st.container(
             )
 
 
-            max_type = (
+            weather_plot["weather_label"] = (
+                weather_plot["weather"]
+                .apply(weather_with_icon)
+            )
+
+
+            max_weather = (
                 float(
-                    type_rank_df[
+                    weather_plot[
                         "accidents"
                     ].max()
                 )
-                if not type_rank_df.empty
+                if not weather_plot.empty
                 else 1
             )
 
 
-            if max_type <= 0:
-                max_type = 1
+            if max_weather <= 0:
+                max_weather = 1
 
 
-            fig_type = go.Figure(
+            fig_weather = go.Figure(
                 go.Bar(
 
-                    x=type_rank_df[
+                    x=weather_plot[
                         "accidents"
                     ],
 
-                    y=type_rank_df[
-                        "accident_type_main"
+                    y=weather_plot[
+                        "weather_label"
                     ],
 
                     orientation="h",
 
                     marker_color=[
                         "#D9A64A"
-                        if value == top_type
+                        if weather == top_weather
                         else "#79B69B"
 
-                        for value
-                        in type_rank_df[
-                            "accident_type_main"
+                        for weather
+                        in weather_plot[
+                            "weather"
                         ]
                     ],
 
                     text=[
                         f"{int(value):,}건"
                         for value
-                        in type_rank_df[
+                        in weather_plot[
                             "accidents"
                         ]
                     ],
@@ -1551,148 +1485,9 @@ with st.container(
             )
 
 
-            fig_type.update_layout(
+            fig_weather.update_layout(
 
-                height=520,
-
-                margin=dict(
-                    l=120,
-                    r=100,
-                    t=35,
-                    b=65
-                ),
-
-                paper_bgcolor="#182035",
-
-                plot_bgcolor="#182035",
-
-                showlegend=False,
-
-                font=dict(
-                    color="#E8EDF5"
-                ),
-
-                xaxis=dict(
-                    title="교통사고 건수(건)",
-                    gridcolor="#35405A",
-                    range=[
-                        0,
-                        max_type * 1.25
-                    ]
-                ),
-
-                yaxis=dict(
-                    title=None
-                )
-            )
-
-
-            st.plotly_chart(
-                fig_type,
-                use_container_width=True,
-                config={
-                    "displayModeBar": False
-                }
-            )
-
-
-    # ========================================================
-    # TIME
-    # ========================================================
-
-    with right:
-
-        with st.container(
-            key="time_panel"
-        ):
-
-            st.html(
-                f"""
-                <div class="panel-title">
-                    {selected_year}년 {selected_type_label} 시간대별 사고
-                </div>
-
-                <div class="panel-sub">
-                    선택한 사고유형에서 사고가 집중되는 시간대를 확인합니다.
-                </div>
-                """
-            )
-
-
-            time_plot_df = (
-                time_summary
-                .sort_values(
-                    "accidents",
-                    ascending=True
-                )
-                .copy()
-            )
-
-
-            max_time = (
-                float(
-                    time_plot_df[
-                        "accidents"
-                    ].max()
-                )
-                if not time_plot_df.empty
-                else 1
-            )
-
-
-            if max_time <= 0:
-                max_time = 1
-
-
-            fig_time = go.Figure(
-                go.Bar(
-
-                    x=time_plot_df[
-                        "accidents"
-                    ],
-
-                    y=time_plot_df[
-                        "time_slot"
-                    ],
-
-                    orientation="h",
-
-                    marker_color=[
-                        "#E8753B"
-                        if value == top_time
-                        else "#8DA9C4"
-
-                        for value
-                        in time_plot_df[
-                            "time_slot"
-                        ]
-                    ],
-
-                    text=[
-                        f"{int(value):,}건"
-                        for value
-                        in time_plot_df[
-                            "accidents"
-                        ]
-                    ],
-
-                    textposition="outside",
-
-                    cliponaxis=False,
-
-                    hovertemplate=(
-                        "<b>%{y}</b>"
-                        "<br>"
-                        "사고: %{x:,}건"
-                        "<extra></extra>"
-                    )
-                )
-            )
-
-
-            fig_time.update_layout(
-
-                height=520,
+                height=500,
 
                 margin=dict(
                     l=90,
@@ -1716,7 +1511,7 @@ with st.container(
                     gridcolor="#35405A",
                     range=[
                         0,
-                        max_time * 1.25
+                        max_weather * 1.25
                     ]
                 ),
 
@@ -1727,7 +1522,7 @@ with st.container(
 
 
             st.plotly_chart(
-                fig_time,
+                fig_weather,
                 use_container_width=True,
                 config={
                     "displayModeBar": False
@@ -1736,183 +1531,98 @@ with st.container(
 
 
     # ========================================================
-    # ANALYSIS
+    # AGE RANK
     # ========================================================
 
-    st.html(
-        f"""
-        <div class="analysis-box">
+    with right:
 
-            <div class="analysis-title">
-                {selected_year}년 사고유형·시간대 분석
-            </div>
+        with st.container(
+            key="age_panel"
+        ):
 
-            현재 선택한 사고유형은
-            <b>{selected_type_label}</b>이며,
-            총 <b>{total_accidents:,}건</b>의 사고가 발생했습니다.
+            st.html(
+                f"""
+                <div class="panel-title">
+                    {selected_year}년 연령대별 사고
+                </div>
 
-            <br>
-
-            이 유형에서 사고가 가장 많이 발생한 시간대는
-            <b>{top_time}</b>로,
-            <b>{top_time_accidents:,}건</b>입니다.
-
-            <br>
-
-            해당 시간대는 선택 유형 전체 사고의 약
-            <b>{top_time_share:.1f}%</b>를 차지합니다.
-
-            <br>
-
-            같은 연도 전체 사고 대분류 기준으로
-            사고가 가장 많은 유형은
-            <b>{top_type}</b>이며,
-            총 <b>{top_type_accidents:,}건</b>입니다.
-
-        </div>
-        """
-    )
+                <div class="panel-sub">
+                    전체 기상상태를 기준으로 가해운전자 연령대별 사고 규모를 비교합니다.
+                </div>
+                """
+            )
 
 
-    # ========================================================
-    # MIDDLE / SUB TYPE
-    # ========================================================
-
-    with st.container(
-        key="subtype_panel"
-    ):
-
-        st.html(
-            f"""
-            <div class="panel-title">
-                {selected_year}년 세부 사고유형 분석
-            </div>
-
-            <div class="panel-sub">
-                현재 필터 조건에서 중분류·소분류별 사고 발생 규모를 확인합니다.
-            </div>
-            """
-        )
+            age_plot = (
+                age_summary
+                .copy()
+            )
 
 
-        if selected_middle == "전체":
-
-            detail_type_df = (
-                year_df[
-                    ~year_df[
-                        "accident_type_middle"
-                    ].isin(
-                        INVALID_VALUES
-                    )
+            age_plot[
+                "sort_key"
+            ] = (
+                age_plot[
+                    "age_group"
                 ]
-                .groupby(
-                    "accident_type_middle",
-                    as_index=False
-                )["accidents"]
-                .sum()
-                .sort_values(
-                    "accidents",
-                    ascending=True
+                .apply(
+                    age_sort_key
                 )
             )
 
-            detail_type_column = (
-                "accident_type_middle"
-            )
 
-            detail_title = (
-                "중분류"
-            )
-
-        else:
-
-            detail_type_df = (
-                year_df[
-                    ~year_df[
-                        "accident_type_sub"
-                    ].isin(
-                        INVALID_VALUES
-                    )
-                ]
-                .groupby(
-                    "accident_type_sub",
-                    as_index=False
-                )["accidents"]
-                .sum()
+            age_plot = (
+                age_plot
                 .sort_values(
-                    "accidents",
-                    ascending=True
-                )
-            )
-
-            detail_type_column = (
-                "accident_type_sub"
-            )
-
-            detail_title = (
-                "소분류"
-            )
-
-
-        if detail_type_df.empty:
-
-            st.info(
-                "현재 조건에 해당하는 세부 사고유형 데이터가 없습니다."
-            )
-
-        else:
-
-            top_detail = (
-                detail_type_df
-                .sort_values(
-                    "accidents",
+                    "sort_key",
                     ascending=False
                 )
-                .iloc[0][
-                    detail_type_column
-                ]
             )
 
 
-            max_detail = float(
-                detail_type_df[
-                    "accidents"
-                ].max()
+            max_age = (
+                float(
+                    age_plot[
+                        "accidents"
+                    ].max()
+                )
+                if not age_plot.empty
+                else 1
             )
 
 
-            if max_detail <= 0:
-                max_detail = 1
+            if max_age <= 0:
+                max_age = 1
 
 
-            fig_detail = go.Figure(
+            fig_age = go.Figure(
                 go.Bar(
 
-                    x=detail_type_df[
+                    x=age_plot[
                         "accidents"
                     ],
 
-                    y=detail_type_df[
-                        detail_type_column
+                    y=age_plot[
+                        "age_group"
                     ],
 
                     orientation="h",
 
                     marker_color=[
-                        "#D9A64A"
-                        if value == top_detail
-                        else "#79B69B"
+                        "#E8753B"
+                        if age == top_age
+                        else "#8DA9C4"
 
-                        for value
-                        in detail_type_df[
-                            detail_type_column
+                        for age
+                        in age_plot[
+                            "age_group"
                         ]
                     ],
 
                     text=[
                         f"{int(value):,}건"
                         for value
-                        in detail_type_df[
+                        in age_plot[
                             "accidents"
                         ]
                     ],
@@ -1931,19 +1641,14 @@ with st.container(
             )
 
 
-            fig_detail.update_layout(
+            fig_age.update_layout(
 
-                height=max(
-                    500,
-                    len(
-                        detail_type_df
-                    ) * 34
-                ),
+                height=500,
 
                 margin=dict(
-                    l=150,
+                    l=90,
                     r=100,
-                    t=30,
+                    t=35,
                     b=65
                 ),
 
@@ -1962,18 +1667,18 @@ with st.container(
                     gridcolor="#35405A",
                     range=[
                         0,
-                        max_detail * 1.25
+                        max_age * 1.25
                     ]
                 ),
 
                 yaxis=dict(
-                    title=detail_title
+                    title=None
                 )
             )
 
 
             st.plotly_chart(
-                fig_detail,
+                fig_age,
                 use_container_width=True,
                 config={
                     "displayModeBar": False
@@ -1982,21 +1687,109 @@ with st.container(
 
 
     # ========================================================
-    # YEAR TREND
+    # AUTO ANALYSIS
+    # ========================================================
+
+    top_weather_share = (
+        top_weather_accidents
+        / annual_total
+        * 100
+        if annual_total > 0
+        else 0
+    )
+
+
+    top_age_share = (
+        top_age_accidents
+        / annual_total
+        * 100
+        if annual_total > 0
+        else 0
+    )
+
+
+    st.html(
+        f"""
+        <div class="analysis-box">
+
+            <div class="analysis-title">
+                {selected_year}년 기상상태·연령대 사고 분석
+            </div>
+
+            {selected_year}년 전체 교통사고는
+            <b>{annual_total:,}건</b>입니다.
+
+            <br>
+
+            사고가 가장 많이 집계된 기상상태는
+            <b>{weather_with_icon(top_weather)}</b>으로
+            <b>{top_weather_accidents:,}건</b>이며,
+            전체의 약
+            <b>{top_weather_share:.1f}%</b>를 차지합니다.
+
+            <br>
+
+            사고건수가 가장 많은 가해운전자 연령대는
+            <b>{top_age}</b>로
+            <b>{top_age_accidents:,}건</b>이며,
+            전체의 약
+            <b>{top_age_share:.1f}%</b>입니다.
+
+            <br><br>
+
+            ※ 기상상태별 사고건수만으로
+            특정 날씨의 사고 위험도가 더 높다고 단정할 수는 없습니다.
+            실제 위험도를 비교하려면 각 기상상태의 노출시간,
+            교통량 등의 추가 정보가 필요합니다.
+
+        </div>
+        """
+    )
+
+
+    # ========================================================
+    # TREND
     # ========================================================
 
     with st.container(
         key="trend_panel"
     ):
 
+        trend_label_parts = []
+
+
+        if selected_age != "전체":
+
+            trend_label_parts.append(
+                selected_age
+            )
+
+
+        if selected_weather != "전체":
+
+            trend_label_parts.append(
+                weather_with_icon(selected_weather)
+            )
+
+
+        trend_label = (
+            " · ".join(
+                trend_label_parts
+            )
+            if trend_label_parts
+            else "전체"
+        )
+
+
         st.html(
             f"""
             <div class="panel-title">
-                {selected_type_label} 연도별 사고 추이
+                {trend_label} 연도별 사고 추이
             </div>
 
             <div class="panel-sub">
-                현재 선택한 사고유형의 연도별 사고 발생 변화를 확인합니다.
+                현재 선택한 연령대와 기상상태 조건의
+                연도별 교통사고 변화를 확인합니다.
             </div>
             """
         )
@@ -2103,19 +1896,10 @@ with st.container(
         )
 
 
-    # ========================================================
-    # PREDICTION SECTION
-    # ========================================================
-
     st.html(
         """
-        <div class="section-heading">
-            예측
-        </div>
-
-        <div class="section-heading-sub">
-            과거 연도별 사고 추세를 기반으로 선택한 사고유형의 향후 사고 규모를 전망합니다.
-        </div>
+        <div class="section-divider"></div>
+        <div class="section-heading">예측</div>
         """
     )
 
@@ -2131,11 +1915,11 @@ with st.container(
         st.html(
             """
             <div class="panel-title">
-                사고유형별 미래 예측
+                기상상태별 교통사고 미래 예측
             </div>
 
             <div class="panel-sub">
-                과거 연도별 고령운전자 사고 건수를 기반으로
+                과거 연도별 사고건수를 기반으로
                 향후 사고 발생 추세를 예측합니다.
                 <br>
                 현재 데이터는 연 단위이므로
@@ -2145,116 +1929,49 @@ with st.container(
         )
 
 
-        p1, p2, p3, p4 = st.columns(
-            [1.3, 1.3, 1.3, 1.5]
+        p1, p2, p3, empty = st.columns(
+            [1, 1, 1.5, 2]
         )
 
 
         with p1:
 
-            predict_main = st.selectbox(
-                "예측 대분류",
-                ["전체"] + main_types,
+            predict_age = st.selectbox(
+                "예측 연령대",
+                ["전체"] + age_groups,
                 index=(
                     0
-                    if selected_main == "전체"
+                    if selected_age == "전체"
                     else (
-                        ["전체"]
-                        + main_types
+                        ["전체"] + age_groups
                     ).index(
-                        selected_main
+                        selected_age
                     )
                 ),
-                key="predict_type_main"
+                key="weather_predict_age"
             )
-
-
-        # ====================================================
-        # PREDICT MIDDLE
-        # ====================================================
-
-        if predict_main == "전체":
-
-            predict_middle_source = df
-
-        else:
-
-            predict_middle_source = df[
-                df[
-                    "accident_type_main"
-                ] == predict_main
-            ]
-
-
-        predict_middle_list = sorted(
-            [
-                value
-                for value
-                in predict_middle_source[
-                    "accident_type_middle"
-                ]
-                .unique()
-                .tolist()
-                if value not in INVALID_VALUES
-            ]
-        )
 
 
         with p2:
 
-            predict_middle = st.selectbox(
-                "예측 중분류",
-                ["전체"]
-                + predict_middle_list,
-                key="predict_type_middle"
+            predict_weather = st.selectbox(
+                "예측 기상상태",
+                ["전체"] + weather_list,
+                index=(
+                    0
+                    if selected_weather == "전체"
+                    else (
+                        ["전체"] + weather_list
+                    ).index(
+                        selected_weather
+                    )
+                ),
+                format_func=weather_with_icon,
+                key="weather_predict_weather"
             )
-
-
-        # ====================================================
-        # PREDICT SUB
-        # ====================================================
-
-        predict_sub_source = (
-            predict_middle_source.copy()
-        )
-
-
-        if predict_middle != "전체":
-
-            predict_sub_source = (
-                predict_sub_source[
-                    predict_sub_source[
-                        "accident_type_middle"
-                    ] == predict_middle
-                ]
-            )
-
-
-        predict_sub_list = sorted(
-            [
-                value
-                for value
-                in predict_sub_source[
-                    "accident_type_sub"
-                ]
-                .unique()
-                .tolist()
-                if value not in INVALID_VALUES
-            ]
-        )
 
 
         with p3:
-
-            predict_sub = st.selectbox(
-                "예측 소분류",
-                ["전체"]
-                + predict_sub_list,
-                key="predict_type_sub"
-            )
-
-
-        with p4:
 
             predict_period = st.radio(
                 "예측 기간",
@@ -2264,7 +1981,7 @@ with st.container(
                     "10년"
                 ],
                 horizontal=True,
-                key="predict_type_period"
+                key="weather_predict_period"
             )
 
 
@@ -2277,56 +1994,22 @@ with st.container(
         )
 
 
-        if predict_main != "전체":
+        if predict_age != "전체":
 
             prediction_df = prediction_df[
                 prediction_df[
-                    "accident_type_main"
-                ] == predict_main
+                    "age_group"
+                ] == predict_age
             ]
 
 
-        if predict_middle != "전체":
+        if predict_weather != "전체":
 
             prediction_df = prediction_df[
                 prediction_df[
-                    "accident_type_middle"
-                ] == predict_middle
+                    "weather"
+                ] == predict_weather
             ]
-
-
-        if predict_sub != "전체":
-
-            prediction_df = prediction_df[
-                prediction_df[
-                    "accident_type_sub"
-                ] == predict_sub
-            ]
-
-
-        if predict_sub != "전체":
-
-            prediction_label = (
-                predict_sub
-            )
-
-        elif predict_middle != "전체":
-
-            prediction_label = (
-                predict_middle
-            )
-
-        elif predict_main != "전체":
-
-            prediction_label = (
-                predict_main
-            )
-
-        else:
-
-            prediction_label = (
-                "전체 사고유형"
-            )
 
 
         prediction_source = (
@@ -2342,6 +2025,32 @@ with st.container(
         )
 
 
+        prediction_label_parts = []
+
+
+        if predict_age != "전체":
+
+            prediction_label_parts.append(
+                predict_age
+            )
+
+
+        if predict_weather != "전체":
+
+            prediction_label_parts.append(
+                weather_with_icon(predict_weather)
+            )
+
+
+        prediction_label = (
+            " · ".join(
+                prediction_label_parts
+            )
+            if prediction_label_parts
+            else "전체"
+        )
+
+
         horizon = {
             "1년": 1,
             "5년": 5,
@@ -2350,10 +2059,6 @@ with st.container(
             predict_period
         ]
 
-
-        # ====================================================
-        # PREDICT
-        # ====================================================
 
         if len(
             prediction_source
@@ -2364,6 +2069,10 @@ with st.container(
             )
 
         else:
+
+            # =================================================
+            # MODEL
+            # =================================================
 
             x = (
                 prediction_source[
@@ -2385,10 +2094,6 @@ with st.container(
             )
 
 
-            # =================================================
-            # LINEAR TREND
-            # =================================================
-
             slope, intercept = (
                 np.polyfit(
                     x,
@@ -2408,6 +2113,10 @@ with st.container(
                 y - fitted
             )
 
+
+            # =================================================
+            # METRICS
+            # =================================================
 
             mae = float(
                 np.mean(
@@ -2451,6 +2160,10 @@ with st.container(
             )
 
 
+            # =================================================
+            # FUTURE
+            # =================================================
+
             last_year = int(
                 x.max()
             )
@@ -2476,7 +2189,7 @@ with st.container(
 
 
             # =================================================
-            # PREDICT GRAPH
+            # GRAPH
             # =================================================
 
             fig_predict = go.Figure()
@@ -2513,14 +2226,14 @@ with st.container(
             )
 
 
-            predict_x = (
+            prediction_x = (
                 [last_year]
                 +
                 future_years.tolist()
             )
 
 
-            predict_y = (
+            prediction_y = (
                 [
                     float(
                         y[-1]
@@ -2534,9 +2247,9 @@ with st.container(
             fig_predict.add_trace(
                 go.Scatter(
 
-                    x=predict_x,
+                    x=prediction_x,
 
-                    y=predict_y,
+                    y=prediction_y,
 
                     mode="lines+markers+text",
 
@@ -2724,7 +2437,7 @@ with st.container(
                         예측 모델 정보
                     </div>
 
-                    <b>예측 사고유형</b> :
+                    <b>예측 대상</b> :
                     {prediction_label}
 
                     <br>
@@ -2770,10 +2483,10 @@ with st.container(
 
                     <br><br>
 
-                    사고유형 데이터는 현재 연 단위로 구성되어 있으므로
-                    월별 계절성을 분석하는 SARIMA보다
-                    전체적인 장기 증가·감소 추세를 확인하기 쉬운
-                    <b>Linear Trend Regression</b>을 적용합니다.
+                    현재 데이터는 연도 단위이므로
+                    계절성을 분석하는 SARIMA보다
+                    장기적인 사고 증가·감소 추세를 설명하기 쉬운
+                    <b>Linear Trend Regression</b>을 사용합니다.
 
                 </div>
                 """
@@ -2781,7 +2494,7 @@ with st.container(
 
 
             # =================================================
-            # FORECAST SUMMARY
+            # PREDICTION SUMMARY
             # =================================================
 
             st.html(
@@ -2792,20 +2505,20 @@ with st.container(
                         {prediction_label} 사고 미래 예측
                     </div>
 
-                    마지막 실제 데이터인
-                    <b>{last_year}년</b>의 사고는
+                    마지막 실제 연도인
+                    <b>{last_year}년</b> 사고는
                     <b>{current_value:,}건</b>입니다.
 
                     <br>
 
-                    현재 추세가 유지된다고 가정할 경우
+                    현재 추세가 지속된다고 가정할 경우
                     <b>{last_year + horizon}년</b>
-                    예상 사고 건수는
-                    약 <b>{predicted_value:,}건</b>입니다.
+                    예상 사고건수는 약
+                    <b>{predicted_value:,}건</b>입니다.
 
                     <br>
 
-                    마지막 실제 연도와 비교하면
+                    마지막 실제 연도 대비
                     <b>{change_value:+,}건</b>,
                     약
                     <b>{change_rate:+.1f}%</b>
@@ -2813,9 +2526,9 @@ with st.container(
 
                     <br><br>
 
-                    ※ 장기 예측은 사고유형별 과거 추세만을 기반으로 하며,
-                    법·제도 변화, 교통환경 변화,
-                    고령운전자 규모 등의 외부 요인은 반영하지 않습니다.
+                    ※ 본 예측은 과거 사고건수 추세만을 이용하며,
+                    향후 실제 기상 발생 빈도, 교통량,
+                    운전자 수 변화 등의 외부 요인은 반영하지 않습니다.
 
                 </div>
                 """
@@ -2837,8 +2550,8 @@ with st.container(
             </div>
 
             <div class="panel-sub">
-                사고유형별 연도 데이터를 예측할 때 활용할 수 있는
-                주요 시계열 모델의 특징을 비교합니다.
+                기상상태별 사고 예측에 활용할 수 있는
+                주요 모델의 특징을 비교합니다.
             </div>
             """
         )
@@ -2863,7 +2576,6 @@ with st.container(
 
                     </thead>
 
-
                     <tbody>
 
                         <tr>
@@ -2879,12 +2591,12 @@ with st.container(
                             </td>
 
                             <td>
-                                사고건수의 장기적인
-                                증가·감소 추세를 직선으로 추정
+                                연도별 사고건수의
+                                장기 증가·감소 방향을 추정
                             </td>
 
                             <td>
-                                적은 연도 데이터도 사용 가능
+                                적은 연도 데이터도 가능
                             </td>
 
                             <td>
@@ -2911,8 +2623,8 @@ with st.container(
                             </td>
 
                             <td>
-                                자기회귀와 이동평균을 사용한
-                                시계열 예측
+                                과거 관측값과 오차 구조를
+                                기반으로 시계열을 예측
                             </td>
 
                             <td>
@@ -2943,11 +2655,12 @@ with st.container(
                             </td>
 
                             <td>
-                                ARIMA에 계절 패턴을 추가
+                                ARIMA에 반복적인
+                                계절 패턴을 추가
                             </td>
 
                             <td>
-                                월별·분기별 장기 데이터
+                                월별 또는 분기별 장기 데이터
                             </td>
 
                             <td>
@@ -2974,8 +2687,8 @@ with st.container(
                             </td>
 
                             <td>
-                                추세·변화점·계절성을
-                                자동으로 모델링
+                                추세와 변화점,
+                                계절성을 자동 모델링
                             </td>
 
                             <td>
@@ -3009,24 +2722,21 @@ with st.container(
                     현재 모델 선정 이유
                 </div>
 
-                현재 사고유형별 데이터는
+                현재 기상상태별 사고 데이터는
                 <b>연도 단위</b>로 구성되어 있습니다.
 
                 <br>
 
-                따라서 월별·분기별 반복 패턴을 분석하는
-                SARIMA와 같은 계절성 모델보다
-                연도별 사고 규모의 장기적인 증가·감소 방향을
-                설명할 수 있는
-                <b>Linear Trend Regression</b>이
-                현재 데이터 구조에 더 적합합니다.
+                이 구조에서는 특정 계절의 반복 패턴을 직접 학습하기 어렵기 때문에
+                SARIMA보다 연도별 장기 추세를 보여주는
+                <b>Linear Trend Regression</b>이 더 적합합니다.
 
                 <br><br>
 
-                향후 월별 사고유형 데이터가 확보되면
-                ARIMA·SARIMA·Prophet 등을 추가하고,
-                테스트 기간의 실제 사고건수와 예측값을 비교하여
-                MAE / RMSE 기준으로 최종 모델을 선정할 수 있습니다.
+                향후 월별 기상상태 사고 데이터와
+                실제 강수일수·적설일수·안개일수 등의 데이터가 확보되면
+                사고건수뿐 아니라 기상 노출량을 고려한
+                상대적인 사고 위험 분석으로 확장할 수 있습니다.
 
             </div>
             """
@@ -3034,24 +2744,22 @@ with st.container(
 
 
     # ========================================================
-    # DETAIL
+    # DETAIL TABLE
     # ========================================================
 
     st.write("")
 
 
     with st.expander(
-        "고령운전자 사고유형·시간대 데이터 상세 보기"
+        "기상상태별 교통사고 데이터 상세 보기"
     ):
 
         detail_df = (
             df[
                 [
                     "year",
-                    "accident_type_main",
-                    "accident_type_middle",
-                    "accident_type_sub",
-                    "time_slot",
+                    "age_group",
+                    "weather",
                     "accidents"
                 ]
             ]
@@ -3059,15 +2767,11 @@ with st.container(
             .sort_values(
                 [
                     "year",
-                    "accident_type_main",
-                    "accident_type_middle",
-                    "accident_type_sub",
-                    "time_slot"
+                    "age_group",
+                    "weather"
                 ],
                 ascending=[
                     False,
-                    True,
-                    True,
                     True,
                     True
                 ]
@@ -3077,10 +2781,8 @@ with st.container(
 
         detail_df.columns = [
             "연도",
-            "대분류",
-            "중분류",
-            "소분류",
-            "시간대",
+            "연령대",
+            "기상상태",
             "사고건수"
         ]
 
@@ -3114,24 +2816,14 @@ with st.container(
                         format="%d년"
                     ),
 
-                "대분류":
+                "연령대":
                     st.column_config.TextColumn(
-                        "대분류"
+                        "연령대"
                     ),
 
-                "중분류":
+                "기상상태":
                     st.column_config.TextColumn(
-                        "중분류"
-                    ),
-
-                "소분류":
-                    st.column_config.TextColumn(
-                        "소분류"
-                    ),
-
-                "시간대":
-                    st.column_config.TextColumn(
-                        "시간대"
+                        "기상상태"
                     ),
 
                 "사고건수":

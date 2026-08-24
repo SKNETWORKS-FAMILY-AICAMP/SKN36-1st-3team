@@ -1672,6 +1672,9 @@ with st.container(
                                 lat=36.15,
                                 lon=127.85
                             ),
+                            # 대한민국 전체 지역(제주 포함)이
+                            # 차트 안에 모두 들어오도록 자동 맞춤
+                            fitbounds="locations",
 
                             projection_scale=5.8,
 
@@ -1722,6 +1725,9 @@ with st.container(
                         # =====================================
 
                         fig_map.update_layout(
+
+                            # 지도 이동 및 확대/축소 비활성화
+                            dragmode=False,
 
                             height=650,
 
@@ -1804,6 +1810,8 @@ with st.container(
                             config={
                                 "displayModeBar": False,
                                 "responsive": True,
+                                "scrollZoom": False,
+                                "doubleClick": False,
                             },
                         )
 
@@ -2010,6 +2018,9 @@ with st.container(
 
                 fig_rank.update_layout(
 
+                    # 드래그 확대/이동 비활성화
+                    dragmode=False,
+
                     height=650,
 
                     margin=dict(
@@ -2033,6 +2044,8 @@ with st.container(
                     ),
 
                     xaxis=dict(
+
+                        fixedrange=True,
 
                         title=dict(
                             text="운전면허 소지자 수(명)",
@@ -2064,6 +2077,8 @@ with st.container(
 
                     yaxis=dict(
 
+                        fixedrange=True,
+
                         title=None,
 
                         showgrid=False,
@@ -2084,6 +2099,8 @@ with st.container(
 
                     config={
                         "displayModeBar": False,
+                        "scrollZoom": False,
+                        "doubleClick": False,
                     },
                 )
 

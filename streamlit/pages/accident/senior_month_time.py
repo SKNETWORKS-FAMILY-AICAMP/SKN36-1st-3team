@@ -1017,6 +1017,29 @@ div[role="radiogroup"] label p {
         #E8EDF5 !important;
 }
 
+/* ==========================================================
+   ANALYSIS / PREDICTION SECTION TITLES
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
+
 </style>
 """
 )
@@ -1440,6 +1463,13 @@ with st.container(
             </div>
             """
         )
+
+
+    st.html(
+        """
+        <div class="section-heading">분석</div>
+        """
+    )
 
 
     # ========================================================
@@ -2050,6 +2080,13 @@ with st.container(
                 "displayModeBar": False
             }
         )
+
+
+    st.html(
+        """
+        <div class="section-heading">예측</div>
+        """
+    )
 
 
     # ========================================================

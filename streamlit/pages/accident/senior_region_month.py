@@ -694,7 +694,6 @@ div[role="radiogroup"] label p {
 .st-key-region_rank_panel,
 .st-key-sigungu_panel,
 .st-key-month_trend_panel,
-.st-key-heatmap_panel,
 .st-key-predict_panel,
 .st-key-model_compare_panel {
 
@@ -955,6 +954,29 @@ div[role="radiogroup"] label p {
 .js-plotly-plot .plotly .annotation-text {
 
     fill: #E8EDF5 !important;
+}
+
+/* ==========================================================
+   ANALYSIS / PREDICTION SECTION TITLES
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
 }
 
 </style>
@@ -1485,6 +1507,13 @@ with st.container(
     left, right = st.columns(
         [1.3, 1],
         gap="medium"
+    )
+
+
+    st.html(
+        """
+        <div class="section-heading">분석</div>
+        """
     )
 
 
@@ -2240,165 +2269,11 @@ with st.container(
                 )
 
 
-    # ========================================================
-    # REGION × MONTH HEATMAP
-    # ========================================================
-
-    with st.container(
-        key="heatmap_panel"
-    ):
-
-        st.html(
-            f"""
-            <div class="panel-title">
-                {selected_year}년 시도 × 월 사고 집중도
-            </div>
-
-            <div class="panel-sub">
-                월별·지역별 고령운전자 사고를 동시에 비교합니다.
-                붉고 밝은 영역일수록 사고 발생 건수가 많습니다.
-            </div>
-            """
-        )
-
-
-        heat_source = (
-            df[
-                df[
-                    "year"
-                ] == selected_year
-            ]
-            .groupby(
-                [
-                    "sido_name",
-                    "month"
-                ],
-                as_index=False
-            )["accidents"]
-            .sum()
-        )
-
-
-        heat_df = (
-            heat_source
-            .pivot_table(
-                index="sido_name",
-                columns="month",
-                values="accidents",
-                aggfunc="sum",
-                fill_value=0
-            )
-            .reindex(
-                columns=range(1, 13),
-                fill_value=0
-            )
-        )
-
-
-        region_totals = (
-            heat_df
-            .sum(axis=1)
-            .sort_values(
-                ascending=True
-            )
-        )
-
-
-        heat_df = heat_df.reindex(
-            region_totals.index
-        )
-
-
-        fig_heat = go.Figure(
-            go.Heatmap(
-
-                z=heat_df.values,
-
-                x=[
-                    f"{month}월"
-                    for month
-                    in heat_df.columns
-                ],
-
-                y=heat_df.index,
-
-                colorscale=[
-                    [0.00, "#10233A"],
-                    [0.15, "#174C6A"],
-                    [0.30, "#1F7A7A"],
-                    [0.45, "#49A078"],
-                    [0.60, "#A3B95D"],
-                    [0.75, "#D5B33F"],
-                    [0.88, "#E8793E"],
-                    [1.00, "#D94A3A"],
-                ],
-
-                colorbar=dict(
-
-                    title=dict(
-                        text="사고 건수",
-
-                        font=dict(
-                            color="#FFFFFF"
-                        )
-                    ),
-
-                    tickfont=dict(
-                        color="#FFFFFF"
-                    )
-                ),
-
-                hovertemplate=(
-                    "<b>%{y}</b>"
-                    "<br>"
-                    "%{x}"
-                    "<br>"
-                    "사고: %{z:,}건"
-                    "<extra></extra>"
-                )
-            )
-        )
-
-
-        fig_heat.update_layout(
-
-            height=650,
-
-            margin=dict(
-                l=100,
-                r=80,
-                t=35,
-                b=70
-            ),
-
-            paper_bgcolor="#182035",
-
-            plot_bgcolor="#182035",
-
-            font=dict(
-                color="#E8EDF5"
-            ),
-
-            xaxis=dict(
-                title="월"
-            ),
-
-            yaxis=dict(
-                title="시도"
-            )
-        )
-
-
-        st.plotly_chart(
-
-            fig_heat,
-
-            use_container_width=True,
-
-            config={
-                "displayModeBar": False
-            }
-        )
+    st.html(
+        """
+        <div class="section-heading">예측</div>
+        """
+    )
 
 
     # ========================================================

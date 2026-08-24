@@ -160,223 +160,15 @@ def load_table(table_name: str):
 
 
 # ============================================================
-# DASHBOARD DATA
+# DB STATUS
 # ============================================================
 
 db_connected = True
 
-
 try:
-
-    region_df = load_table(
-        "accident_region"
-    )
-
-    driver_age_df = load_table(
-        "driver_age_accident"
-    )
-
-    driver_time_df = load_table(
-        "driver_time_accident"
-    )
-
-
+    _ = load_table("accident_region")
 except Exception:
-
     db_connected = False
-
-    region_df = pd.DataFrame()
-
-    driver_age_df = pd.DataFrame()
-
-    driver_time_df = pd.DataFrame()
-
-
-# ============================================================
-# KPI - REGION
-# ============================================================
-
-latest_year = "-"
-
-total_accidents = 0
-
-top_region = "-"
-
-
-if not region_df.empty:
-
-    region_df["year"] = pd.to_numeric(
-        region_df["year"],
-        errors="coerce",
-    )
-
-    region_df["accidents"] = pd.to_numeric(
-        region_df["accidents"],
-        errors="coerce",
-    )
-
-
-    valid_year = (
-        region_df["year"]
-        .dropna()
-    )
-
-
-    if not valid_year.empty:
-
-        latest_year = int(
-            valid_year.max()
-        )
-
-
-        latest_df = region_df[
-            region_df["year"]
-            == latest_year
-        ].copy()
-
-
-        total_accidents = int(
-            latest_df[
-                "accidents"
-            ].sum()
-        )
-
-
-        region_total = (
-            latest_df
-            .groupby(
-                "sido"
-            )["accidents"]
-            .sum()
-            .sort_values(
-                ascending=False
-            )
-        )
-
-
-        if not region_total.empty:
-
-            top_region = str(
-                region_total.index[0]
-            )
-
-
-# ============================================================
-# KPI - AGE
-# ============================================================
-
-top_age = "-"
-
-
-if not driver_age_df.empty:
-
-    age_long = driver_age_df.melt(
-        id_vars="age_group",
-        var_name="year",
-        value_name="accidents",
-    )
-
-
-    age_long["accidents"] = pd.to_numeric(
-        age_long["accidents"],
-        errors="coerce",
-    )
-
-
-    age_long = age_long[
-        ~age_long["age_group"].isin(
-            [
-                "합계",
-                "불명",
-            ]
-        )
-    ]
-
-
-    age_sum = (
-        age_long
-        .groupby(
-            "age_group"
-        )["accidents"]
-        .sum()
-        .sort_values(
-            ascending=False
-        )
-    )
-
-
-    if not age_sum.empty:
-
-        top_age = str(
-            age_sum.index[0]
-        )
-
-
-# ============================================================
-# KPI - TIME
-# ============================================================
-
-top_time = "-"
-
-
-if not driver_time_df.empty:
-
-    time_long = driver_time_df.melt(
-        id_vars="age_group",
-        var_name="time_slot",
-        value_name="accidents",
-    )
-
-
-    time_long["accidents"] = pd.to_numeric(
-        time_long["accidents"],
-        errors="coerce",
-    )
-
-
-    time_long = time_long[
-        ~time_long["age_group"].isin(
-            [
-                "합계",
-                "불명",
-            ]
-        )
-    ]
-
-
-    time_total = (
-        time_long
-        .groupby(
-            "time_slot"
-        )["accidents"]
-        .sum()
-        .sort_values(
-            ascending=False
-        )
-    )
-
-
-    if not time_total.empty:
-
-        top_time = str(
-            time_total.index[0]
-        )
-
-
-        top_time = (
-            top_time
-            .replace(
-                "time_",
-                ""
-            )
-            .replace(
-                "_",
-                "~"
-            )
-        )
-
-
-        top_time += "시"
 
 
 # ============================================================
@@ -594,47 +386,6 @@ footer {
     line-height: 1.6;
 
     margin-bottom: 26px;
-}
-
-
-/* ==========================================================
-   KPI
-========================================================== */
-
-.kpi-card {
-
-    min-height: 105px;
-
-    background: #192136;
-
-    border:
-        1px solid
-        #3B4662;
-
-    border-radius: 16px;
-
-    padding:
-        17px 18px;
-}
-
-
-.kpi-label {
-
-    color: #8992A4;
-
-    font-size: 10px;
-
-    margin-bottom: 14px;
-}
-
-
-.kpi-value {
-
-    color: #FFFFFF;
-
-    font-size: 21px;
-
-    font-weight: 800;
 }
 
 
@@ -930,128 +681,29 @@ with st.container(
 
 
     # ========================================================
-    # KPI
-    # ========================================================
-
-    k1, k2, k3, k4 = st.columns(
-        4
-    )
-
-
-    with k1:
-
-        st.html(
-            f"""
-            <div class="kpi-card">
-
-                <div class="kpi-label">
-                    최신 분석 연도
-                </div>
-
-                <div class="kpi-value">
-                    {latest_year}
-                </div>
-
-            </div>
-            """
-        )
-
-
-    with k2:
-
-        st.html(
-            f"""
-            <div class="kpi-card">
-
-                <div class="kpi-label">
-                    전체 사고 건수
-                </div>
-
-                <div class="kpi-value">
-                    {total_accidents:,}
-                </div>
-
-            </div>
-            """
-        )
-
-
-    with k3:
-
-        st.html(
-            f"""
-            <div class="kpi-card">
-
-                <div class="kpi-label">
-                    사고 최다 연령대
-                </div>
-
-                <div class="kpi-value">
-                    {top_age}
-                </div>
-
-            </div>
-            """
-        )
-
-
-    with k4:
-
-        st.html(
-            f"""
-            <div class="kpi-card">
-
-                <div class="kpi-label">
-                    사고 집중 시간대
-                </div>
-
-                <div class="kpi-value">
-                    {top_time}
-                </div>
-
-            </div>
-            """
-        )
-
-
-    # ========================================================
-    # ANALYSIS TITLE
+    # 1. DRIVER
     # ========================================================
 
     st.html(
         """
         <div class="section-title">
-            분석 항목
+            가해운전자
         </div>
 
         <div class="section-sub">
-            분석할 교통사고 데이터셋을 선택하세요.
+            가해운전자의 연령대와 시간대별 사고 특성을 분석합니다.
         </div>
         """
     )
-
-
-    # ========================================================
-    # ANALYSIS CARDS
-    # ========================================================
 
     with st.container(
         key="analysis_cards"
     ):
 
-        # ====================================================
-        # ROW 1
-        # ====================================================
-
-        c1, c2, c3, c4 = st.columns(
-            4,
+        c1, c2, empty1 = st.columns(
+            3,
             gap="medium",
         )
-
-
-        # ====================================================
-        # 1
-        # ====================================================
 
         with c1:
 
@@ -1062,7 +714,6 @@ with st.container(
             ):
                 go_driver_age()
 
-
             st.html(
                 """
                 <div class="card-desc">
@@ -1072,11 +723,6 @@ with st.container(
                 """
             )
 
-
-        # ====================================================
-        # 2
-        # ====================================================
-
         with c2:
 
             if st.button(
@@ -1085,7 +731,6 @@ with st.container(
                 use_container_width=True,
             ):
                 go_driver_age_time()
-
 
             st.html(
                 """
@@ -1098,34 +743,27 @@ with st.container(
 
 
         # ====================================================
-        # 3
+        # 2. SENIOR DRIVER
         # ====================================================
+
+        st.html(
+            """
+            <div class="section-title">
+                고령운전자
+            </div>
+
+            <div class="section-sub">
+                고령운전자의 사고유형·시간·월·지역별 사고 특성을 분석합니다.
+            </div>
+            """
+        )
+
+        c3, c4, c5 = st.columns(
+            3,
+            gap="medium",
+        )
 
         with c3:
-
-            if st.button(
-                "🌦️\n\n기상상태별\n교통사고",
-                key="card_weather",
-                use_container_width=True,
-            ):
-                go_weather()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    날씨 조건별 사고 규모와<br>
-                    연도별 변화 비교
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 4
-        # ====================================================
-
-        with c4:
 
             if st.button(
                 "⚠️\n\n고령운전자\n사고유형 × 시간",
@@ -1133,7 +771,6 @@ with st.container(
                 use_container_width=True,
             ):
                 go_senior_type_time()
-
 
             st.html(
                 """
@@ -1144,22 +781,7 @@ with st.container(
                 """
             )
 
-
-        # ====================================================
-        # ROW 2
-        # ====================================================
-
-        c5, c6, c7, c8 = st.columns(
-            4,
-            gap="medium",
-        )
-
-
-        # ====================================================
-        # 5
-        # ====================================================
-
-        with c5:
+        with c4:
 
             if st.button(
                 "📅\n\n고령운전자\n월 × 시간",
@@ -1167,7 +789,6 @@ with st.container(
                 use_container_width=True,
             ):
                 go_senior_month_time()
-
 
             st.html(
                 """
@@ -1178,12 +799,7 @@ with st.container(
                 """
             )
 
-
-        # ====================================================
-        # 6
-        # ====================================================
-
-        with c6:
+        with c5:
 
             if st.button(
                 "📍\n\n고령운전자\n지역 × 월",
@@ -1191,7 +807,6 @@ with st.container(
                 use_container_width=True,
             ):
                 go_senior_region_month()
-
 
             st.html(
                 """
@@ -1204,8 +819,43 @@ with st.container(
 
 
         # ====================================================
-        # 7
+        # 3. INTEGRATED TRAFFIC ACCIDENT
         # ====================================================
+
+        st.html(
+            """
+            <div class="section-title">
+                통합 교통사고
+            </div>
+
+            <div class="section-sub">
+                지역·연령대·기상상태를 기준으로 전체 교통사고를 비교 분석합니다.
+            </div>
+            """
+        )
+
+        c6, c7, c8 = st.columns(
+            3,
+            gap="medium",
+        )
+
+        with c6:
+
+            if st.button(
+                "🗺️\n\n지역별\n전체 교통사고",
+                key="card_region_total",
+                use_container_width=True,
+            ):
+                go_region_total()
+
+            st.html(
+                """
+                <div class="card-desc">
+                    지역별 사고 수준과<br>
+                    연도별 변화 비교
+                </div>
+                """
+            )
 
         with c7:
 
@@ -1216,7 +866,6 @@ with st.container(
             ):
                 go_age_total()
 
-
             st.html(
                 """
                 <div class="card-desc">
@@ -1226,25 +875,19 @@ with st.container(
                 """
             )
 
-
-        # ====================================================
-        # 8
-        # ====================================================
-
         with c8:
 
             if st.button(
-                "🗺️\n\n지역별\n전체 교통사고",
-                key="card_region_total",
+                "🌦️\n\n기상상태별\n교통사고",
+                key="card_weather",
                 use_container_width=True,
             ):
-                go_region_total()
-
+                go_weather()
 
             st.html(
                 """
                 <div class="card-desc">
-                    지역별 사고 수준과<br>
+                    날씨 조건별 사고 규모와<br>
                     연도별 변화 비교
                 </div>
                 """

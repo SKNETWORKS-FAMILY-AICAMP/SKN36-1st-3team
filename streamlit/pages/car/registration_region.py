@@ -1905,22 +1905,9 @@ with st.container(
 
                             projection_type="mercator",
 
-                            center=dict(
-                                lat=36.15,
-                                lon=127.85
-                            ),
-
-                            projection_scale=5.8,
-
-                            lataxis_range=[
-                                32.8,
-                                38.8
-                            ],
-
-                            lonaxis_range=[
-                                124.5,
-                                131.2
-                            ],
+                            # 대한민국 전체 지역(제주 포함)이
+                            # 지도 안에 모두 들어오도록 자동 맞춤
+                            fitbounds="locations",
 
                             visible=False,
 
@@ -1960,6 +1947,9 @@ with st.container(
 
                         fig_map.update_layout(
 
+                            # 맞춰진 전체 지도 화면에서 이동/확대 방지
+                            dragmode=False,
+
                             height=650,
 
                             margin=dict(
@@ -1975,7 +1965,7 @@ with st.container(
 
                             font=dict(
                                 color="#E7EAF0",
-                                size=13,
+                                size=15,
                             ),
 
                             coloraxis_colorbar=dict(
@@ -1990,7 +1980,7 @@ with st.container(
 
                                     font=dict(
                                         color="#E7EAF0",
-                                        size=13,
+                                        size=15,
                                     ),
                                 ),
 
@@ -2014,7 +2004,7 @@ with st.container(
 
                                 tickfont=dict(
                                     color="#D5DAE4",
-                                    size=12,
+                                    size=14,
                                 ),
 
                                 thickness=18,
@@ -2041,6 +2031,8 @@ with st.container(
                             config={
                                 "displayModeBar": False,
                                 "responsive": True,
+                                "scrollZoom": False,
+                                "doubleClick": False,
                             },
                         )
 
@@ -2229,7 +2221,7 @@ with st.container(
 
                         textfont=dict(
                             color="#F2F4F8",
-                            size=12,
+                            size=14,
                         ),
 
                         cliponaxis=False,
@@ -2269,7 +2261,7 @@ with st.container(
 
                     font=dict(
                         color="#E7EAF0",
-                        size=13,
+                        size=15,
                     ),
 
                     xaxis=dict(
@@ -2279,7 +2271,7 @@ with st.container(
 
                             font=dict(
                                 color="#D8DEE8",
-                                size=13,
+                                size=15,
                             ),
                         ),
 
@@ -2293,7 +2285,7 @@ with st.container(
 
                         tickfont=dict(
                             color="#C2C9D5",
-                            size=11,
+                            size=13,
                         ),
 
                         range=[
@@ -2310,7 +2302,7 @@ with st.container(
 
                         tickfont=dict(
                             color="#F0F2F6",
-                            size=12,
+                            size=14,
                         ),
                     ),
                 )
