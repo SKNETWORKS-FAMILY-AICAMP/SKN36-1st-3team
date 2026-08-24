@@ -1,3 +1,8 @@
+# ============================================================
+# streamlit/pages/car.py
+# SAFER - 자동차·운전면허 분석 메인 페이지
+# ============================================================
+
 import streamlit as st
 
 
@@ -30,46 +35,6 @@ def go_faq():
 
 
 # ============================================================
-# CAR DETAIL PAGE MOVE
-# ============================================================
-
-def go_license_gender():
-    st.switch_page("pages/car/license_gender.py")
-
-
-def go_license_age():
-    st.switch_page("pages/car/license_age.py")
-
-
-def go_license_region():
-    st.switch_page("pages/car/license_region.py")
-
-
-def go_return_2023():
-    st.switch_page("pages/car/return_2023.py")
-
-
-def go_return_2025():
-    st.switch_page("pages/car/return_2025.py")
-
-
-def go_return_compare():
-    st.switch_page("pages/car/return_compare.py")
-
-
-def go_return_policy_region():
-    st.switch_page("pages/car/return_policy_region.py")
-
-
-def go_registration_year():
-    st.switch_page("pages/car/registration_year.py")
-
-
-def go_registration_region():
-    st.switch_page("pages/car/registration_region.py")
-
-
-# ============================================================
 # CSS
 # ============================================================
 
@@ -78,7 +43,7 @@ st.html(
 <style>
 
 /* ==========================================================
-   GLOBAL
+   전체 배경
 ========================================================== */
 
 html,
@@ -101,21 +66,9 @@ body,
 }
 
 
-header[data-testid="stHeader"] {
-    display: none;
-}
-
-
-section[data-testid="stSidebar"] {
-    display: none;
-}
-
-
-#MainMenu {
-    display: none;
-}
-
-
+header[data-testid="stHeader"],
+section[data-testid="stSidebar"],
+#MainMenu,
 footer {
     display: none;
 }
@@ -123,28 +76,30 @@ footer {
 
 .block-container {
 
-    max-width: 1500px;
+    max-width: 1600px;
 
-    padding-top: 12px;
-    padding-left: 26px;
-    padding-right: 26px;
-    padding-bottom: 40px;
+    padding-top: 14px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 50px;
 }
 
 
 /* ==========================================================
-   NAVBAR
+   상단 NAV
 ========================================================== */
 
 .st-key-top_nav {
 
-    background: rgba(255,255,255,.98);
+    background:
+        rgba(255,255,255,.98);
 
     border-radius: 16px;
 
-    padding: 10px 20px;
+    padding:
+        10px 20px;
 
-    margin-bottom: 18px;
+    margin-bottom: 28px;
 
     box-shadow:
         0 5px 20px
@@ -154,109 +109,114 @@ footer {
 
 .st-key-top_nav button {
 
-    background: transparent !important;
+    background:
+        transparent !important;
 
-    color: #30384D !important;
+    color:
+        #30384D !important;
 
-    border: none !important;
+    border:
+        none !important;
 
-    box-shadow: none !important;
+    box-shadow:
+        none !important;
 
-    min-height: 42px !important;
+    font-size:
+        16px !important;
 
-    font-size: 14px !important;
+    font-weight:
+        500 !important;
 
-    font-weight: 500 !important;
+    min-height:
+        44px !important;
 
-    white-space: nowrap !important;
-
-    transition: all .15s ease !important;
+    white-space:
+        nowrap !important;
 }
 
 
 .st-key-top_nav button:hover {
 
-    background: transparent !important;
+    background:
+        transparent !important;
 
-    color: #D6A348 !important;
+    color:
+        #D6A348 !important;
 }
 
 
-/* ==========================================================
-   SAFER LOGO
-========================================================== */
+/* 로고 */
 
 .st-key-nav_logo button {
 
-    color: #27314C !important;
+    color:
+        #27314C !important;
 
-    font-size: 28px !important;
+    font-size:
+        30px !important;
 
-    font-weight: 900 !important;
+    font-weight:
+        900 !important;
 
-    justify-content: flex-start !important;
+    justify-content:
+        flex-start !important;
 
-    padding-left: 0 !important;
-
-    letter-spacing: -1px !important;
+    padding-left:
+        0 !important;
 }
 
 
-/* ==========================================================
-   ACTIVE NAV
-========================================================== */
+/* 현재 자동차 메뉴 */
 
 .st-key-nav_car button {
 
-    color: #D6A348 !important;
+    color:
+        #D6A348 !important;
 
-    font-weight: 800 !important;
+    font-weight:
+        800 !important;
 }
 
 
-/* ==========================================================
-   FUTURE BUTTON
-========================================================== */
+/* 미래 전망 */
 
 .st-key-nav_future button {
 
-    background: #D9A64A !important;
+    background:
+        #D9A64A !important;
 
-    color: #172035 !important;
+    color:
+        #172035 !important;
 
-    font-weight: 800 !important;
+    font-size:
+        15px !important;
 
-    border-radius: 1px !important;
+    font-weight:
+        800 !important;
 
-    padding-left: 18px !important;
-    padding-right: 18px !important;
-}
-
-
-.st-key-nav_future button:hover {
-
-    background: #C9973C !important;
-
-    color: #172035 !important;
+    border-radius:
+        2px !important;
 }
 
 
 /* ==========================================================
-   PAGE
+   MAIN PAGE
 ========================================================== */
 
 .st-key-car_page {
 
-    background: #101625;
+    background:
+        #101625;
 
     border:
         1px solid
         #34405A;
 
-    border-radius: 20px;
+    border-radius:
+        20px;
 
     padding:
-        30px 32px 40px 32px;
+        34px 34px 48px 34px;
 
     box-shadow:
         0 12px 36px
@@ -268,80 +228,96 @@ footer {
    HEADER
 ========================================================== */
 
-.car-path {
+.page-eyebrow {
 
-    color: #D6A348;
+    color:
+        #D6A348;
 
-    font-size: 11px;
+    font-size:
+        13px;
 
-    font-weight: 800;
+    font-weight:
+        900;
 
-    letter-spacing: 1.5px;
+    letter-spacing:
+        1.6px;
 
-    margin-bottom: 9px;
+    margin-bottom:
+        10px;
 }
 
 
-.car-title {
+.page-title {
 
-    color: #FFFFFF;
+    color:
+        #FFFFFF;
 
-    font-size: 38px;
+    font-size:
+        42px;
 
-    font-weight: 900;
+    line-height:
+        1.15;
 
-    letter-spacing: -2px;
+    font-weight:
+        900;
 
-    line-height: 1.15;
+    letter-spacing:
+        -2px;
 
-    margin-bottom: 10px;
+    margin-bottom:
+        13px;
 }
 
 
-.car-sub {
+.page-description {
 
-    color: #929AAC;
+    color:
+        #AEB7C8;
 
-    font-size: 13px;
+    font-size:
+        15px;
 
-    line-height: 1.6;
+    line-height:
+        1.8;
 
-    margin-bottom: 28px;
+    margin-bottom:
+        25px;
 }
 
 
 /* ==========================================================
-   CATEGORY BADGES
+   CATEGORY PILLS
 ========================================================== */
 
-.category-row {
+.category-pill {
 
-    display: flex;
+    display:
+        inline-block;
 
-    gap: 8px;
+    padding:
+        8px 15px;
 
-    margin-top: 5px;
+    margin-right:
+        8px;
 
-    margin-bottom: 34px;
-}
+    background:
+        #171F33;
 
-
-.category-badge {
-
-    background: #192136;
-
-    color: #A3ABBA;
+    color:
+        #B7C0D0;
 
     border:
         1px solid
-        #39445D;
+        #3B465F;
 
-    border-radius: 50px;
+    border-radius:
+        999px;
 
-    padding:
-        7px 14px;
+    font-size:
+        12px;
 
-    font-size: 10px;
+    font-weight:
+        600;
 }
 
 
@@ -349,195 +325,201 @@ footer {
    SECTION
 ========================================================== */
 
-.section-title {
+.analysis-title {
 
-    color: white;
+    color:
+        #FFFFFF;
 
-    font-size: 19px;
+    font-size:
+        23px;
 
-    font-weight: 800;
+    font-weight:
+        800;
 
-    margin-top: 8px;
+    margin-top:
+        42px;
 
-    margin-bottom: 5px;
+    margin-bottom:
+        5px;
 }
 
 
-.section-sub {
+.analysis-description {
 
-    color: #7F899B;
+    color:
+        #8995A9;
 
-    font-size: 11px;
+    font-size:
+        13px;
 
-    margin-bottom: 20px;
+    margin-bottom:
+        26px;
 }
 
 
 /* ==========================================================
-   ANALYSIS CARDS
+   CARD
 ========================================================== */
 
-.st-key-car_cards button {
+.st-key-card_license_gender button,
+.st-key-card_license_age button,
+.st-key-card_license_region button,
+.st-key-card_return_2023 button,
+.st-key-card_return_2025 button,
+.st-key-card_return_compare button,
+.st-key-card_total_car button,
+.st-key-card_registration_year button,
+.st-key-card_registration_region button {
 
-    width: 100% !important;
+    width:
+        100% !important;
 
-    height: 165px !important;
+    min-height:
+        165px !important;
 
-    background: #182035 !important;
-
-    color: #FFFFFF !important;
+    background:
+        #192136 !important;
 
     border:
         1px solid
-        #3A4662 !important;
+        #3A4661 !important;
 
-    border-radius: 22px !important;
+    border-radius:
+        22px !important;
 
-    white-space: pre-line !important;
+    color:
+        #FFFFFF !important;
 
-    line-height: 1.55 !important;
+    font-size:
+        16px !important;
 
-    font-size: 15px !important;
+    font-weight:
+        800 !important;
 
-    font-weight: 800 !important;
+    line-height:
+        1.55 !important;
 
     box-shadow:
-        0 7px 16px
-        rgba(0,0,0,.12) !important;
+        none !important;
 
     transition:
-        transform .15s ease,
-        border-color .15s ease,
-        box-shadow .15s ease !important;
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease !important;
 }
 
 
-.st-key-car_cards button:hover {
+.st-key-card_license_gender button:hover,
+.st-key-card_license_age button:hover,
+.st-key-card_license_region button:hover,
+.st-key-card_return_2023 button:hover,
+.st-key-card_return_2025 button:hover,
+.st-key-card_return_compare button:hover,
+.st-key-card_total_car button:hover,
+.st-key-card_registration_year button:hover,
+.st-key-card_registration_region button:hover {
 
-    transform: translateY(-4px);
+    transform:
+        translateY(-4px);
 
-    border-color: #D6A348 !important;
+    background:
+        #202A43 !important;
 
-    box-shadow:
-        0 13px 25px
-        rgba(0,0,0,.22) !important;
+    border-color:
+        #D6A348 !important;
 }
 
 
 /* ==========================================================
-   CARD ACCENTS
+   카드별 상단 컬러
 ========================================================== */
 
 .st-key-card_license_gender button {
-    border-top: 5px solid #69B895 !important;
+    border-top:
+        5px solid #79B69B !important;
 }
 
 
 .st-key-card_license_age button {
-    border-top: 5px solid #85A7C7 !important;
+    border-top:
+        5px solid #88A8CF !important;
 }
 
 
 .st-key-card_license_region button {
-    border-top: 5px solid #9C82BF !important;
+    border-top:
+        5px solid #A58AC8 !important;
 }
 
 
 .st-key-card_return_2023 button {
-    border-top: 5px solid #D3A24A !important;
+    border-top:
+        5px solid #D2A653 !important;
 }
 
 
 .st-key-card_return_2025 button {
-    border-top: 5px solid #C76A4F !important;
+    border-top:
+        5px solid #C57B5E !important;
 }
 
 
 .st-key-card_return_compare button {
-
     border-top:
-        5px solid
-        #E9BD55 !important;
-
-    background:
-        linear-gradient(
-            145deg,
-            #1B243A,
-            #242943
-        ) !important;
+        5px solid #E2BA58 !important;
 }
 
 
-.st-key-card_return_policy button {
-    border-top: 5px solid #CB866B !important;
+/* 전체 자동차 */
+
+.st-key-card_total_car button {
+    border-top:
+        5px solid #C78C72 !important;
 }
 
+
+/* 연도별 자동차 */
 
 .st-key-card_registration_year button {
-    border-top: 5px solid #70B29A !important;
+    border-top:
+        5px solid #83B39E !important;
 }
 
+
+/* 지역별 자동차 */
 
 .st-key-card_registration_region button {
-    border-top: 5px solid #6AA8B4 !important;
-}
-
-
-/* ==========================================================
-   DESCRIPTION
-========================================================== */
-
-.card-desc {
-
-    color: #7E8799;
-
-    text-align: center;
-
-    font-size: 10px;
-
-    line-height: 1.45;
-
-    margin-top: -7px;
-
-    margin-bottom: 18px;
-}
-
-
-/* ==========================================================
-   DATA INFO
-========================================================== */
-
-.data-info {
-
-    margin-top: 26px;
-
-    padding-top: 18px;
-
     border-top:
-        1px solid
-        #252F46;
-
-    color: #798296;
-
-    font-size: 10px;
-
-    line-height: 1.7;
+        5px solid #85AEB8 !important;
 }
 
 
 /* ==========================================================
-   RESPONSIVE
+   CARD DESCRIPTION
 ========================================================== */
 
-@media(max-width: 1000px) {
+.card-description {
 
-    .car-title {
-        font-size: 30px;
-    }
+    text-align:
+        center;
 
-    .st-key-car_page {
-        padding: 20px;
-    }
+    color:
+        #8290A6;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.65;
+
+    min-height:
+        48px;
+
+    margin-top:
+        8px;
+
+    margin-bottom:
+        25px;
 }
 
 </style>
@@ -546,7 +528,7 @@ footer {
 
 
 # ============================================================
-# TOP NAVIGATION
+# TOP NAV
 # ============================================================
 
 with st.container(
@@ -564,25 +546,25 @@ with st.container(
             1.9,
         ],
         vertical_alignment="center",
-        gap="small",
+        gap="small"
     )
 
 
     # --------------------------------------------------------
-    # SAFER
+    # LOGO
     # --------------------------------------------------------
 
     with logo:
 
         if st.button(
             "SAFER",
-            key="nav_logo",
+            key="nav_logo"
         ):
             go_main()
 
 
     # --------------------------------------------------------
-    # 인구
+    # PEOPLE
     # --------------------------------------------------------
 
     with n1:
@@ -590,13 +572,13 @@ with st.container(
         if st.button(
             "인구",
             key="nav_people",
-            use_container_width=True,
+            use_container_width=True
         ):
             go_people()
 
 
     # --------------------------------------------------------
-    # 자동차
+    # CAR
     # --------------------------------------------------------
 
     with n2:
@@ -604,13 +586,13 @@ with st.container(
         if st.button(
             "자동차",
             key="nav_car",
-            use_container_width=True,
+            use_container_width=True
         ):
             go_car()
 
 
     # --------------------------------------------------------
-    # 교통사고
+    # ACCIDENT
     # --------------------------------------------------------
 
     with n3:
@@ -618,13 +600,13 @@ with st.container(
         if st.button(
             "교통사고",
             key="nav_accident",
-            use_container_width=True,
+            use_container_width=True
         ):
             go_accident()
 
 
     # --------------------------------------------------------
-    # 제도
+    # POLICY
     # --------------------------------------------------------
 
     with n4:
@@ -632,7 +614,7 @@ with st.container(
         if st.button(
             "제도",
             key="nav_policy",
-            use_container_width=True,
+            use_container_width=True
         ):
             go_policy()
 
@@ -646,13 +628,13 @@ with st.container(
         if st.button(
             "FAQ",
             key="nav_faq",
-            use_container_width=True,
+            use_container_width=True
         ):
             go_faq()
 
 
     # --------------------------------------------------------
-    # 미래전망
+    # FUTURE
     # --------------------------------------------------------
 
     with nf:
@@ -660,17 +642,17 @@ with st.container(
         if st.button(
             "미래 전망 예측하기 ▶",
             key="nav_future",
-            use_container_width=True,
+            use_container_width=True
         ):
 
             st.toast(
                 "미래 전망 페이지는 준비 중입니다.",
-                icon="📈",
+                icon="📈"
             )
 
 
 # ============================================================
-# CAR PAGE
+# MAIN
 # ============================================================
 
 with st.container(
@@ -683,49 +665,47 @@ with st.container(
 
     st.html(
         """
-        <div class="car-path">
+        <div class="page-eyebrow">
             SAFER DATA ANALYTICS
         </div>
 
-        <div class="car-title">
-            자동차 · 운전면허 분석
+        <div class="page-title">
+            자동차·운전면허 분석
         </div>
 
-        <div class="car-sub">
+        <div class="page-description">
             운전면허 보유 현황, 고령운전자 자진반납,
             자동차 등록 데이터를 통해 지역별 자동차·운전자 특성을 분석합니다.
         </div>
 
-        <div class="category-row">
-
-            <div class="category-badge">
+        <div>
+            <span class="category-pill">
                 운전면허
-            </div>
+            </span>
 
-            <div class="category-badge">
+            <span class="category-pill">
                 자진반납
-            </div>
+            </span>
 
-            <div class="category-badge">
+            <span class="category-pill">
                 자동차 등록
-            </div>
-
+            </span>
         </div>
         """
     )
 
 
     # ========================================================
-    # SECTION
+    # ANALYSIS TITLE
     # ========================================================
 
     st.html(
         """
-        <div class="section-title">
+        <div class="analysis-title">
             분석 항목
         </div>
 
-        <div class="section-sub">
+        <div class="analysis-description">
             분석할 자동차·운전면허 데이터셋을 선택하세요.
         </div>
         """
@@ -733,287 +713,276 @@ with st.container(
 
 
     # ========================================================
-    # CARDS
+    # ROW 1
+    # 운전면허
     # ========================================================
 
-    with st.container(
-        key="car_cards"
-    ):
-
-        # ====================================================
-        # ROW 1
-        # ====================================================
-
-        c1, c2, c3 = st.columns(
-            3,
-            gap="medium",
-        )
-
-
-        # ====================================================
-        # 1. LICENSE GENDER
-        # ====================================================
-
-        with c1:
-
-            if st.button(
-                "👥\n\n운전면허소지자\n성별 분석",
-                key="card_license_gender",
-                use_container_width=True,
-            ):
-
-                go_license_gender()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    성별 면허 보유 규모와<br>
-                    연도별 변화 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 2. LICENSE AGE
-        # ====================================================
-
-        with c2:
-
-            if st.button(
-                "🎂\n\n운전면허소지자\n연령대별 분석",
-                key="card_license_age",
-                use_container_width=True,
-            ):
-
-                go_license_age()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    연령대별 운전자 규모와<br>
-                    고령운전자 증가 추세 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 3. LICENSE REGION
-        # ====================================================
-
-        with c3:
-
-            if st.button(
-                "📍\n\n운전면허소지자\n지역별 분석",
-                key="card_license_region",
-                use_container_width=True,
-            ):
-
-                go_license_region()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    지역별 면허 보유자와<br>
-                    고령운전자 분포 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # ROW 2
-        # ====================================================
-
-        c4, c5, c6 = st.columns(
-            3,
-            gap="medium",
-        )
-
-
-        # ====================================================
-        # 4. RETURN 2023
-        # ====================================================
-
-        with c4:
-
-            if st.button(
-                "📄\n\n운전면허 자진반납\n2023",
-                key="card_return_2023",
-                use_container_width=True,
-            ):
-
-                go_return_2023()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    2023년 지역·연령별<br>
-                    운전면허 자진반납 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 5. RETURN 2025
-        # ====================================================
-
-        with c5:
-
-            if st.button(
-                "📄\n\n운전면허 자진반납\n2025",
-                key="card_return_2025",
-                use_container_width=True,
-            ):
-
-                go_return_2025()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    2025년 지역·연령별<br>
-                    운전면허 자진반납 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 6. COMPARE
-        # ====================================================
-
-        with c6:
-
-            if st.button(
-                "📊\n\n자진반납\n2023 ↔ 2025 비교",
-                key="card_return_compare",
-                use_container_width=True,
-            ):
-
-                go_return_compare()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    지역·연령별 증감과<br>
-                    자진반납 변화율 비교
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # ROW 3
-        # ====================================================
-
-        c7, c8, c9 = st.columns(
-            3,
-            gap="medium",
-        )
-
-
-        # ====================================================
-        # 7. RETURN REGION
-        # ====================================================
-
-        with c7:
-
-            if st.button(
-                "🗺️\n\n자진반납\n지역별 종합 현황",
-                key="card_return_policy",
-                use_container_width=True,
-            ):
-
-                go_return_policy_region()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    지역별 면허 반납 규모와<br>
-                    정책 활용 현황 비교
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 8. REGISTRATION YEAR
-        # ====================================================
-
-        with c8:
-
-            if st.button(
-                "🚗\n\n자동차 등록\n연도별 현황",
-                key="card_registration_year",
-                use_container_width=True,
-            ):
-
-                go_registration_year()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    차종·용도별 등록대수와<br>
-                    장기 변화 추세 분석
-                </div>
-                """
-            )
-
-
-        # ====================================================
-        # 9. REGISTRATION REGION
-        # ====================================================
-
-        with c9:
-
-            if st.button(
-                "🌎\n\n자동차 등록\n지역별 현황",
-                key="card_registration_region",
-                use_container_width=True,
-            ):
-
-                go_registration_region()
-
-
-            st.html(
-                """
-                <div class="card-desc">
-                    지역·차종·용도별<br>
-                    자동차 등록 현황 비교
-                </div>
-                """
-            )
-
-
-    # ========================================================
-    # DATA INFO
-    # ========================================================
-
-    st.html(
-        """
-        <div class="data-info">
-
-            연결 데이터<br><br>
-
-            · KOSIS 운전면허소지자현황 성별<br>
-            · KOSIS 운전면허소지자현황 연령대별<br>
-            · KOSIS 운전면허소지자현황 지역별<br>
-            · 경찰청 운전면허 자진반납 2023<br>
-            · 경찰청 운전면허 자진반납 2025<br>
-            · 경찰청 운전면허 자진반납 지역별 종합 현황<br>
-            · 국토교통통계누리 자동차등록현황 연도별<br>
-            · 국토교통통계누리 자동차등록현황 지역별
-
-        </div>
-        """
+    col1, col2, col3 = st.columns(
+        3,
+        gap="large"
     )
+
+
+    # --------------------------------------------------------
+    # 성별 면허
+    # --------------------------------------------------------
+
+    with col1:
+
+        if st.button(
+            "👥\n\n운전면허소지자\n성별 분석",
+            key="card_license_gender",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/license_gender.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                성별 면허 보유 규모와<br>
+                인구 대비 면허 보유 특성 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 연령별 면허
+    # --------------------------------------------------------
+
+    with col2:
+
+        if st.button(
+            "🧓\n\n운전면허소지자\n연령대별 분석",
+            key="card_license_age",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/license_age.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                연령대별 운전자 규모와<br>
+                고령운전자 증가 추세 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 지역별 면허
+    # --------------------------------------------------------
+
+    with col3:
+
+        if st.button(
+            "📍\n\n운전면허소지자\n지역별 분석",
+            key="card_license_region",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/license_region.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                지역별 면허 보유자와<br>
+                고령운전자 분포 분석
+            </div>
+            """
+        )
+
+
+    # ========================================================
+    # ROW 2
+    # 자진반납
+    # ========================================================
+
+    col4, col5, col6 = st.columns(
+        3,
+        gap="large"
+    )
+
+
+    # --------------------------------------------------------
+    # 2023
+    # --------------------------------------------------------
+
+    with col4:
+
+        if st.button(
+            "📄\n\n운전면허 자진반납\n2023",
+            key="card_return_2023",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/return_2023.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                2023년 지역·연령별<br>
+                운전면허 자진반납 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 2025
+    # --------------------------------------------------------
+
+    with col5:
+
+        if st.button(
+            "📄\n\n운전면허 자진반납\n2025",
+            key="card_return_2025",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/return_2025.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                2025년 지역·연령별<br>
+                운전면허 자진반납 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 비교
+    # --------------------------------------------------------
+
+    with col6:
+
+        if st.button(
+            "📊\n\n자진반납\n2023 ↔ 2025 비교",
+            key="card_return_compare",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/return_compare.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                지역·연령별 증감과<br>
+                자진반납 변화율 비교
+            </div>
+            """
+        )
+
+
+    # ========================================================
+    # ROW 3
+    # 자동차 등록
+    # ========================================================
+
+    col7, col8, col9 = st.columns(
+        3,
+        gap="large"
+    )
+
+
+    # --------------------------------------------------------
+    # 전체 자동차 등록 현황
+    # --------------------------------------------------------
+
+    with col7:
+
+        if st.button(
+            "🚘\n\n전체 자동차\n등록 현황",
+            key="card_total_car",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/total_car.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                지역·차종·용도별<br>
+                자동차 등록 종합 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 연도별 자동차 등록
+    # --------------------------------------------------------
+
+    with col8:
+
+        if st.button(
+            "🚗\n\n자동차 등록\n연도별 현황",
+            key="card_registration_year",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/registration_year.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                연도별 자동차 등록대수와<br>
+                등록 변화 추이 분석
+            </div>
+            """
+        )
+
+
+    # --------------------------------------------------------
+    # 지역별 자동차 등록
+    # --------------------------------------------------------
+
+    with col9:
+
+        if st.button(
+            "🌎\n\n자동차 등록\n지역별 현황",
+            key="card_registration_region",
+            use_container_width=True
+        ):
+
+            st.switch_page(
+                "pages/car/registration_region.py"
+            )
+
+
+        st.html(
+            """
+            <div class="card-description">
+                지역별 자동차 등록 규모와<br>
+                공간적 분포 비교
+            </div>
+            """
+        )
