@@ -49,7 +49,7 @@ local_population_page = st.Page(
 
 resident_population_monthly_page = st.Page(
     "pages/people/resident_population_monthly.py",
-    title="주민등록 인구 및 세대 현황",
+    title="주민등록 인구 현황",
     url_path="resident_population_monthly",
 )
 
@@ -141,13 +141,101 @@ registration_region_page = st.Page(
 
 
 # ============================================================
-# ACCIDENT
+# ACCIDENT MAIN
 # ============================================================
 
 accident_page = st.Page(
     "pages/accident.py",
     title="교통사고 분석",
     url_path="accident",
+)
+
+
+# ============================================================
+# ACCIDENT - AGE TOTAL
+# ============================================================
+
+age_total_page = st.Page(
+    "pages/accident/age_total.py",
+    title="연령별 교통사고 분석",
+    url_path="age_total",
+)
+
+
+# ============================================================
+# ACCIDENT - DRIVER AGE
+# ============================================================
+
+driver_age_page = st.Page(
+    "pages/accident/driver_age.py",
+    title="가해운전자 연령대별 사고",
+    url_path="driver_age",
+)
+
+
+# ============================================================
+# ACCIDENT - DRIVER AGE TIME
+# ============================================================
+
+driver_age_time_page = st.Page(
+    "pages/accident/driver_age_time.py",
+    title="가해운전자 연령대·시간대 사고",
+    url_path="driver_age_time",
+)
+
+
+# ============================================================
+# ACCIDENT - REGION TOTAL
+# ============================================================
+
+region_total_page = st.Page(
+    "pages/accident/region_total.py",
+    title="지역별 교통사고 분석",
+    url_path="region_total",
+)
+
+
+# ============================================================
+# ACCIDENT - SENIOR MONTH TIME
+# ============================================================
+
+senior_month_time_page = st.Page(
+    "pages/accident/senior_month_time.py",
+    title="고령운전자 월별·시간대 사고",
+    url_path="senior_month_time",
+)
+
+
+# ============================================================
+# ACCIDENT - SENIOR REGION MONTH
+# ============================================================
+
+senior_region_month_page = st.Page(
+    "pages/accident/senior_region_month.py",
+    title="고령운전자 지역별·월별 사고",
+    url_path="senior_region_month",
+)
+
+
+# ============================================================
+# ACCIDENT - SENIOR TYPE TIME
+# ============================================================
+
+senior_type_time_page = st.Page(
+    "pages/accident/senior_type_time.py",
+    title="고령운전자 사고유형·시간대 분석",
+    url_path="senior_type_time",
+)
+
+
+# ============================================================
+# ACCIDENT - WEATHER
+# ============================================================
+
+weather_page = st.Page(
+    "pages/accident/weather.py",
+    title="기상상태별 교통사고 분석",
+    url_path="accident_weather",
 )
 
 
@@ -185,9 +273,7 @@ pg = st.navigation(
         # ====================================================
 
         "SAFER": [
-
             main_page,
-
         ],
 
 
@@ -199,10 +285,8 @@ pg = st.navigation(
 
             people_page,
 
-            # 지역별 인구 현황
             local_population_page,
 
-            # 주민등록 인구 및 세대 현황
             resident_population_monthly_page,
 
         ],
@@ -218,36 +302,21 @@ pg = st.navigation(
             car_page,
 
 
-            # -----------------------------------------------
             # 운전면허
-            # -----------------------------------------------
-
             license_gender_page,
-
             license_age_page,
-
             license_region_page,
 
 
-            # -----------------------------------------------
             # 자진반납
-            # -----------------------------------------------
-
             return_2023_page,
-
             return_2025_page,
-
             return_compare_page,
 
 
-            # -----------------------------------------------
             # 자동차 등록
-            # -----------------------------------------------
-
             total_car_page,
-
             registration_year_page,
-
             registration_region_page,
 
         ],
@@ -259,7 +328,28 @@ pg = st.navigation(
 
         "교통사고": [
 
+            # 메인
             accident_page,
+
+
+            # 연령
+            age_total_page,
+            driver_age_page,
+            driver_age_time_page,
+
+
+            # 지역
+            region_total_page,
+
+
+            # 고령운전자
+            senior_month_time_page,
+            senior_region_month_page,
+            senior_type_time_page,
+
+
+            # 기상
+            weather_page,
 
         ],
 
@@ -269,9 +359,7 @@ pg = st.navigation(
         # ====================================================
 
         "제도": [
-
             policy_page,
-
         ],
 
 
@@ -280,9 +368,7 @@ pg = st.navigation(
         # ====================================================
 
         "FAQ": [
-
             faq_page,
-
         ],
 
     },
