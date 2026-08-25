@@ -90,52 +90,44 @@ def load_local_people_data(
 
 
 # ============================================================
-# 2. 행정안전부 주민등록인구 및 세대현황 - 월간
+# 2. 행정안전부 연령별 인구 현황
 # ============================================================
 
-def resident_regristration_data(
-    file_path: str = "data/인구/행정안전부_주민등록인구및세대현황_월간.csv"
+def load_age_population_data(
+    file_path: str = "data/인구/행정안전부_연령별인구현황.csv"
 ) -> pd.DataFrame:
 
-    # CSV 읽기
     df = pd.read_csv(
         file_path,
         encoding="cp949"
     )
 
-    # 첫 번째 컬럼 = 행정구역
-    region_col = df.columns[0]
-
-    # 총인구수 컬럼만 선택
-    population_cols = [
-        col
-        for col in df.columns
-        if "총인구수" in str(col)
-    ]
-
-    resident_people = df[
-        [region_col] + population_cols
-    ].copy()
-
-    # 지역 컬럼명 통일
-    resident_people.rename(
-        columns={
-            region_col: "region"
-        },
-        inplace=True
-    )
-
-    # 지역명 정리
-    resident_people["region"] = (
-        resident_people["region"]
-        .fillna("")
+    # 행정구역 정리
+    # 서울특별시 (1100000000) → 서울특별시
+    df["행정구역"] = (
+        df["행정구역"]
         .astype(str)
+        .str.replace(
+            r"\s*\(\d+\)\s*$",
+            "",
+            regex=True
+        )
         .str.strip()
     )
 
-    # 빈 지역 제거
-    resident_people = resident_people[
-        ~resident_people["region"].isin([
+    df = df.rename(
+        columns={
+            "행정구역": "region"
+        }
+    )
+
+    # 전국 / 합계 제외
+    df = df[
+        ~df["region"].isin([
+            "전국",
+            "계",
+            "총계",
+            "합계",
             "",
             "nan",
             "None",
@@ -143,124 +135,88 @@ def resident_regristration_data(
     ].copy()
 
     # wide → long
-    resident_people = resident_people.melt(
+    age_population = df.melt(
         id_vars=["region"],
-        var_name="month_raw",
+        var_name="variable",
         value_name="population"
     )
 
-    # 컬럼명에서 YYYYMM 추출
-    resident_people["month"] = (
-        resident_people["month_raw"]
-        .astype(str)
-        .str.extract(r"(\d{6})")[0]
-    )
-
-    # 혹시 2025년01월 형태라면 추가 처리
-    missing_month = (
-        resident_people["month"].isna()
-    )
-
-    if missing_month.any():
-
-        extracted = (
-            resident_people.loc[
-                missing_month,
-                "month_raw"
-            ]
-            .astype(str)
-            .str.extract(
-                r"(\d{4}).*?(\d{1,2})"
-            )
+    # 총인구수 / 연령구간인구수 제외
+    age_population = age_population[
+        ~age_population["variable"].str.contains(
+            "총인구수|연령구간인구수",
+            regex=True
         )
+    ].copy()
 
-        resident_people.loc[
-            missing_month,
-            "month"
-        ] = (
-            extracted[0]
-            + "-"
-            + extracted[1].str.zfill(2)
-        )
-
-    # 202501 → 2025-01
-    mask = (
-        resident_people["month"]
-        .astype(str)
-        .str.match(r"^\d{6}$")
+    # 2026년07월_남_60~69세 → 2026
+    age_population["year"] = (
+        age_population["variable"]
+        .str.extract(r"(\d{4})년")[0]
     )
 
-    resident_people.loc[
-        mask,
-        "month"
-    ] = (
-        resident_people.loc[
-            mask,
-            "month"
-        ].str[:4]
-        + "-"
-        + resident_people.loc[
-            mask,
-            "month"
-        ].str[4:6]
-    )
-
-    # 인구 숫자 변환
-    resident_people["population"] = (
-        resident_people["population"]
-        .astype(str)
-        .str.replace(",", "", regex=False)
-    )
-
-    resident_people["population"] = pd.to_numeric(
-        resident_people["population"],
+    age_population["year"] = pd.to_numeric(
+        age_population["year"],
         errors="coerce"
     )
 
-    resident_people = resident_people.dropna(
+    # 성별 추출
+    age_population["gender"] = (
+        age_population["variable"]
+        .str.extract(r"월_(계|남|여)_")[0]
+    )
+
+    # 연령대 추출
+    age_population["age_group"] = (
+        age_population["variable"]
+        .str.extract(
+            r"월_(?:계|남|여)_(.+)$"
+        )[0]
+    )
+
+    # 인구수 숫자 변환
+    age_population["population"] = (
+        age_population["population"]
+        .astype(str)
+        .str.replace(",", "", regex=False)
+        .str.strip()
+    )
+
+    age_population["population"] = pd.to_numeric(
+        age_population["population"],
+        errors="coerce"
+    )
+
+    # 결측치 제거
+    age_population = age_population.dropna(
         subset=[
-            "month",
-            "population"
+            "year",
+            "gender",
+            "age_group",
+            "population",
         ]
     )
 
-    resident_people["population"] = (
-        resident_people["population"]
+    # 자료형 변환
+    age_population["year"] = (
+        age_population["year"]
         .astype(int)
     )
 
-    # 필요한 컬럼만 반환
-    resident_people = resident_people[
+    age_population["population"] = (
+        age_population["population"]
+        .astype(int)
+    )
+
+    # 필요한 컬럼만 남기기
+    age_population = age_population[
         [
-            "month",
             "region",
-            "population"
+            "year",
+            "gender",
+            "age_group",
+            "population",
         ]
     ]
 
-    return resident_people.reset_index(drop=True)
-
-
-# ============================================================
-# 테스트
-# ============================================================
-
-if __name__ == "__main__":
-
-    print("=" * 60)
-    print("▶ 지역별 연간 인구")
-
-    df1 = load_local_people_data()
-
-    print(df1.head())
-    print(df1.shape)
-    print(df1.columns.tolist())
-
-    print("\n" + "=" * 60)
-    print("▶ 주민등록 월별 인구")
-
-    df2 = resident_regristration_data()
-
-    print(df2.head())
-    print(df2.shape)
-    print(df2.columns.tolist())
+    return age_population.reset_index(drop=True)

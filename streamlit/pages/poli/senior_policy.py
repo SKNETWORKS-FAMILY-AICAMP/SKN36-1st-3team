@@ -867,40 +867,6 @@ div[data-baseweb="select"] span {
 
 
 /* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background: #182035 !important;
-
-    border: 1px solid #46536F !important;
-
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-}
-
-
-/* ==========================================================
    PLOT
 ========================================================== */
 
@@ -910,6 +876,397 @@ div[data-baseweb="select"] span {
 .js-plotly-plot .plotly .annotation-text {
 
     fill: #E8EDF5 !important;
+}
+
+
+
+/* ==========================================================
+   GOVERNMENT DASHBOARD SECTIONS
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 34px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
+
+.section-sub {
+    color: #AEB8C8;
+    font-size: 13px;
+    line-height: 1.75;
+    margin: -4px 0 16px 4px;
+}
+
+.section-divider {
+    height: 1px;
+    margin: 38px 0 6px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
+}
+
+
+/* ==========================================================
+   COLLAPSE BUTTONS
+========================================================== */
+
+.st-key-policy_recommend_toggle button,
+.st-key-policy_data_toggle button,
+.st-key-policy_detail_toggle button {
+
+    width: 100% !important;
+    min-height: 52px !important;
+
+    background: #182035 !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-policy_recommend_toggle button *,
+.st-key-policy_data_toggle button *,
+.st-key-policy_detail_toggle button * {
+
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-policy_recommend_toggle button:hover,
+.st-key-policy_data_toggle button:hover,
+.st-key-policy_detail_toggle button:hover {
+
+    background: #202A42 !important;
+    border-color: #D6A348 !important;
+    color: #F1C66A !important;
+}
+
+.st-key-policy_recommend_toggle button:hover *,
+.st-key-policy_data_toggle button:hover *,
+.st-key-policy_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   COLLAPSE PANELS
+========================================================== */
+
+.st-key-policy_recommend_body,
+.st-key-policy_data_body,
+.st-key-policy_detail_body {
+
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+
+    padding: 18px 20px 20px 20px;
+    margin-top: 10px;
+}
+
+
+/* ==========================================================
+   DARK DETAIL TABLE
+========================================================== */
+
+.policy-dark-table-wrap {
+    width: 100%;
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    background: #182035;
+    border: 1px solid #3A4662;
+    border-radius: 12px;
+}
+
+.policy-dark-table {
+    width: 100%;
+    min-width: 1600px;
+    border-collapse: collapse;
+
+    background: #182035;
+    color: #E7EAF0;
+
+    font-size: 12px;
+}
+
+.policy-dark-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.policy-dark-table th {
+    background: #202A42;
+    color: #D6A348;
+    font-weight: 900;
+
+    text-align: center;
+
+    padding: 13px 14px;
+
+    border-bottom: 1px solid #4A5670;
+
+    white-space: nowrap;
+}
+
+.policy-dark-table td {
+    background: #182035;
+    color: #E7EAF0;
+
+    padding: 11px 13px;
+
+    border-bottom: 1px solid #303B55;
+
+    vertical-align: top;
+    line-height: 1.65;
+}
+
+.policy-dark-table tbody tr:nth-child(even) td {
+    background: #1B243A;
+}
+
+.policy-dark-table tbody tr:hover td {
+    background: #222D47;
+    color: #FFFFFF;
+}
+
+.policy-dark-table a {
+    color: #F1C66A !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media(max-width:1000px) {
+    .summary-strip {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+/* ==========================================================
+   POLICY REVIEW TWO COLUMN
+========================================================== */
+
+.st-key-policy_detail_column,
+.st-key-policy_recommend_column {
+
+    background: #151D30;
+    border: 1px solid #3A4662;
+    border-radius: 22px;
+
+    padding: 22px 22px 24px 22px;
+
+    margin-top: 8px;
+    min-height: 190px;
+}
+
+.review-box-title {
+
+    color: #FFFFFF;
+    font-size: 21px;
+    font-weight: 900;
+
+    margin-bottom: 8px;
+}
+
+.review-box-sub {
+
+    color: #B8C2D2;
+    font-size: 12px;
+    line-height: 1.75;
+
+    min-height: 64px;
+    margin-bottom: 14px;
+}
+
+.review-box-sub b {
+
+    color: #F3C867;
+}
+
+
+/* LEFT/RIGHT PANEL TOGGLES */
+
+.st-key-policy_cards_toggle button,
+.st-key-policy_recommend_toggle button {
+
+    width: 100% !important;
+    min-height: 48px !important;
+
+    background: #192238 !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #414D69 !important;
+    border-radius: 11px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+    padding-left: 16px !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-policy_cards_toggle button *,
+.st-key-policy_recommend_toggle button * {
+
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+}
+
+.st-key-policy_cards_toggle button:hover,
+.st-key-policy_recommend_toggle button:hover {
+
+    background: #232D46 !important;
+    border-color: #D6A348 !important;
+}
+
+.st-key-policy_cards_toggle button:hover *,
+.st-key-policy_recommend_toggle button:hover * {
+
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* OPEN BODY */
+
+.st-key-policy_cards_body,
+.st-key-policy_recommend_body {
+
+    margin-top: 12px;
+}
+
+
+/* COMPACT CARDS */
+
+.compact-policy-card {
+
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-policy-card .policy-name {
+
+    font-size: 17px;
+}
+
+.compact-policy-card .policy-meta,
+.compact-policy-card .policy-content {
+
+    font-size: 12px;
+}
+
+.compact-saas-card {
+
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-saas-card .saas-policy {
+
+    font-size: 15px;
+}
+
+.compact-saas-card .saas-idea {
+
+    font-size: 12px;
+}
+
+
+/* LIST MORE BUTTONS */
+
+.st-key-policy_detail_column button[kind="secondary"],
+.st-key-policy_recommend_column button[kind="secondary"] {
+
+    border-radius: 10px !important;
+}
+
+
+@media(max-width: 1000px) {
+
+    .review-box-sub {
+        min-height: auto;
+    }
+}
+
+
+
+/* ==========================================================
+   POLICY LIST MORE BUTTONS
+========================================================== */
+
+.st-key-policy_cards_more button,
+.st-key-policy_ideas_more button {
+
+    width: 100% !important;
+    min-height: 46px !important;
+
+    background: #192238 !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #414D69 !important;
+    border-radius: 10px !important;
+
+    box-shadow: none !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-policy_cards_more button *,
+.st-key-policy_ideas_more button * {
+
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-policy_cards_more button:hover,
+.st-key-policy_ideas_more button:hover {
+
+    background: #232D46 !important;
+    border-color: #D6A348 !important;
+    color: #F1C66A !important;
+}
+
+.st-key-policy_cards_more button:hover *,
+.st-key-policy_ideas_more button:hover * {
+
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
 }
 
 </style>
@@ -1270,6 +1627,16 @@ with st.container(
         )
 
 
+    st.html(
+        """
+        <div class="section-heading">정책 현황 요약</div>
+        <div class="section-sub">
+            정책 의사결정을 위해 유형·시행상태·담당기관 구조를 먼저 확인합니다.
+        </div>
+        """
+    )
+
+
     # ========================================================
     # CATEGORY / STATUS
     # ========================================================
@@ -1577,151 +1944,6 @@ with st.container(
 
 
     # ========================================================
-    # AGENCY
-    # ========================================================
-
-    with st.container(
-        key="agency_panel"
-    ):
-
-        st.html(
-            """
-            <div class="panel-title">
-                운영기관별 정책 현황
-            </div>
-
-            <div class="panel-sub">
-                어떤 기관이 고령운전자 정책을 담당하고 있는지 비교합니다.
-            </div>
-            """
-        )
-
-
-        agency_df = (
-            df[
-                df[
-                    "agency"
-                ] != ""
-            ]
-            .groupby(
-                "agency",
-                as_index=False
-            )
-            .size()
-            .rename(
-                columns={
-                    "size": "count"
-                }
-            )
-            .sort_values(
-                "count",
-                ascending=True
-            )
-        )
-
-
-        if agency_df.empty:
-
-            st.info(
-                "운영기관 데이터가 없습니다."
-            )
-
-        else:
-
-            max_agency = (
-                agency_df[
-                    "count"
-                ].max()
-            )
-
-
-            fig_agency = go.Figure(
-                go.Bar(
-
-                    x=agency_df[
-                        "count"
-                    ],
-
-                    y=agency_df[
-                        "agency"
-                    ],
-
-                    orientation="h",
-
-                    marker_color="#8DA9C4",
-
-                    text=[
-                        f"{int(value)}개"
-                        for value
-                        in agency_df[
-                            "count"
-                        ]
-                    ],
-
-                    textposition="outside",
-
-                    cliponaxis=False,
-
-                    hovertemplate=(
-                        "<b>%{y}</b>"
-                        "<br>"
-                        "정책: %{x}개"
-                        "<extra></extra>"
-                    )
-                )
-            )
-
-
-            fig_agency.update_layout(
-
-                height=max(
-                    450,
-                    len(agency_df) * 42
-                ),
-
-                margin=dict(
-                    l=180,
-                    r=90,
-                    t=30,
-                    b=60
-                ),
-
-                paper_bgcolor="#182035",
-
-                plot_bgcolor="#182035",
-
-                showlegend=False,
-
-                font=dict(
-                    color="#E8EDF5"
-                ),
-
-                xaxis=dict(
-                    title="정책 수(개)",
-                    gridcolor="#35405A",
-                    dtick=1,
-                    range=[
-                        0,
-                        max_agency * 1.25
-                    ]
-                ),
-
-                yaxis=dict(
-                    title=None
-                )
-            )
-
-
-            st.plotly_chart(
-                fig_agency,
-                use_container_width=True,
-                config={
-                    "displayModeBar": False
-                }
-            )
-
-
-    # ========================================================
     # AUTO ANALYSIS
     # ========================================================
 
@@ -1852,327 +2074,580 @@ with st.container(
     )
 
 
+    st.html(
+        """
+        <div class="section-divider"></div>
+        <div class="section-heading">정책 검토</div>
+        <div class="section-sub">
+            실제 시행정책과 SAFER 활용 제안을 나란히 비교하여 검토합니다.
+        </div>
+        """
+    )
+
+
     # ========================================================
-    # POLICY DETAIL LIST
+    # POLICY REVIEW - TWO COLUMN
     # ========================================================
 
-    with st.container(
-        key="policy_list_panel"
-    ):
-
-        st.html(
-            f"""
-            <div class="panel-title">
-                정책 상세 보기
-            </div>
-
-            <div class="panel-sub">
-                현재 필터 조건에 해당하는
-                <b>{len(filtered_df):,}개</b> 정책의 주요 내용을 확인합니다.
-            </div>
-            """
-        )
+    review_left, review_right = st.columns(
+        [1, 1],
+        gap="medium"
+    )
 
 
-        if filtered_df.empty:
+    # ========================================================
+    # LEFT : POLICY DETAIL
+    # ========================================================
 
-            st.info(
-                "현재 조건에 해당하는 정책이 없습니다."
+    with review_left:
+
+        with st.container(
+            key="policy_detail_column"
+        ):
+
+            st.html(
+                f"""
+                <div class="review-box-title">
+                    정책 세부 현황
+                </div>
+
+                <div class="review-box-sub">
+                    현재 조건에 해당하는
+                    <b>{len(filtered_df):,}개</b> 정책의
+                    시행상태·대상·운영기관·주요 내용을 확인합니다.
+                </div>
+                """
             )
 
-        else:
 
-            for _, row in filtered_df.iterrows():
+            if "show_policy_cards_panel" not in st.session_state:
 
-                category = safe_text(
-                    row["category"]
-                )
+                st.session_state[
+                    "show_policy_cards_panel"
+                ] = False
 
-                policy_name = safe_text(
-                    row["policy_name"]
-                )
 
-                status = safe_text(
-                    row["status"]
-                )
+            with st.container(
+                key="policy_cards_toggle"
+            ):
 
-                target = safe_text(
-                    row["target"]
-                )
+                policy_panel_open = st.session_state[
+                    "show_policy_cards_panel"
+                ]
 
-                content = safe_text(
-                    row["content"]
-                )
 
-                scale = safe_text(
-                    row["scale"]
-                )
-
-                agency = safe_text(
-                    row["agency"]
-                )
-
-                source_url = safe_text(
-                    row["source_url"],
-                    default=""
+                policy_panel_label = (
+                    "▲ 정책 세부 현황 접기"
+                    if policy_panel_open
+                    else "▼ 정책 세부 현황 펼치기"
                 )
 
 
-                start_date = safe_date(
-                    row["start_date"]
-                )
+                if st.button(
+                    policy_panel_label,
+                    key="policy_cards_panel_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_policy_cards_panel"
+                    ] = not policy_panel_open
+
+                    st.rerun()
 
 
-                confirm_date = safe_date(
-                    row["confirm_date"]
-                )
+            if st.session_state[
+                "show_policy_cards_panel"
+            ]:
+
+                with st.container(
+                    key="policy_cards_body"
+                ):
+
+                    if filtered_df.empty:
+
+                        st.info(
+                            "현재 조건에 해당하는 정책이 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_policy_cards" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_policy_cards"
+                            ] = False
 
 
-                status_class = (
-                    "status-active"
-                    if any(
-                        word in status
-                        for word in [
-                            "시행",
-                            "운영",
-                            "진행",
-                            "적용",
-                        ]
+                        display_policy_df = (
+                            filtered_df
+                            if st.session_state[
+                                "show_all_policy_cards"
+                            ]
+                            else filtered_df.head(5)
+                        )
+
+
+                        for _, row in display_policy_df.iterrows():
+
+                            category = safe_text(
+                                row["category"]
+                            )
+
+                            policy_name = safe_text(
+                                row["policy_name"]
+                            )
+
+                            status = safe_text(
+                                row["status"]
+                            )
+
+                            target = safe_text(
+                                row["target"]
+                            )
+
+                            content = safe_text(
+                                row["content"]
+                            )
+
+                            scale = safe_text(
+                                row["scale"]
+                            )
+
+                            agency = safe_text(
+                                row["agency"]
+                            )
+
+                            source_url = safe_text(
+                                row["source_url"],
+                                default=""
+                            )
+
+                            start_date = safe_date(
+                                row["start_date"]
+                            )
+
+                            confirm_date = safe_date(
+                                row["confirm_date"]
+                            )
+
+
+                            status_class = (
+                                "status-active"
+                                if any(
+                                    word in status
+                                    for word in [
+                                        "시행",
+                                        "운영",
+                                        "진행",
+                                        "적용",
+                                    ]
+                                )
+                                else "status-etc"
+                            )
+
+
+                            if source_url:
+
+                                source_html = f"""
+                                <div class="policy-source">
+
+                                    <span class="policy-source-label">
+                                        출처
+                                    </span>
+
+                                    <a
+                                        href="{source_url}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="policy-source-link"
+                                    >
+                                        원문 보기 ↗
+                                    </a>
+
+                                </div>
+                                """
+
+                            else:
+
+                                source_html = """
+                                <div class="policy-source">
+
+                                    <span class="policy-source-label">
+                                        출처
+                                    </span>
+
+                                    <span class="policy-source-empty">
+                                        출처 정보 없음
+                                    </span>
+
+                                </div>
+                                """
+
+
+                            st.html(
+                                f"""
+                                <div class="policy-detail-card compact-policy-card">
+
+                                    <div class="policy-category">
+                                        {category}
+                                    </div>
+
+                                    <div class="policy-name">
+                                        {policy_name}
+                                    </div>
+
+                                    <div class="policy-meta">
+
+                                        <b>시행상태</b> :
+                                        <span class="{status_class}">
+                                            {status}
+                                        </span>
+
+                                        <br>
+
+                                        <b>대상</b> :
+                                        {target}
+
+                                        <br>
+
+                                        <b>운영기관</b> :
+                                        {agency}
+
+                                        <br>
+
+                                        <b>시행규모</b> :
+                                        {scale}
+
+                                        <br>
+
+                                        <b>시작일</b> :
+                                        {start_date}
+
+                                        &nbsp; | &nbsp;
+
+                                        <b>확인일</b> :
+                                        {confirm_date}
+
+                                    </div>
+
+                                    <div class="policy-content">
+                                        {content}
+                                    </div>
+
+                                    {source_html}
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(filtered_df) > 5:
+
+                            more_label = (
+                                "정책 목록 줄이기"
+                                if st.session_state[
+                                    "show_all_policy_cards"
+                                ]
+                                else f"전체 {len(filtered_df):,}개 정책 보기"
+                            )
+
+
+                            with st.container(
+                                key="policy_cards_more"
+                            ):
+
+                                if st.button(
+                                    more_label,
+                                    key="policy_cards_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_policy_cards"
+                                    ] = not st.session_state[
+                                        "show_all_policy_cards"
+                                    ]
+
+                                    st.rerun()
+
+
+    # ========================================================
+    # RIGHT : SAFER RECOMMENDATION
+    # ========================================================
+
+    with review_right:
+
+        with st.container(
+            key="policy_recommend_column"
+        ):
+
+            idea_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "saas_idea"
+                    ].isin(
+                        INVALID_VALUES
                     )
-                    else "status-etc"
-                )
-
-
-                # =================================================
-                # SOURCE
-                # =================================================
-
-                if source_url:
-
-                    source_html = f"""
-                    <div class="policy-source">
-
-                        <span class="policy-source-label">
-                            출처
-                        </span>
-
-                        <a
-                            href="{source_url}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="policy-source-link"
-                        >
-                            원문 보기 ↗
-                        </a>
-
-                    </div>
-                    """
-
-                else:
-
-                    source_html = """
-                    <div class="policy-source">
-
-                        <span class="policy-source-label">
-                            출처
-                        </span>
-
-                        <span class="policy-source-empty">
-                            출처 정보 없음
-                        </span>
-
-                    </div>
-                    """
-
-
-                st.html(
-                    f"""
-                    <div class="policy-detail-card">
-
-                        <div class="policy-category">
-                            {category}
-                        </div>
-
-                        <div class="policy-name">
-                            {policy_name}
-                        </div>
-
-                        <div class="policy-meta">
-
-                            <b>시행상태</b> :
-                            <span class="{status_class}">
-                                {status}
-                            </span>
-
-                            &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                            <b>대상</b> :
-                            {target}
-
-                            <br>
-
-                            <b>운영기관</b> :
-                            {agency}
-
-                            &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                            <b>시행규모</b> :
-                            {scale}
-
-                            <br>
-
-                            <b>시작일</b> :
-                            {start_date}
-
-                            &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                            <b>확인일</b> :
-                            {confirm_date}
-
-                        </div>
-
-                        <div class="policy-content">
-                            {content}
-                        </div>
-
-                        {source_html}
-
-                    </div>
-                    """
-                )
-
-
-    # ========================================================
-    # SAFER RECOMMENDATIONS
-    # ========================================================
-
-    with st.container(
-        key="saas_panel"
-    ):
-
-        st.html(
-            """
-            <div class="panel-title">
-                SAFER 정책·서비스 추천
-            </div>
-
-            <div class="panel-sub">
-                기존 정책 내용을 바탕으로 SAFER 서비스에서 활용할 수 있는
-                정책·서비스 아이디어를 정리합니다.
-
-                <br>
-
-                <b style="color:#F3C867;">
-                    아래 내용은 실제 시행 중인 정책이 아니라
-                    SAFER 서비스 활용을 위한 추천 아이디어입니다.
-                </b>
-            </div>
-            """
-        )
-
-
-        idea_df = (
-            filtered_df[
-                ~filtered_df[
-                    "saas_idea"
-                ].isin(
-                    INVALID_VALUES
-                )
-            ]
-            .copy()
-        )
-
-
-        if idea_df.empty:
-
-            st.info(
-                "현재 조건에 해당하는 SAFER 추천 아이디어가 없습니다."
+                ]
+                .copy()
             )
 
-        else:
 
-            for _, row in idea_df.iterrows():
+            st.html(
+                f"""
+                <div class="review-box-title">
+                    SAFER 정책 추천
+                </div>
 
-                st.html(
-                    f"""
-                    <div class="saas-card">
+                <div class="review-box-sub">
+                    기존 정책을 바탕으로 SAFER에서 활용할 수 있는
+                    정책·서비스 제안
+                    <b>{len(idea_df):,}건</b>을 확인합니다.
 
-                        <div class="saas-label">
-                            SAFER RECOMMENDATION
-                        </div>
+                    <br>
 
-                        <div class="saas-policy">
-                            {safe_text(row["policy_name"])}
-                        </div>
-
-                        <div class="saas-idea">
-                            {safe_text(row["saas_idea"])}
-                        </div>
-
-                    </div>
-                    """
-                )
-
-
-    # ========================================================
-    # NEEDED DATA
-    # ========================================================
-
-    with st.container(
-        key="data_panel"
-    ):
-
-        st.html(
-            """
-            <div class="panel-title">
-                추가 필요 데이터
-            </div>
-
-            <div class="panel-sub">
-                정책 효과 분석이나 SAFER 서비스 확장을 위해
-                추가 확보가 필요한 데이터 항목을 확인합니다.
-            </div>
-            """
-        )
-
-
-        needed_df = (
-            filtered_df[
-                ~filtered_df[
-                    "needed_data"
-                ].isin(
-                    INVALID_VALUES
-                )
-            ]
-            .copy()
-        )
-
-
-        if needed_df.empty:
-
-            st.info(
-                "현재 조건에서 별도로 기록된 추가 필요 데이터가 없습니다."
+                    <span style="color:#F3C867;font-weight:800;">
+                        ※ 실제 시행정책이 아닌 서비스 활용 제안입니다.
+                    </span>
+                </div>
+                """
             )
 
-        else:
 
-            for _, row in needed_df.iterrows():
+            if "show_policy_recommend" not in st.session_state:
 
-                st.html(
-                    f"""
-                    <div class="data-card">
+                st.session_state[
+                    "show_policy_recommend"
+                ] = False
 
-                        <div class="data-policy">
-                            {safe_text(row["policy_name"])}
-                        </div>
 
-                        <div class="data-text">
-                            {safe_text(row["needed_data"])}
-                        </div>
+            with st.container(
+                key="policy_recommend_toggle"
+            ):
 
-                    </div>
-                    """
+                recommend_open = st.session_state[
+                    "show_policy_recommend"
+                ]
+
+
+                recommend_label = (
+                    "▲ SAFER 정책 추천 접기"
+                    if recommend_open
+                    else "▼ SAFER 정책 추천 펼치기"
                 )
+
+
+                if st.button(
+                    recommend_label,
+                    key="policy_recommend_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_policy_recommend"
+                    ] = not recommend_open
+
+                    st.rerun()
+
+
+            if st.session_state[
+                "show_policy_recommend"
+            ]:
+
+                with st.container(
+                    key="policy_recommend_body"
+                ):
+
+                    if idea_df.empty:
+
+                        st.info(
+                            "현재 조건에 해당하는 SAFER 추천 아이디어가 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_policy_ideas" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_policy_ideas"
+                            ] = False
+
+
+                        display_idea_df = (
+                            idea_df
+                            if st.session_state[
+                                "show_all_policy_ideas"
+                            ]
+                            else idea_df.head(5)
+                        )
+
+
+                        for _, row in display_idea_df.iterrows():
+
+                            st.html(
+                                f"""
+                                <div class="saas-card compact-saas-card">
+
+                                    <div class="saas-label">
+                                        SAFER RECOMMENDATION
+                                    </div>
+
+                                    <div class="saas-policy">
+                                        {safe_text(row["policy_name"])}
+                                    </div>
+
+                                    <div class="saas-idea">
+                                        {safe_text(row["saas_idea"])}
+                                    </div>
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(idea_df) > 5:
+
+                            idea_more_label = (
+                                "추천 목록 줄이기"
+                                if st.session_state[
+                                    "show_all_policy_ideas"
+                                ]
+                                else f"전체 {len(idea_df):,}개 추천 보기"
+                            )
+
+
+                            with st.container(
+                                key="policy_ideas_more"
+                            ):
+
+                                if st.button(
+                                    idea_more_label,
+                                    key="policy_ideas_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_policy_ideas"
+                                    ] = not st.session_state[
+                                        "show_all_policy_ideas"
+                                    ]
+
+                                    st.rerun()
+
+
+    st.html(
+        """
+        <div class="section-divider"></div>
+        <div class="section-heading">정책 활용·확장 정보</div>
+        <div class="section-sub">
+            정책 효과 분석이나 향후 서비스 확장에 필요한 보조 정보를 확인합니다.
+        </div>
+        """
+    )
+
+
+    # ========================================================
+    # NEEDED DATA - COLLAPSIBLE
+    # ========================================================
+
+    if "show_policy_data" not in st.session_state:
+
+        st.session_state[
+            "show_policy_data"
+        ] = False
+
+
+    with st.container(
+        key="policy_data_toggle"
+    ):
+
+        data_open = st.session_state[
+            "show_policy_data"
+        ]
+
+
+        data_label = (
+            "▲ 추가 필요 데이터 닫기"
+            if data_open
+            else "▼ 추가 필요 데이터 보기"
+        )
+
+
+        if st.button(
+            data_label,
+            key="policy_data_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_policy_data"
+            ] = not data_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_policy_data"
+    ]:
+
+        with st.container(
+            key="policy_data_body"
+        ):
+
+
+            st.html(
+                """
+                <div class="panel-title">
+                    추가 필요 데이터
+                </div>
+
+                <div class="panel-sub">
+                    정책 효과 분석이나 SAFER 서비스 확장을 위해
+                    추가 확보가 필요한 데이터 항목을 확인합니다.
+                </div>
+                """
+            )
+
+
+            needed_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "needed_data"
+                    ].isin(
+                        INVALID_VALUES
+                    )
+                ]
+                .copy()
+            )
+
+
+            if needed_df.empty:
+
+                st.info(
+                    "현재 조건에서 별도로 기록된 추가 필요 데이터가 없습니다."
+                )
+
+            else:
+
+                for _, row in needed_df.iterrows():
+
+                    st.html(
+                        f"""
+                        <div class="data-card">
+
+                            <div class="data-policy">
+                                {safe_text(row["policy_name"])}
+                            </div>
+
+                            <div class="data-text">
+                                {safe_text(row["needed_data"])}
+                            </div>
+
+                        </div>
+                        """
+                    )
+
 
 
     # ========================================================
@@ -2182,126 +2657,174 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "전국 고령운전자 정책 데이터 상세 보기"
+    if "show_policy_detail" not in st.session_state:
+
+        st.session_state[
+            "show_policy_detail"
+        ] = False
+
+
+    with st.container(
+        key="policy_detail_toggle"
     ):
 
-        detail_df = (
-            filtered_df[
-                [
-                    "category",
-                    "policy_name",
-                    "status",
-                    "target",
-                    "content",
-                    "scale",
-                    "start_date",
-                    "agency",
-                    "saas_idea",
-                    "needed_data",
-                    "confirm_date",
-                    "source_url",
-                ]
-            ]
-            .copy()
-        )
-
-
-        detail_df.columns = [
-            "카테고리",
-            "정책명",
-            "시행상태",
-            "대상",
-            "정책내용",
-            "시행규모",
-            "시작일",
-            "운영기관",
-            "SAFER 추천 아이디어",
-            "추가 필요 데이터",
-            "확인일",
-            "출처",
+        detail_open = st.session_state[
+            "show_policy_detail"
         ]
 
 
-        st.dataframe(
-
-            detail_df,
-
-            use_container_width=True,
-
-            hide_index=True,
-
-            height=500,
-
-            column_config={
-
-                "카테고리":
-                    st.column_config.TextColumn(
-                        "카테고리"
-                    ),
-
-                "정책명":
-                    st.column_config.TextColumn(
-                        "정책명",
-                        width="large"
-                    ),
-
-                "시행상태":
-                    st.column_config.TextColumn(
-                        "시행상태"
-                    ),
-
-                "대상":
-                    st.column_config.TextColumn(
-                        "대상",
-                        width="medium"
-                    ),
-
-                "정책내용":
-                    st.column_config.TextColumn(
-                        "정책내용",
-                        width="large"
-                    ),
-
-                "시행규모":
-                    st.column_config.TextColumn(
-                        "시행규모"
-                    ),
-
-                "시작일":
-                    st.column_config.DateColumn(
-                        "시작일",
-                        format="YYYY-MM-DD"
-                    ),
-
-                "운영기관":
-                    st.column_config.TextColumn(
-                        "운영기관",
-                        width="medium"
-                    ),
-
-                "SAFER 추천 아이디어":
-                    st.column_config.TextColumn(
-                        "SAFER 추천 아이디어",
-                        width="large"
-                    ),
-
-                "추가 필요 데이터":
-                    st.column_config.TextColumn(
-                        "추가 필요 데이터",
-                        width="large"
-                    ),
-
-                "확인일":
-                    st.column_config.DateColumn(
-                        "확인일",
-                        format="YYYY-MM-DD"
-                    ),
-
-                "출처":
-                    st.column_config.LinkColumn(
-                        "출처",
-                        display_text="원문 보기"
-                    ),
-            }
+        detail_label = (
+            "▲ 전국 고령운전자 정책 데이터 닫기"
+            if detail_open
+            else "▼ 전국 고령운전자 정책 데이터 상세 보기"
         )
+
+
+        if st.button(
+            detail_label,
+            key="policy_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_policy_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_policy_detail"
+    ]:
+
+        with st.container(
+            key="policy_detail_body"
+        ):
+
+            detail_df = (
+                filtered_df[
+                    [
+                        "category",
+                        "policy_name",
+                        "status",
+                        "target",
+                        "content",
+                        "scale",
+                        "start_date",
+                        "agency",
+                        "saas_idea",
+                        "needed_data",
+                        "confirm_date",
+                        "source_url",
+                    ]
+                ]
+                .copy()
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            detail_df.columns = [
+                "카테고리",
+                "정책명",
+                "시행상태",
+                "대상",
+                "정책내용",
+                "시행규모",
+                "시작일",
+                "운영기관",
+                "SAFER 추천 아이디어",
+                "추가 필요 데이터",
+                "확인일",
+                "출처",
+            ]
+
+
+            detail_df[
+                "시작일"
+            ] = detail_df[
+                "시작일"
+            ].apply(
+                safe_date
+            )
+
+
+            detail_df[
+                "확인일"
+            ] = detail_df[
+                "확인일"
+            ].apply(
+                safe_date
+            )
+
+
+            table_rows = ""
+
+
+            for _, row in detail_df.iterrows():
+
+                source_value = safe_text(
+                    row["출처"],
+                    default=""
+                )
+
+
+                source_html = (
+                    f'<a href="{source_value}" target="_blank" '
+                    f'rel="noopener noreferrer">원문 보기 ↗</a>'
+                    if source_value
+                    else "-"
+                )
+
+
+                table_rows += f"""
+                    <tr>
+                        <td>{safe_text(row["카테고리"])}</td>
+                        <td>{safe_text(row["정책명"])}</td>
+                        <td>{safe_text(row["시행상태"])}</td>
+                        <td>{safe_text(row["대상"])}</td>
+                        <td>{safe_text(row["정책내용"])}</td>
+                        <td>{safe_text(row["시행규모"])}</td>
+                        <td>{safe_text(row["시작일"])}</td>
+                        <td>{safe_text(row["운영기관"])}</td>
+                        <td>{safe_text(row["SAFER 추천 아이디어"])}</td>
+                        <td>{safe_text(row["추가 필요 데이터"])}</td>
+                        <td>{safe_text(row["확인일"])}</td>
+                        <td>{source_html}</td>
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <div class="policy-dark-table-wrap">
+
+                    <table class="policy-dark-table">
+
+                        <thead>
+                            <tr>
+                                <th>카테고리</th>
+                                <th>정책명</th>
+                                <th>시행상태</th>
+                                <th>대상</th>
+                                <th>정책내용</th>
+                                <th>시행규모</th>
+                                <th>시작일</th>
+                                <th>운영기관</th>
+                                <th>SAFER 추천 아이디어</th>
+                                <th>추가 필요 데이터</th>
+                                <th>확인일</th>
+                                <th>출처</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {table_rows}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

@@ -459,113 +459,741 @@ def offending_driver_region_time_data(file_path: str = "data/교통사고/TAAS_�
 # 2     19세 이하  2023       4606
 # 3     19세 이하  2024       4736
 # 4     19세 이하  2025       4392
-def accident_age(file_path: str = "data/교통사고/TAAS_연령대별 교통사고 수.xlsx") -> pd.DataFrame:
-    # 1. 엑셀 파일 불러오기 (헤더 없이)
-    df = pd.read_excel(file_path, header=None)
-    
-    # 2. 헤더 정보 추출 (0행: 연도 목록)
-    years = df.iloc[0].fillna("").astype(str).str.strip()
-    
-    # 3. 데이터 영역 (1행부터 시작) 선택 및 A열(연령대) ffill 처리
-    data_df = df.iloc[1:].copy()
-    data_df[0] = data_df[0].replace("", None).ffill().fillna("").astype(str).str.strip() # 연령대
-    data_df[1] = data_df[1].fillna("").astype(str).str.strip() # 구분 (사고[건]/사망[명]/부상[명])
-    
-    # 4. '사고[건]' 행만 필터링 및 전체 '합계' 제외
-    accident_df = data_df[
-        (data_df[1].str.contains("사고", na=False)) & 
-        (~data_df[0].isin(["합계", "운전자(1당) 연령", "연령", "", "nan", "None"]))
-    ].copy()
-    
-    records = []
-    
-    # 5. 행/열 순회하며 데이터 수집
-    for _, row in accident_df.iterrows():
-        age_group = row[0]  # 예: "19세 이하", "20-29세", "65세 이상" 등
-        
-        # C열(2번 인덱스)은 합계열이므로, D열(3번 인덱스: 2021년)부터 순회
-        for col_idx in range(3, len(df.columns)):
-            year_val = years[col_idx]
-            
-            # 연도 4자리 추출 (2021~2025년)
-            year_match = re.search(r'(202[1-5])', year_val)
-            
-            if year_match:
-                year_num = int(year_match.group(1))
-                
-                val = str(row[col_idx]).replace(",", "").strip()
-                try:
-                    count = int(float(val))
-                except (ValueError, TypeError):
-                    count = 0
-                    
-                records.append({
-                    "age_group": age_group,
-                    "year": year_num,
-                    "accidents": count
-                })
-                
-    result_df = pd.DataFrame(records)
-    return result_df.reset_index(drop=True)
+def accident_age(
+    file_path: str = "data/교통사고/TAAS_연령대별 교통사고 수.xlsx"
+) -> pd.DataFrame:
 
+    # ========================================================
+    # 1. 엑셀 불러오기
+    # ========================================================
+
+    df = pd.read_excel(
+        file_path,
+        header=None
+    )
+
+
+    # ========================================================
+    # 2. 연도 헤더
+    # ========================================================
+
+    years = (
+        df.iloc[0]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # ========================================================
+    # 3. 데이터 영역
+    # ========================================================
+
+    data_df = (
+        df.iloc[1:]
+        .copy()
+    )
+
+
+    # 연령대
+    data_df[0] = (
+        data_df[0]
+        .replace("", None)
+        .ffill()
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # 사고 / 사망 / 부상 구분
+    data_df[1] = (
+        data_df[1]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # ========================================================
+    # 4. 필요 행만 사용
+    # ========================================================
+
+    data_df = data_df[
+        ~data_df[0].isin(
+            [
+                "",
+                "합계",
+                "가해운전자(1당) 연령대",
+                "운전자(1당) 연령",
+                "연령",
+                "nan",
+                "None",
+                "불명",
+            ]
+        )
+    ].copy()
+
+
+    # 사고 / 사망 / 부상만 사용
+    data_df = data_df[
+        data_df[1].isin(
+            [
+                "사고[건]",
+                "사망[명]",
+                "부상[명]",
+            ]
+        )
+    ].copy()
+
+
+    # ========================================================
+    # 5. LONG 형태 생성
+    # ========================================================
+
+    records = []
+
+
+    for _, row in data_df.iterrows():
+
+        age_group = str(
+            row[0]
+        ).strip()
+
+        category = str(
+            row[1]
+        ).strip()
+
+
+        # C열(index 2)은 합계
+        # D열(index 3)부터 2021~2025
+        for col_idx in range(
+            3,
+            len(df.columns)
+        ):
+
+            year_value = str(
+                years[col_idx]
+            ).strip()
+
+
+            # 핵심 수정 부분
+            # 2021.0 / 2021 모두 잡힘
+            year_match = re.search(
+                r"(20\d{2})",
+                year_value
+            )
+
+
+            if not year_match:
+                continue
+
+
+            year = int(
+                year_match.group(1)
+            )
+
+
+            # 2021~2025만 사용
+            if year < 2021 or year > 2025:
+                continue
+
+
+            value = (
+                str(
+                    row[col_idx]
+                )
+                .replace(",", "")
+                .strip()
+            )
+
+
+            count = pd.to_numeric(
+                value,
+                errors="coerce"
+            )
+
+
+            if pd.isna(count):
+                count = 0
+
+
+            records.append(
+                {
+                    "age_group": age_group,
+                    "year": year,
+                    "category": category,
+                    "value": int(count),
+                }
+            )
+
+
+    # ========================================================
+    # 6. LONG DATAFRAME
+    # ========================================================
+
+    long_df = pd.DataFrame(
+        records
+    )
+
+
+    if long_df.empty:
+
+        print(
+            "⚠️ accident_age records가 생성되지 않았습니다."
+        )
+
+        print(
+            "연도 헤더:",
+            years.tolist()
+        )
+
+        print(
+            "구분 값:",
+            data_df[1].unique().tolist()
+        )
+
+
+        return pd.DataFrame(
+            columns=[
+                "age_group",
+                "year",
+                "accidents",
+                "deaths",
+                "injuries",
+            ]
+        )
+
+
+    # ========================================================
+    # 7. 사고 / 사망 / 부상 PIVOT
+    # ========================================================
+
+    result_df = (
+        long_df
+        .pivot_table(
+            index=[
+                "age_group",
+                "year",
+            ],
+            columns="category",
+            values="value",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .reset_index()
+    )
+
+
+    # ========================================================
+    # 8. 컬럼명 변경
+    # ========================================================
+
+    result_df = result_df.rename(
+        columns={
+            "사고[건]":
+                "accidents",
+
+            "사망[명]":
+                "deaths",
+
+            "부상[명]":
+                "injuries",
+        }
+    )
+
+
+    # ========================================================
+    # 9. 필수 컬럼 보장
+    # ========================================================
+
+    required_columns = [
+        "accidents",
+        "deaths",
+        "injuries",
+    ]
+
+
+    for column in required_columns:
+
+        if column not in result_df.columns:
+
+            result_df[
+                column
+            ] = 0
+
+
+    # ========================================================
+    # 10. 숫자 타입
+    # ========================================================
+
+    result_df[
+        "year"
+    ] = (
+        pd.to_numeric(
+            result_df[
+                "year"
+            ],
+            errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
+    )
+
+
+    for column in required_columns:
+
+        result_df[
+            column
+        ] = (
+            pd.to_numeric(
+                result_df[
+                    column
+                ],
+                errors="coerce"
+            )
+            .fillna(0)
+            .astype(int)
+        )
+
+
+    # ========================================================
+    # 11. 연령대 정렬
+    # ========================================================
+
+    def age_sort_key(
+        age_group: str
+    ) -> int:
+
+        age_group = str(
+            age_group
+        ).strip()
+
+
+        if age_group == "19세 이하":
+            return 19
+
+
+        if age_group == "65세 이상":
+            return 65
+
+
+        match = re.search(
+            r"(\d+)",
+            age_group
+        )
+
+
+        if match:
+
+            return int(
+                match.group(1)
+            )
+
+
+        return 999
+
+
+    result_df[
+        "age_order"
+    ] = (
+        result_df[
+            "age_group"
+        ]
+        .apply(
+            age_sort_key
+        )
+    )
+
+
+    result_df = (
+        result_df
+        .sort_values(
+            [
+                "year",
+                "age_order",
+            ]
+        )
+        .drop(
+            columns=[
+                "age_order"
+            ]
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+
+    # ========================================================
+    # 12. 최종 컬럼 순서
+    # ========================================================
+
+    result_df = result_df[
+        [
+            "age_group",
+            "year",
+            "accidents",
+            "deaths",
+            "injuries",
+        ]
+    ]
+
+
+    # 확인용 출력
+    print(
+        "\n📊 accident_age 전처리 결과"
+    )
+
+    print(
+        result_df.head(
+            10
+        ).to_string(
+            index=False
+        )
+    )
+
+
+    print(
+        f"\n총 {len(result_df):,}행"
+    )
+
+
+    return result_df
 
 # 8. TAAS_연령대별 교통사고 수.xlsx
 #        sido    sigungu  year     accidents
 # 0      서울     종로구  2021        778
 # 1      서울     종로구  2022        974
 # 2      서울     종로구  2023        988
-def accident_region_total(file_path:str = "data/교통사고/TAAS_지역별 전체 교통사고 건수.xlsx") -> pd.DataFrame:
-    # 1. 엑셀 파일 불러오기 (헤더 없이)
-    df = pd.read_excel(file_path, header=None)
-    
-    # 2. 헤더 정보 추출 (0행: 연도 목록)
-    years = df.iloc[0].fillna("").astype(str).str.strip()
-    
-    # 3. 데이터 영역 (1행부터 시작) 선택 및 병합 셀(A열, B열) ffill 처리
-    data_df = df.iloc[1:].copy()
-    data_df[0] = data_df[0].replace("", None).ffill().fillna("").astype(str).str.strip() # 시도
-    data_df[1] = data_df[1].replace("", None).ffill().fillna("").astype(str).str.strip() # 시군구
-    data_df[2] = data_df[2].fillna("").astype(str).str.strip() # 구분 (사고/사망/부상)
-    
-    # 4. '사고[건]' 행만 필터링 (전체 총합 및 헤더 텍스트 제외)
-    accident_df = data_df[
-        (data_df[2].str.contains("사고", na=False)) & 
-        (~data_df[0].isin(["시도", "합계", "", "nan", "None"])) &
-        (~data_df[1].isin(["시군구", "합계", "", "nan", "None"]))
+import pandas as pd
+import re
+
+
+# ============================================================
+# 지역별 전체 교통사고
+# 사고건수 + 사망자수 + 부상자수
+# ============================================================
+
+def accident_region_total(
+    file_path: str = "data/교통사고/TAAS_지역별 전체 교통사고 건수.xlsx"
+) -> pd.DataFrame:
+
+    # ========================================================
+    # 1. 엑셀 불러오기
+    # ========================================================
+
+    df = pd.read_excel(
+        file_path,
+        header=None
+    )
+
+
+    # ========================================================
+    # 2. 연도 헤더 추출
+    #
+    # 0행:
+    # 시도 / 시군구 / 연도 / 합계 / 2021 / 2022 / ...
+    # ========================================================
+
+    years = (
+        df.iloc[0]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # ========================================================
+    # 3. 실제 데이터 영역
+    # ========================================================
+
+    data_df = (
+        df.iloc[1:]
+        .copy()
+    )
+
+
+    # --------------------------------------------------------
+    # 시도
+    # --------------------------------------------------------
+
+    data_df[0] = (
+        data_df[0]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # --------------------------------------------------------
+    # 시군구
+    # --------------------------------------------------------
+
+    data_df[1] = (
+        data_df[1]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # --------------------------------------------------------
+    # 구분
+    # 사고[건] / 사망[명] / 부상[명]
+    # --------------------------------------------------------
+
+    data_df[2] = (
+        data_df[2]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+    )
+
+
+    # ========================================================
+    # 4. 불필요한 행 제외
+    # ========================================================
+
+    data_df = data_df[
+        ~data_df[0].isin(
+            [
+                "",
+                "시도",
+                "nan",
+                "None",
+            ]
+        )
     ].copy()
-    
+
+
+    # 주석 행 제거
+    data_df = data_df[
+        ~data_df[0].str.contains(
+            "주\\)",
+            regex=True,
+            na=False
+        )
+    ].copy()
+
+
+    # 사고 / 사망 / 부상만 사용
+    data_df = data_df[
+        data_df[2].isin(
+            [
+                "사고[건]",
+                "사망[명]",
+                "부상[명]",
+            ]
+        )
+    ].copy()
+
+
+    # ========================================================
+    # 5. long 형태로 변환
+    # ========================================================
+
     records = []
-    
-    # 5. 행/열 순회하며 데이터 수집
-    for _, row in accident_df.iterrows():
-        sido = row[0]
-        sigungu = row[1]
-        
-        # D열(3번 인덱스)은 누적 '합계'열이므로, E열(4번 인덱스: 2021년)부터 순회
-        for col_idx in range(4, len(df.columns)):
-            year_val = years[col_idx]
-            
-            # 연도 4자리 추출 (2021~2025년 매칭)
-            year_match = re.search(r'(202[1-5])', year_val)
-            
-            if year_match:
-                year_num = int(year_match.group(1))
-                
-                val = str(row[col_idx]).replace(",", "").strip()
-                try:
-                    count = int(float(val))
-                except (ValueError, TypeError):
-                    count = 0
-                    
-                records.append({
+
+
+    for _, row in data_df.iterrows():
+
+        sido = str(
+            row[0]
+        ).strip()
+
+
+        sigungu = str(
+            row[1]
+        ).strip()
+
+
+        category = str(
+            row[2]
+        ).strip()
+
+
+        # ----------------------------------------------------
+        # D열(index=3)은 2021~2025 합계이므로 제외
+        # E열(index=4)부터 실제 연도
+        # ----------------------------------------------------
+
+        for col_idx in range(
+            4,
+            len(df.columns)
+        ):
+
+            year_value = str(
+                years[col_idx]
+            ).strip()
+
+
+            # ------------------------------------------------
+            # 2021.0 → 2021
+            # ------------------------------------------------
+
+            year_match = re.search(
+                r"(20\d{2})",
+                year_value
+            )
+
+
+            if not year_match:
+                continue
+
+
+            year = int(
+                year_match.group(1)
+            )
+
+
+            # ------------------------------------------------
+            # 값 숫자 변환
+            # ------------------------------------------------
+
+            value = (
+                str(
+                    row[col_idx]
+                )
+                .replace(",", "")
+                .strip()
+            )
+
+
+            count = pd.to_numeric(
+                value,
+                errors="coerce"
+            )
+
+
+            if pd.isna(count):
+                count = 0
+
+
+            records.append(
+                {
                     "sido": sido,
                     "sigungu": sigungu,
-                    "year": year_num,
-                    "accidents": count
-                })
-                
-    result_df = pd.DataFrame(records)
-    return result_df.reset_index(drop=True)
+                    "year": year,
+                    "category": category,
+                    "value": int(count),
+                }
+            )
+
+
+    # ========================================================
+    # 6. DataFrame 생성
+    # ========================================================
+
+    long_df = pd.DataFrame(
+        records
+    )
+
+
+    # ========================================================
+    # 7. 사고 / 사망 / 부상 컬럼으로 pivot
+    # ========================================================
+
+    result_df = (
+        long_df
+        .pivot_table(
+            index=[
+                "sido",
+                "sigungu",
+                "year",
+            ],
+            columns="category",
+            values="value",
+            aggfunc="sum",
+            fill_value=0,
+        )
+        .reset_index()
+    )
+
+
+    # ========================================================
+    # 8. 컬럼명 변경
+    # ========================================================
+
+    result_df = result_df.rename(
+        columns={
+            "사고[건]": "accidents",
+            "사망[명]": "deaths",
+            "부상[명]": "injuries",
+        }
+    )
+
+
+    # 혹시 특정 구분이 없더라도 컬럼 생성
+    required_columns = [
+        "accidents",
+        "deaths",
+        "injuries",
+    ]
+
+
+    for column in required_columns:
+
+        if column not in result_df.columns:
+
+            result_df[column] = 0
+
+
+    # ========================================================
+    # 9. 타입 정리
+    # ========================================================
+
+    result_df["year"] = (
+        pd.to_numeric(
+            result_df["year"],
+            errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
+    )
+
+
+    for column in required_columns:
+
+        result_df[column] = (
+            pd.to_numeric(
+                result_df[column],
+                errors="coerce"
+            )
+            .fillna(0)
+            .astype(int)
+        )
+
+
+    # ========================================================
+    # 10. 정렬
+    # ========================================================
+
+    result_df = (
+        result_df[
+            [
+                "sido",
+                "sigungu",
+                "year",
+                "accidents",
+                "deaths",
+                "injuries",
+            ]
+        ]
+        .sort_values(
+            [
+                "year",
+                "sido",
+                "sigungu",
+            ]
+        )
+        .reset_index(
+            drop=True
+        )
+    )
+
+
+    return result_df
 
 if __name__ == "__main__":
     file_path = "data/교통사고/TAAS_노인운전자 사고유형별 및 시간대별 교통사고.xlsx"

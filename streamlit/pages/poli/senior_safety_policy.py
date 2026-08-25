@@ -1093,40 +1093,6 @@ div[data-baseweb="select"] span {
 
 
 /* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background:
-        #182035 !important;
-
-    border:
-        1px solid #46536F !important;
-
-    border-radius:
-        14px !important;
-
-    overflow:
-        hidden !important;
-
-    margin-top:
-        12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color:
-        #FFFFFF !important;
-
-    opacity:
-        1 !important;
-}
-
-
-
-/* ==========================================================
    SECTION
 ========================================================== */
 
@@ -1161,10 +1127,319 @@ div[data-baseweb="select"] span {
     min-height: 44px !important;
 }
 
-[data-testid="stDataFrame"] {
-    border: 1px solid #3A4662 !important;
-    border-radius: 14px !important;
-    overflow: hidden !important;
+
+
+/* ==========================================================
+   GOVERNMENT SECTION
+========================================================== */
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 34px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
+
+.section-sub-gov {
+    color: #AEB8C8;
+    font-size: 13px;
+    line-height: 1.75;
+    margin: -4px 0 16px 4px;
+}
+
+.section-divider-gov {
+    height: 1px;
+    margin: 38px 0 6px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
+}
+
+
+/* ==========================================================
+   KPI
+========================================================== */
+
+.gov-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+}
+
+.gov-kpi {
+    background: #192136;
+    border: 1px solid #394560;
+    border-radius: 17px;
+    padding: 18px 20px;
+    min-height: 112px;
+}
+
+.gov-kpi-label {
+    color: #C4CCD9;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+.gov-kpi-value {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 900;
+    word-break: keep-all;
+}
+
+.gov-kpi-value.gold {
+    color: #F1C66A;
+}
+
+
+/* ==========================================================
+   POLICY REVIEW 2-COLUMN
+========================================================== */
+
+.st-key-region_policy_detail_column,
+.st-key-region_policy_recommend_column {
+    background: #151D30;
+    border: 1px solid #3A4662;
+    border-radius: 22px;
+    padding: 22px 22px 24px 22px;
+    margin-top: 8px;
+    min-height: 190px;
+}
+
+.review-box-title {
+    color: #FFFFFF;
+    font-size: 21px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.review-box-sub {
+    color: #B8C2D2;
+    font-size: 12px;
+    line-height: 1.75;
+    min-height: 64px;
+    margin-bottom: 14px;
+}
+
+.review-box-sub b {
+    color: #F3C867;
+}
+
+
+/* ==========================================================
+   COLLAPSE BUTTONS
+========================================================== */
+
+.st-key-region_policy_detail_toggle button,
+.st-key-region_policy_recommend_toggle button,
+.st-key-region_compare_toggle button,
+.st-key-region_note_toggle button,
+.st-key-region_detail_toggle button,
+.st-key-region_policy_cards_more button,
+.st-key-region_policy_ideas_more button {
+
+    width: 100% !important;
+    min-height: 48px !important;
+
+    background: #192238 !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #414D69 !important;
+    border-radius: 11px !important;
+
+    box-shadow: none !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-region_policy_detail_toggle button,
+.st-key-region_policy_recommend_toggle button,
+.st-key-region_compare_toggle button,
+.st-key-region_note_toggle button,
+.st-key-region_detail_toggle button {
+    justify-content: flex-start !important;
+    padding-left: 16px !important;
+}
+
+.st-key-region_policy_detail_toggle button *,
+.st-key-region_policy_recommend_toggle button *,
+.st-key-region_compare_toggle button *,
+.st-key-region_note_toggle button *,
+.st-key-region_detail_toggle button *,
+.st-key-region_policy_cards_more button *,
+.st-key-region_policy_ideas_more button * {
+
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-region_policy_detail_toggle button:hover,
+.st-key-region_policy_recommend_toggle button:hover,
+.st-key-region_compare_toggle button:hover,
+.st-key-region_note_toggle button:hover,
+.st-key-region_detail_toggle button:hover,
+.st-key-region_policy_cards_more button:hover,
+.st-key-region_policy_ideas_more button:hover {
+
+    background: #232D46 !important;
+    border-color: #D6A348 !important;
+}
+
+.st-key-region_policy_detail_toggle button:hover *,
+.st-key-region_policy_recommend_toggle button:hover *,
+.st-key-region_compare_toggle button:hover *,
+.st-key-region_note_toggle button:hover *,
+.st-key-region_detail_toggle button:hover *,
+.st-key-region_policy_cards_more button:hover *,
+.st-key-region_policy_ideas_more button:hover * {
+
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   COLLAPSE BODY
+========================================================== */
+
+.st-key-region_policy_detail_body,
+.st-key-region_policy_recommend_body,
+.st-key-region_compare_body,
+.st-key-region_note_body,
+.st-key-region_detail_body {
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+    padding: 18px 20px 20px 20px;
+    margin-top: 10px;
+}
+
+
+/* ==========================================================
+   COMPACT CARDS
+========================================================== */
+
+.compact-region-policy-card {
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-region-policy-card .policy-name {
+    font-size: 17px;
+}
+
+.compact-region-policy-card .policy-meta,
+.compact-region-policy-card .policy-content {
+    font-size: 12px;
+}
+
+.compact-region-saas-card {
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-region-saas-card .saas-policy {
+    font-size: 15px;
+}
+
+.compact-region-saas-card .saas-idea {
+    font-size: 12px;
+}
+
+
+/* ==========================================================
+   DARK TABLE
+========================================================== */
+
+.region-dark-table-wrap {
+    width: 100%;
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    background: #182035;
+    border: 1px solid #3A4662;
+    border-radius: 12px;
+}
+
+.region-dark-table {
+    width: 100%;
+    min-width: 1500px;
+    border-collapse: collapse;
+
+    background: #182035;
+    color: #E7EAF0;
+    font-size: 12px;
+}
+
+.region-dark-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.region-dark-table th {
+    background: #202A42;
+    color: #D6A348;
+    font-weight: 900;
+    text-align: center;
+    padding: 13px 14px;
+    border-bottom: 1px solid #4A5670;
+    white-space: nowrap;
+}
+
+.region-dark-table td {
+    background: #182035;
+    color: #E7EAF0;
+    padding: 11px 13px;
+    border-bottom: 1px solid #303B55;
+    vertical-align: top;
+    line-height: 1.65;
+}
+
+.region-dark-table tbody tr:nth-child(even) td {
+    background: #1B243A;
+}
+
+.region-dark-table tbody tr:hover td {
+    background: #222D47;
+    color: #FFFFFF;
+}
+
+.region-dark-table a {
+    color: #F1C66A !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media(max-width:1000px) {
+    .gov-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .review-box-sub {
+        min-height: auto;
+    }
 }
 
 </style>
@@ -1323,6 +1598,42 @@ with st.container(key="region_policy_page"):
         key="region_policy_region"
     )
 
+
+    # ========================================================
+    # 지역 선택 변경 감지
+    # 특정 지역을 조회하면 아래 정책 상세가 자동으로 펼쳐지도록 처리
+    # ========================================================
+
+    previous_region = st.session_state.get(
+        "previous_region_policy_region"
+    )
+
+
+    if previous_region != selected_region:
+
+        st.session_state[
+            "previous_region_policy_region"
+        ] = selected_region
+
+        st.session_state[
+            "show_region_policy_detail"
+        ] = True
+
+        # 지역을 변경해도 SAFER 정책 추천은 펼친 상태 유지
+        st.session_state[
+            "show_region_policy_recommend"
+        ] = True
+
+        # 전체보기 상태 초기화
+        st.session_state[
+            "show_all_region_policy_cards"
+        ] = False
+
+        st.session_state[
+            "show_all_region_policy_ideas"
+        ] = False
+
+
     filtered_df = df.copy()
 
     if selected_region != "전체":
@@ -1381,198 +1692,563 @@ with st.container(key="region_policy_page"):
     )
 
     # ========================================================
-    # REGION DETAIL
+    # KPI / POLICY STATUS OVERVIEW
     # ========================================================
 
+    selected_policy_count = len(
+        filtered_df
+    )
+
+
+    selected_idea_count = int(
+        filtered_df[
+            "saas_idea"
+        ]
+        .replace(
+            "",
+            pd.NA
+        )
+        .notna()
+        .sum()
+    )
+
+
+    selected_stage_count = (
+        filtered_df[
+            "current_stage"
+        ]
+        .replace(
+            "",
+            pd.NA
+        )
+        .nunique()
+    )
+
+
+    selected_label = (
+        selected_region
+        if selected_region != "전체"
+        else "전국"
+    )
+
+
     st.html(
-        """
-        <div class="section-title">
-            지역별 고령운전자 안전정책 상세
-        </div>
-        <div class="section-sub">
-            선택한 지역의 정책 대상, 규모, 주요 내용과 현재 추진단계를 확인합니다.
+        f"""
+        <div class="gov-kpi-grid">
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    현재 조회 지역
+                </div>
+                <div class="gov-kpi-value gold">
+                    {selected_label}
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    조회 정책 수
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_policy_count:,}개
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    추진단계 유형
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_stage_count:,}개
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    SAFER 추천 아이디어
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_idea_count:,}건
+                </div>
+            </div>
+
         </div>
         """
     )
 
-    if filtered_df.empty:
-        st.info("현재 조건에 해당하는 정책이 없습니다.")
 
-    else:
-        for _, row in filtered_df.iterrows():
+    # ========================================================
+    # POLICY REVIEW
+    # ========================================================
 
-            region = safe_text(row["region_name"])
-            policy = safe_text(row["policy_project"])
-            target = safe_text(row["target"])
-            scale = safe_text(row["scale"])
-            content = safe_text(row["content"])
-            current_stage = safe_text(row["current_stage"])
-            source_url = safe_text(row["source_url"], default="")
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">정책 검토</div>
+        <div class="section-sub-gov">
+            실제 지역 정책과 SAFER 활용 제안을 나란히 비교하여 검토합니다.
+        </div>
+        """
+    )
 
-            base_year = (
-                f"{int(row['base_year'])}년"
-                if pd.notna(row["base_year"])
-                else "-"
-            )
 
-            stage_class = (
-                "stage-active"
-                if any(
-                    word in current_stage
-                    for word in ["시행", "운영", "진행", "추진", "확대"]
-                )
-                else "stage-etc"
-            )
+    review_left, review_right = st.columns(
+        [1, 1],
+        gap="medium"
+    )
 
-            if source_url:
-                source_html = f"""
-                <div class="policy-source">
-                    <span class="source-label">출처</span>
-                    <a href="{source_url}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="source-link">
-                        원문 보기 ↗
-                    </a>
-                </div>
-                """
-            else:
-                source_html = """
-                <div class="policy-source">
-                    <span class="source-label">출처</span>
-                    <span class="source-empty">출처 정보 없음</span>
-                </div>
-                """
+
+    # ========================================================
+    # LEFT : REGION POLICY DETAIL
+    # ========================================================
+
+    with review_left:
+
+        with st.container(
+            key="region_policy_detail_column"
+        ):
 
             st.html(
                 f"""
-                <div class="policy-card">
+                <div class="review-box-title">
+                    지역 정책 세부 현황
+                </div>
 
-                    <div class="policy-region">
-                        {region}
-                    </div>
-
-                    <div class="policy-name">
-                        {policy}
-                    </div>
-
-                    <div class="policy-meta">
-                        <b>기준연도</b> : {base_year}
-                        &nbsp;&nbsp; | &nbsp;&nbsp;
-                        <b>현재 단계</b> :
-                        <span class="{stage_class}">
-                            {current_stage}
-                        </span>
-
-                        <br>
-
-                        <b>정책 대상</b> : {target}
-
-                        <br>
-
-                        <b>정책 규모</b> : {scale}
-                    </div>
-
-                    <div class="policy-content">
-                        {content}
-                    </div>
-
-                    {source_html}
-
+                <div class="review-box-sub">
+                    선택한 지역의 정책 대상·규모·현재 단계·주요 내용을 확인합니다.
+                    현재 <b>{len(filtered_df):,}개</b> 정책이 조회됩니다.
+                    {f"<br><span style='color:#F3C867;font-weight:800;'>{selected_region} 정책 조회 결과가 아래에 표시됩니다.</span>" if selected_region != "전체" else ""}
                 </div>
                 """
             )
 
+
+            if "show_region_policy_detail" not in st.session_state:
+
+                st.session_state[
+                    "show_region_policy_detail"
+                ] = True
+
+
+            with st.container(
+                key="region_policy_detail_toggle"
+            ):
+
+                policy_open = st.session_state[
+                    "show_region_policy_detail"
+                ]
+
+
+                policy_label = (
+                    "▲ 지역 정책 세부 현황 접기"
+                    if policy_open
+                    else "▼ 지역 정책 세부 현황 펼치기"
+                )
+
+
+                if st.button(
+                    policy_label,
+                    key="region_policy_detail_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_region_policy_detail"
+                    ] = not policy_open
+
+                    st.rerun()
+
+
+            if st.session_state[
+                "show_region_policy_detail"
+            ]:
+
+                with st.container(
+                    key="region_policy_detail_body"
+                ):
+
+                    if filtered_df.empty:
+
+                        st.info(
+                            "현재 조건에 해당하는 정책이 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_region_policy_cards" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_region_policy_cards"
+                            ] = False
+
+
+                        display_policy_df = (
+                            filtered_df
+                            if st.session_state[
+                                "show_all_region_policy_cards"
+                            ]
+                            else filtered_df.head(5)
+                        )
+
+
+                        for _, row in display_policy_df.iterrows():
+
+                            region = safe_text(
+                                row["region_name"]
+                            )
+
+                            policy = safe_text(
+                                row["policy_project"]
+                            )
+
+                            target = safe_text(
+                                row["target"]
+                            )
+
+                            scale = safe_text(
+                                row["scale"]
+                            )
+
+                            content = safe_text(
+                                row["content"]
+                            )
+
+                            current_stage = safe_text(
+                                row["current_stage"]
+                            )
+
+                            source_url = safe_text(
+                                row["source_url"],
+                                default=""
+                            )
+
+                            base_year = (
+                                f"{int(row['base_year'])}년"
+                                if pd.notna(
+                                    row["base_year"]
+                                )
+                                else "-"
+                            )
+
+
+                            stage_class = (
+                                "stage-active"
+                                if any(
+                                    word in current_stage
+                                    for word in [
+                                        "시행",
+                                        "운영",
+                                        "진행",
+                                        "추진",
+                                        "확대",
+                                    ]
+                                )
+                                else "stage-etc"
+                            )
+
+
+                            if source_url:
+
+                                source_html = f"""
+                                <div class="policy-source">
+
+                                    <span class="source-label">
+                                        출처
+                                    </span>
+
+                                    <a
+                                        href="{source_url}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="source-link"
+                                    >
+                                        원문 보기 ↗
+                                    </a>
+
+                                </div>
+                                """
+
+                            else:
+
+                                source_html = """
+                                <div class="policy-source">
+
+                                    <span class="source-label">
+                                        출처
+                                    </span>
+
+                                    <span class="source-empty">
+                                        출처 정보 없음
+                                    </span>
+
+                                </div>
+                                """
+
+
+                            st.html(
+                                f"""
+                                <div class="policy-card compact-region-policy-card">
+
+                                    <div class="policy-region">
+                                        {region}
+                                    </div>
+
+                                    <div class="policy-name">
+                                        {policy}
+                                    </div>
+
+                                    <div class="policy-meta">
+
+                                        <b>기준연도</b> :
+                                        {base_year}
+
+                                        <br>
+
+                                        <b>현재 단계</b> :
+                                        <span class="{stage_class}">
+                                            {current_stage}
+                                        </span>
+
+                                        <br>
+
+                                        <b>정책 대상</b> :
+                                        {target}
+
+                                        <br>
+
+                                        <b>정책 규모</b> :
+                                        {scale}
+
+                                    </div>
+
+                                    <div class="policy-content">
+                                        {content}
+                                    </div>
+
+                                    {source_html}
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(filtered_df) > 5:
+
+                            more_label = (
+                                "정책 목록 줄이기"
+                                if st.session_state[
+                                    "show_all_region_policy_cards"
+                                ]
+                                else f"전체 {len(filtered_df):,}개 정책 보기"
+                            )
+
+
+                            with st.container(
+                                key="region_policy_cards_more"
+                            ):
+
+                                if st.button(
+                                    more_label,
+                                    key="region_policy_cards_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_region_policy_cards"
+                                    ] = not st.session_state[
+                                        "show_all_region_policy_cards"
+                                    ]
+
+                                    st.rerun()
+
+
     # ========================================================
-    # REGION COMPARE
+    # RIGHT : SAFER IDEA
     # ========================================================
 
-    st.html('<div class="section-divider"></div>')
+    with review_right:
+
+        with st.container(
+            key="region_policy_recommend_column"
+        ):
+
+            idea_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "saas_idea"
+                    ].isin(
+                        INVALID_VALUES
+                    )
+                ]
+                .copy()
+            )
+
+
+            st.html(
+                f"""
+                <div class="review-box-title">
+                    SAFER 지역 정책 추천
+                </div>
+
+                <div class="review-box-sub">
+                    기존 지역 정책을 바탕으로 SAFER에서 활용할 수 있는
+                    서비스·정책 제안 <b>{len(idea_df):,}건</b>을 확인합니다.
+
+                    <br>
+
+                    <span style="color:#F3C867;font-weight:800;">
+                        ※ 실제 시행정책이 아닌 SAFER 활용 제안입니다.
+                    </span>
+                </div>
+                """
+            )
+
+
+            if "show_region_policy_recommend" not in st.session_state:
+
+                st.session_state[
+                    "show_region_policy_recommend"
+                ] = True
+
+
+            with st.container(
+                key="region_policy_recommend_toggle"
+            ):
+
+                recommend_open = st.session_state[
+                    "show_region_policy_recommend"
+                ]
+
+
+                recommend_label = (
+                    "▲ SAFER 지역 정책 추천 접기"
+                    if recommend_open
+                    else "▼ SAFER 지역 정책 추천 펼치기"
+                )
+
+
+                if st.button(
+                    recommend_label,
+                    key="region_policy_recommend_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_region_policy_recommend"
+                    ] = not recommend_open
+
+                    st.rerun()
+
+
+            if st.session_state[
+                "show_region_policy_recommend"
+            ]:
+
+                with st.container(
+                    key="region_policy_recommend_body"
+                ):
+
+                    if idea_df.empty:
+
+                        st.info(
+                            "현재 조건에 해당하는 SAFER 추천 아이디어가 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_region_policy_ideas" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_region_policy_ideas"
+                            ] = False
+
+
+                        display_idea_df = (
+                            idea_df
+                            if st.session_state[
+                                "show_all_region_policy_ideas"
+                            ]
+                            else idea_df.head(5)
+                        )
+
+
+                        for _, row in display_idea_df.iterrows():
+
+                            st.html(
+                                f"""
+                                <div class="saas-card compact-region-saas-card">
+
+                                    <div class="saas-label">
+                                        SAFER RECOMMENDATION
+                                    </div>
+
+                                    <div class="saas-region">
+                                        {safe_text(row["region_name"])}
+                                    </div>
+
+                                    <div class="saas-policy">
+                                        {safe_text(row["policy_project"])}
+                                    </div>
+
+                                    <div class="saas-idea">
+                                        {safe_text(row["saas_idea"])}
+                                    </div>
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(idea_df) > 5:
+
+                            idea_more_label = (
+                                "추천 목록 줄이기"
+                                if st.session_state[
+                                    "show_all_region_policy_ideas"
+                                ]
+                                else f"전체 {len(idea_df):,}개 추천 보기"
+                            )
+
+
+                            with st.container(
+                                key="region_policy_ideas_more"
+                            ):
+
+                                if st.button(
+                                    idea_more_label,
+                                    key="region_policy_ideas_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_region_policy_ideas"
+                                    ] = not st.session_state[
+                                        "show_all_region_policy_ideas"
+                                    ]
+
+                                    st.rerun()
+
 
     st.html(
         """
-        <div class="section-title">
-            지역별 고령운전자 안전정책 비교
-        </div>
-        <div class="section-sub">
-            비교할 지역을 선택하면 지역별 정책 내용을 한 화면에서 비교할 수 있습니다.
+        <div class="section-divider-gov"></div>
+        """
+    )
+
+
+    # ========================================================
+    # ANALYSIS SUMMARY
+    # ========================================================
+
+    st.html(
+        """
+        <div class="section-heading">정책 현황 요약</div>
+        <div class="section-sub-gov">
+            지역별 정책 보유 수준과 현재 선택 지역의 정책 현황을 먼저 확인합니다.
         </div>
         """
     )
 
-    compare_regions = st.multiselect(
-        "비교 지역",
-        regions,
-        max_selections=4,
-        placeholder="비교할 지역을 2~4개 선택하세요",
-        key="region_policy_compare"
-    )
-
-    compare_btn_col, _ = st.columns([1, 3])
-
-    with compare_btn_col:
-        compare_clicked = st.button(
-            "비교하기",
-            key="policy_compare_btn",
-            use_container_width=True
-        )
-
-    if compare_clicked:
-
-        if len(compare_regions) < 2:
-            st.warning("비교할 지역을 2개 이상 선택해주세요.")
-
-        else:
-            compare_df = df[
-                df["region_name"].isin(compare_regions)
-            ][
-                [
-                    "region_name",
-                    "policy_project",
-                    "base_year",
-                    "target",
-                    "scale",
-                    "current_stage",
-                    "content",
-                ]
-            ].copy()
-
-            compare_df["base_year"] = (
-                pd.to_numeric(compare_df["base_year"], errors="coerce")
-                .astype("Int64")
-            )
-
-            compare_df.columns = [
-                "지역",
-                "정책사업",
-                "기준연도",
-                "정책대상",
-                "정책규모",
-                "현재단계",
-                "정책내용",
-            ]
-
-            st.dataframe(
-                compare_df,
-                use_container_width=True,
-                hide_index=True,
-                height=min(520, 60 + len(compare_df) * 38),
-                column_config={
-                    "지역": st.column_config.TextColumn("지역", width="small"),
-                    "정책사업": st.column_config.TextColumn("정책사업", width="large"),
-                    "기준연도": st.column_config.NumberColumn("기준연도", format="%d년"),
-                    "정책대상": st.column_config.TextColumn("정책대상", width="medium"),
-                    "정책규모": st.column_config.TextColumn("정책규모", width="medium"),
-                    "현재단계": st.column_config.TextColumn("현재단계", width="medium"),
-                    "정책내용": st.column_config.TextColumn("정책내용", width="large"),
-                }
-            )
-
-    # ========================================================
-    # ANALYSIS
-    # ========================================================
-
-    st.html('<div class="section-divider"></div>')
 
     st.html(
         f"""
@@ -1584,7 +2260,7 @@ with st.container(key="region_policy_page"):
 
             현재 DB에는
             <b>{total_regions:,}개 지역</b>에서
-            총 <b>{total_policy:,}개의 정책</b>이 확인됩니다.
+            총 <b>{total_policy:,}개 정책</b>이 확인됩니다.
 
             <br>
 
@@ -1606,191 +2282,448 @@ with st.container(key="region_policy_page"):
 
             <br><br>
 
-            ※ 정책 수는 실제 전국 정책 전체를 의미하는 통계가 아니라
-            현재 <b>region_old_driver_policy</b> 테이블에 수집된 데이터를
+            ※ 본 수치는 현재
+            <b>region_old_driver_policy</b> 테이블에 수집된 데이터를
             기준으로 한 비교 결과입니다.
 
         </div>
         """
     )
 
+
     # ========================================================
-    # SAFER IDEA
+    # REGION COMPARISON
     # ========================================================
 
-    st.html('<div class="section-divider"></div>')
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">지역 정책 비교</div>
+        <div class="section-sub-gov">
+            필요한 경우 2~4개 지역을 선택해 정책 내용을 비교합니다.
+        </div>
+        """
+    )
 
-    with st.container(key="saas_panel"):
 
-        st.html(
-            """
-            <div class="panel-title">
-                SAFER 지역 정책 추천
-            </div>
+    if "show_region_compare" not in st.session_state:
 
-            <div class="panel-sub">
-                기존 지역 정책을 기반으로 SAFER에서 활용할 수 있는
-                서비스·정책 아이디어를 확인합니다.
+        st.session_state[
+            "show_region_compare"
+        ] = False
 
-                <br>
 
-                <b style="color:#F3C867;">
-                    아래 내용은 실제 시행 중인 정책이 아니라
-                    기존 정책 데이터를 기반으로 작성된 SAFER 활용 아이디어입니다.
-                </b>
-            </div>
-            """
+    with st.container(
+        key="region_compare_toggle"
+    ):
+
+        compare_open = st.session_state[
+            "show_region_compare"
+        ]
+
+
+        compare_label = (
+            "▲ 지역별 정책 비교 닫기"
+            if compare_open
+            else "▼ 지역별 정책 비교 보기"
         )
 
-        idea_df = filtered_df[
-            ~filtered_df["saas_idea"].isin(INVALID_VALUES)
-        ].copy()
 
-        if idea_df.empty:
-            st.info("현재 조건에 해당하는 SAFER 추천 아이디어가 없습니다.")
+        if st.button(
+            compare_label,
+            key="region_compare_toggle_button",
+            use_container_width=True
+        ):
 
-        else:
-            for _, row in idea_df.iterrows():
+            st.session_state[
+                "show_region_compare"
+            ] = not compare_open
 
-                st.html(
-                    f"""
-                    <div class="saas-card">
+            st.rerun()
 
-                        <div class="saas-label">
-                            SAFER RECOMMENDATION
-                        </div>
 
-                        <div class="saas-region">
-                            {safe_text(row["region_name"])}
-                        </div>
+    if st.session_state[
+        "show_region_compare"
+    ]:
 
-                        <div class="saas-policy">
-                            {safe_text(row["policy_project"])}
-                        </div>
+        with st.container(
+            key="region_compare_body"
+        ):
 
-                        <div class="saas-idea">
-                            {safe_text(row["saas_idea"])}
-                        </div>
+            compare_regions = st.multiselect(
+                "비교 지역",
+                regions,
+                max_selections=4,
+                placeholder="비교할 지역을 2~4개 선택하세요",
+                key="region_policy_compare"
+            )
 
-                    </div>
-                    """
+
+            compare_btn_col, _ = st.columns(
+                [1, 3]
+            )
+
+
+            with compare_btn_col:
+
+                compare_clicked = st.button(
+                    "비교하기",
+                    key="policy_compare_btn",
+                    use_container_width=True
                 )
 
+
+            if compare_clicked:
+
+                if len(compare_regions) < 2:
+
+                    st.warning(
+                        "비교할 지역을 2개 이상 선택해주세요."
+                    )
+
+                else:
+
+                    compare_df = (
+                        df[
+                            df[
+                                "region_name"
+                            ].isin(
+                                compare_regions
+                            )
+                        ][
+                            [
+                                "region_name",
+                                "policy_project",
+                                "base_year",
+                                "target",
+                                "scale",
+                                "current_stage",
+                                "content",
+                            ]
+                        ]
+                        .copy()
+                    )
+
+
+                    compare_df[
+                        "base_year"
+                    ] = (
+                        pd.to_numeric(
+                            compare_df[
+                                "base_year"
+                            ],
+                            errors="coerce"
+                        )
+                        .astype(
+                            "Int64"
+                        )
+                    )
+
+
+                    compare_rows = ""
+
+
+                    for _, row in compare_df.iterrows():
+
+                        year_text = (
+                            f"{int(row['base_year'])}년"
+                            if pd.notna(
+                                row["base_year"]
+                            )
+                            else "-"
+                        )
+
+
+                        compare_rows += f"""
+                            <tr>
+                                <td>{safe_text(row["region_name"])}</td>
+                                <td>{safe_text(row["policy_project"])}</td>
+                                <td>{year_text}</td>
+                                <td>{safe_text(row["target"])}</td>
+                                <td>{safe_text(row["scale"])}</td>
+                                <td>{safe_text(row["current_stage"])}</td>
+                                <td>{safe_text(row["content"])}</td>
+                            </tr>
+                        """
+
+
+                    st.html(
+                        f"""
+                        <div class="region-dark-table-wrap">
+
+                            <table class="region-dark-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>지역</th>
+                                        <th>정책사업</th>
+                                        <th>기준연도</th>
+                                        <th>정책대상</th>
+                                        <th>정책규모</th>
+                                        <th>현재단계</th>
+                                        <th>정책내용</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {compare_rows}
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                        """
+                    )
+
+
     # ========================================================
-    # NOTE
+    # SUPPORTING INFORMATION
     # ========================================================
 
-    st.html('<div class="section-divider"></div>')
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">정책 활용·참고 정보</div>
+        <div class="section-sub-gov">
+            참고사항과 원본 데이터를 필요할 때만 펼쳐서 확인합니다.
+        </div>
+        """
+    )
 
-    with st.container(key="note_panel"):
 
-        st.html(
-            """
-            <div class="panel-title">
-                정책 참고사항
-            </div>
+    # ========================================================
+    # NOTE - COLLAPSIBLE
+    # ========================================================
 
-            <div class="panel-sub">
-                선택한 정책 데이터에 별도로 기록된 참고사항을 확인합니다.
-            </div>
-            """
+    if "show_region_note" not in st.session_state:
+
+        st.session_state[
+            "show_region_note"
+        ] = False
+
+
+    with st.container(
+        key="region_note_toggle"
+    ):
+
+        note_open = st.session_state[
+            "show_region_note"
+        ]
+
+
+        note_label = (
+            "▲ 정책 참고사항 닫기"
+            if note_open
+            else "▼ 정책 참고사항 보기"
         )
 
-        note_df = filtered_df[
-            ~filtered_df["note"].isin(INVALID_VALUES)
-        ].copy()
 
-        if note_df.empty:
-            st.info("현재 조건에 별도로 기록된 참고사항이 없습니다.")
+        if st.button(
+            note_label,
+            key="region_note_button",
+            use_container_width=True
+        ):
 
-        else:
-            for _, row in note_df.iterrows():
+            st.session_state[
+                "show_region_note"
+            ] = not note_open
 
-                st.html(
-                    f"""
-                    <div class="note-card">
+            st.rerun()
 
-                        <div class="note-title">
-                            {safe_text(row["region_name"])}
-                            ·
-                            {safe_text(row["policy_project"])}
-                        </div>
 
-                        <div class="note-text">
-                            {safe_text(row["note"])}
-                        </div>
+    if st.session_state[
+        "show_region_note"
+    ]:
 
-                    </div>
-                    """
+        with st.container(
+            key="region_note_body"
+        ):
+
+            note_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "note"
+                    ].isin(
+                        INVALID_VALUES
+                    )
+                ]
+                .copy()
+            )
+
+
+            if note_df.empty:
+
+                st.info(
+                    "현재 조건에 별도로 기록된 참고사항이 없습니다."
                 )
 
+            else:
+
+                for _, row in note_df.iterrows():
+
+                    st.html(
+                        f"""
+                        <div class="note-card">
+
+                            <div class="note-title">
+                                {safe_text(row["region_name"])}
+                                ·
+                                {safe_text(row["policy_project"])}
+                            </div>
+
+                            <div class="note-text">
+                                {safe_text(row["note"])}
+                            </div>
+
+                        </div>
+                        """
+                    )
+
+
     # ========================================================
-    # DETAIL TABLE
+    # DETAIL TABLE - COLLAPSIBLE
     # ========================================================
 
     st.write("")
 
-    with st.expander(
-        "지역 특화 고령운전자 정책 전체 데이터 보기"
+
+    if "show_region_detail" not in st.session_state:
+
+        st.session_state[
+            "show_region_detail"
+        ] = False
+
+
+    with st.container(
+        key="region_detail_toggle"
     ):
 
-        detail_df = filtered_df[
-            [
-                "region_name",
-                "policy_project",
-                "base_year",
-                "target",
-                "scale",
-                "content",
-                "current_stage",
-                "saas_idea",
-                "note",
-                "source_url",
-            ]
-        ].copy()
-
-        detail_df["base_year"] = (
-            pd.to_numeric(detail_df["base_year"], errors="coerce")
-            .astype("Int64")
-        )
-
-        detail_df.columns = [
-            "지역",
-            "정책사업",
-            "기준연도",
-            "정책대상",
-            "정책규모",
-            "정책내용",
-            "현재단계",
-            "SAFER 추천 아이디어",
-            "참고사항",
-            "출처",
+        detail_open = st.session_state[
+            "show_region_detail"
         ]
 
-        st.dataframe(
-            detail_df,
-            use_container_width=True,
-            hide_index=True,
-            height=500,
-            column_config={
-                "지역": st.column_config.TextColumn("지역"),
-                "정책사업": st.column_config.TextColumn("정책사업", width="large"),
-                "기준연도": st.column_config.NumberColumn("기준연도", format="%d년"),
-                "정책대상": st.column_config.TextColumn("정책대상", width="medium"),
-                "정책규모": st.column_config.TextColumn("정책규모", width="medium"),
-                "정책내용": st.column_config.TextColumn("정책내용", width="large"),
-                "현재단계": st.column_config.TextColumn("현재단계"),
-                "SAFER 추천 아이디어": st.column_config.TextColumn(
-                    "SAFER 추천 아이디어",
-                    width="large"
-                ),
-                "참고사항": st.column_config.TextColumn(
-                    "참고사항",
-                    width="large"
-                ),
-                "출처": st.column_config.LinkColumn(
-                    "출처",
-                    display_text="원문 보기"
-                ),
-            }
+
+        detail_label = (
+            "▲ 지역 특화 고령운전자 정책 데이터 닫기"
+            if detail_open
+            else "▼ 지역 특화 고령운전자 정책 데이터 상세 보기"
         )
+
+
+        if st.button(
+            detail_label,
+            key="region_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_region_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_region_detail"
+    ]:
+
+        with st.container(
+            key="region_detail_body"
+        ):
+
+            detail_df = (
+                filtered_df[
+                    [
+                        "region_name",
+                        "policy_project",
+                        "base_year",
+                        "target",
+                        "scale",
+                        "content",
+                        "current_stage",
+                        "saas_idea",
+                        "note",
+                        "source_url",
+                    ]
+                ]
+                .copy()
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            detail_rows = ""
+
+
+            for _, row in detail_df.iterrows():
+
+                base_year_text = (
+                    f"{int(row['base_year'])}년"
+                    if pd.notna(
+                        row["base_year"]
+                    )
+                    else "-"
+                )
+
+
+                source_value = safe_text(
+                    row["source_url"],
+                    default=""
+                )
+
+
+                source_html = (
+                    f'<a href="{source_value}" target="_blank" '
+                    f'rel="noopener noreferrer">원문 보기 ↗</a>'
+                    if source_value
+                    else "-"
+                )
+
+
+                detail_rows += f"""
+                    <tr>
+                        <td>{safe_text(row["region_name"])}</td>
+                        <td>{safe_text(row["policy_project"])}</td>
+                        <td>{base_year_text}</td>
+                        <td>{safe_text(row["target"])}</td>
+                        <td>{safe_text(row["scale"])}</td>
+                        <td>{safe_text(row["content"])}</td>
+                        <td>{safe_text(row["current_stage"])}</td>
+                        <td>{safe_text(row["saas_idea"])}</td>
+                        <td>{safe_text(row["note"])}</td>
+                        <td>{source_html}</td>
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <div class="region-dark-table-wrap">
+
+                    <table class="region-dark-table">
+
+                        <thead>
+                            <tr>
+                                <th>지역</th>
+                                <th>정책사업</th>
+                                <th>기준연도</th>
+                                <th>정책대상</th>
+                                <th>정책규모</th>
+                                <th>정책내용</th>
+                                <th>현재단계</th>
+                                <th>SAFER 추천 아이디어</th>
+                                <th>참고사항</th>
+                                <th>출처</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {detail_rows}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

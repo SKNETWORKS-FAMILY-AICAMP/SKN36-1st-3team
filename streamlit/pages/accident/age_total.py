@@ -1950,7 +1950,7 @@ with st.container(
             </div>
 
             <div class="panel-sub">
-                선택한 연령대의 사고건수뿐 아니라 사망·부상 인명피해까지 함께 확인합니다.
+                선택한 연령대의 사고 발생량과 인명피해 수준을 함께 확인합니다.
             </div>
 
             <div class="severity-kpi-grid">
@@ -2015,6 +2015,7 @@ with st.container(
             severity_df[
                 "accidents"
             ] > 0,
+
             severity_df[
                 "deaths"
             ]
@@ -2022,6 +2023,7 @@ with st.container(
                 "accidents"
             ]
             * 100,
+
             0
         )
 
@@ -2032,264 +2034,606 @@ with st.container(
             severity_df[
                 "accidents"
             ] > 0,
+
             severity_df[
                 "injuries"
             ]
             / severity_df[
                 "accidents"
             ],
+
             0
         )
 
 
-        severity_df[
-            "marker_size"
-        ] = np.sqrt(
-            severity_df[
-                "injuries"
-            ].clip(
-                lower=0
+        # ----------------------------------------------------
+        # 사망 / 부상 피해를 각각 독립된 Lollipop Chart로 표현
+        # ----------------------------------------------------
+
+        severity_sorted = (
+            severity_df
+            .copy()
+            .sort_values(
+                "age_group",
+                key=lambda series:
+                    series.map(age_sort_key)
+            )
+            .reset_index(
+                drop=True
             )
         )
 
 
-        max_marker = (
-            float(
-                severity_df[
-                    "marker_size"
-                ].max()
+        damage_left, damage_right = st.columns(
+            2,
+            gap="medium"
+        )
+
+
+        # ====================================================
+        # 1. 사망 피해
+        # ====================================================
+
+        with damage_left:
+
+            st.html(
+                f"""
+                <div style="
+                    background:#121A2B;
+                    border:1px solid #394560;
+                    border-radius:14px;
+                    padding:14px 16px;
+                    margin:10px 0 4px 0;
+                ">
+                    <div style="
+                        color:#AEB8C8;
+                        font-size:11px;
+                        margin-bottom:5px;
+                    ">
+                        {selected_age} 사망 피해
+                    </div>
+
+                    <div style="
+                        color:#FFFFFF;
+                        font-size:22px;
+                        font-weight:900;
+                    ">
+                        {selected_age_deaths:,}명
+                    </div>
+
+                    <div style="
+                        color:#F1C66A;
+                        font-size:12px;
+                        font-weight:800;
+                        margin-top:4px;
+                    ">
+                        사고 100건당 {selected_age_fatality_per_100:.2f}명
+                    </div>
+                </div>
+                """
             )
-            if not severity_df.empty
-            else 1
-        )
 
 
-        if max_marker <= 0:
-            max_marker = 1
-
-
-        severity_df[
-            "marker_size"
-        ] = (
-            severity_df[
-                "marker_size"
-            ]
-            / max_marker
-            * 34
-            + 12
-        )
-
-
-        avg_accidents = (
-            float(
-                severity_df[
-                    "accidents"
-                ].mean()
+            death_plot_df = (
+                severity_sorted
+                .copy()
             )
-            if not severity_df.empty
-            else 0
-        )
 
 
-        avg_fatality = (
-            float(
-                severity_df[
-                    "fatality_per_100"
-                ].mean()
-            )
-            if not severity_df.empty
-            else 0
-        )
+            fig_death = go.Figure()
 
 
-        fig_severity = go.Figure(
-            go.Scatter(
+            # 기준선
+            for _, row in death_plot_df.iterrows():
 
-                x=severity_df[
-                    "accidents"
-                ],
+                line_color = (
+                    "#D6A348"
+                    if row["age_group"] == selected_age
+                    else "#42516C"
+                )
 
-                y=severity_df[
-                    "fatality_per_100"
-                ],
 
-                mode="markers+text",
+                fig_death.add_shape(
 
-                text=severity_df[
-                    "age_group"
-                ],
+                    type="line",
 
-                textposition="top center",
+                    x0=0,
 
-                textfont=dict(
-                    color="#E8EDF5",
-                    size=11
-                ),
-
-                customdata=severity_df[
-                    [
-                        "deaths",
-                        "injuries",
-                        "injury_per_accident",
-                    ]
-                ],
-
-                marker=dict(
-                    size=severity_df[
-                        "marker_size"
-                    ],
-
-                    color=severity_df[
-                        "injury_per_accident"
-                    ],
-
-                    colorscale=[
-                        [0.00, "#315B7A"],
-                        [0.40, "#79B69B"],
-                        [0.72, "#D9A64A"],
-                        [1.00, "#D86A45"],
-                    ],
-
-                    showscale=True,
-
-                    colorbar=dict(
-                        title=dict(
-                            text="사고 1건당<br>부상자",
-                            font=dict(
-                                color="#FFFFFF"
-                            )
-                        ),
-                        tickfont=dict(
-                            color="#FFFFFF"
-                        )
+                    x1=float(
+                        row["deaths"]
                     ),
 
+                    y0=row["age_group"],
+
+                    y1=row["age_group"],
+
                     line=dict(
-                        color=[
-                            "#F3C867"
+                        color=line_color,
+                        width=(
+                            5
+                            if row["age_group"] == selected_age
+                            else 3
+                        )
+                    )
+                )
+
+
+            death_marker_colors = [
+                "#F1C66A"
+                if age == selected_age
+                else "#79B69B"
+
+                for age
+                in death_plot_df[
+                    "age_group"
+                ]
+            ]
+
+
+            fig_death.add_trace(
+                go.Scatter(
+
+                    x=death_plot_df[
+                        "deaths"
+                    ],
+
+                    y=death_plot_df[
+                        "age_group"
+                    ],
+
+                    mode="markers",
+
+                    marker=dict(
+                        size=[
+                            18
                             if age == selected_age
-                            else "#E4E9F1"
+                            else 12
+
                             for age
-                            in severity_df[
+                            in death_plot_df[
                                 "age_group"
                             ]
                         ],
-                        width=[
-                            4
-                            if age == selected_age
-                            else 1
-                            for age
-                            in severity_df[
-                                "age_group"
-                            ]
-                        ]
+
+                        color=death_marker_colors,
+
+                        line=dict(
+                            color="#E7ECF3",
+                            width=1.2
+                        )
                     ),
 
-                    opacity=.94
-                ),
+                    customdata=death_plot_df[
+                        [
+                            "accidents",
+                            "fatality_per_100",
+                        ]
+                    ],
 
-                hovertemplate=(
-                    "<b>%{text}</b>"
-                    "<br>"
-                    "사고: %{x:,}건"
-                    "<br>"
-                    "사망자: %{customdata[0]:,}명"
-                    "<br>"
-                    "부상자: %{customdata[1]:,}명"
-                    "<br>"
-                    "사고 100건당 사망자: %{y:.2f}명"
-                    "<br>"
-                    "사고 1건당 부상자: %{customdata[2]:.2f}명"
-                    "<extra></extra>"
+                    hovertemplate=(
+                        "<b>%{y}</b>"
+                        "<br>"
+                        "사망자: %{x:,}명"
+                        "<br>"
+                        "사고건수: %{customdata[0]:,}건"
+                        "<br>"
+                        "사고 100건당 사망자: %{customdata[1]:.2f}명"
+                        "<extra></extra>"
+                    ),
+
+                    showlegend=False
                 )
             )
-        )
 
 
-        if avg_accidents > 0:
+            # 값 라벨은 별도 annotation으로 배치해 겹침 방지
+            for _, row in death_plot_df.iterrows():
 
-            fig_severity.add_vline(
-                x=avg_accidents,
-                line_dash="dot",
-                line_color="#69768E",
-                line_width=1.5
+                fig_death.add_annotation(
+
+                    x=float(
+                        row["deaths"]
+                    ),
+
+                    y=row[
+                        "age_group"
+                    ],
+
+                    text=(
+                        f"<b>{int(row['deaths']):,}명</b>"
+                    ),
+
+                    showarrow=False,
+
+                    xshift=38,
+
+                    xanchor="left",
+
+                    yanchor="middle",
+
+                    font=dict(
+                        color="#FFFFFF",
+                        size=12
+                    ),
+
+                    bgcolor="rgba(18,26,43,0.88)",
+
+                    bordercolor=(
+                        "#F1C66A"
+                        if row["age_group"] == selected_age
+                        else "#3D4964"
+                    ),
+
+                    borderwidth=1,
+
+                    borderpad=3
+                )
+
+
+            max_deaths = (
+                float(
+                    death_plot_df[
+                        "deaths"
+                    ].max()
+                )
+                if not death_plot_df.empty
+                else 1
             )
 
 
-        if avg_fatality > 0:
+            fig_death.update_layout(
 
-            fig_severity.add_hline(
-                y=avg_fatality,
-                line_dash="dot",
-                line_color="#69768E",
-                line_width=1.5
+                title=dict(
+                    text="연령대별 사망자 수",
+                    font=dict(
+                        color="#FFFFFF",
+                        size=16
+                    ),
+                    x=0
+                ),
+
+                height=500,
+
+                margin=dict(
+                    l=90,
+                    r=145,
+                    t=60,
+                    b=65
+                ),
+
+                paper_bgcolor="#182035",
+
+                plot_bgcolor="#182035",
+
+                font=dict(
+                    color="#E8EDF5"
+                ),
+
+                xaxis=dict(
+                    title="사망자 수(명)",
+                    gridcolor="#303B55",
+                    zeroline=False,
+                    tickformat=",",
+                    range=[
+                        0,
+                        max(
+                            max_deaths * 1.38,
+                            1
+                        )
+                    ]
+                ),
+
+                yaxis=dict(
+                    title=None,
+                    categoryorder="array",
+                    categoryarray=death_plot_df[
+                        "age_group"
+                    ].tolist(),
+                    tickfont=dict(
+                        color="#F0F2F6",
+                        size=12
+                    )
+                )
             )
 
 
-        fig_severity.add_annotation(
-            x=1,
-            y=1,
-            xref="paper",
-            yref="paper",
-            text="사고 多 · 치명도 高",
-            showarrow=False,
-            xanchor="right",
-            yanchor="top",
-            font=dict(
-                color="#F3C867",
-                size=12
-            ),
-            bgcolor="rgba(18,26,43,.78)",
-            bordercolor="#D6A348",
-            borderwidth=1,
-            borderpad=6
-        )
-
-
-        fig_severity.update_layout(
-
-            height=560,
-
-            margin=dict(
-                l=85,
-                r=120,
-                t=40,
-                b=75
-            ),
-
-            paper_bgcolor="#182035",
-
-            plot_bgcolor="#182035",
-
-            showlegend=False,
-
-            font=dict(
-                color="#E8EDF5"
-            ),
-
-            xaxis=dict(
-                title="교통사고 건수(건)",
-                gridcolor="#35405A",
-                tickformat=",",
-                rangemode="tozero"
-            ),
-
-            yaxis=dict(
-                title="사고 100건당 사망자 수(명)",
-                gridcolor="#35405A",
-                rangemode="tozero"
+            st.plotly_chart(
+                fig_death,
+                use_container_width=True,
+                config={
+                    "displayModeBar": False
+                }
             )
+
+
+        # ====================================================
+        # 2. 부상 피해
+        # ====================================================
+
+        with damage_right:
+
+            st.html(
+                f"""
+                <div style="
+                    background:#121A2B;
+                    border:1px solid #394560;
+                    border-radius:14px;
+                    padding:14px 16px;
+                    margin:10px 0 4px 0;
+                ">
+                    <div style="
+                        color:#AEB8C8;
+                        font-size:11px;
+                        margin-bottom:5px;
+                    ">
+                        {selected_age} 부상 피해
+                    </div>
+
+                    <div style="
+                        color:#FFFFFF;
+                        font-size:22px;
+                        font-weight:900;
+                    ">
+                        {selected_age_injuries:,}명
+                    </div>
+
+                    <div style="
+                        color:#F1C66A;
+                        font-size:12px;
+                        font-weight:800;
+                        margin-top:4px;
+                    ">
+                        사고 1건당 {selected_age_injury_per_accident:.2f}명
+                    </div>
+                </div>
+                """
+            )
+
+
+            injury_plot_df = (
+                severity_sorted
+                .copy()
+            )
+
+
+            fig_injury = go.Figure()
+
+
+            for _, row in injury_plot_df.iterrows():
+
+                line_color = (
+                    "#D6A348"
+                    if row["age_group"] == selected_age
+                    else "#42516C"
+                )
+
+
+                fig_injury.add_shape(
+
+                    type="line",
+
+                    x0=0,
+
+                    x1=float(
+                        row["injuries"]
+                    ),
+
+                    y0=row["age_group"],
+
+                    y1=row["age_group"],
+
+                    line=dict(
+                        color=line_color,
+                        width=(
+                            5
+                            if row["age_group"] == selected_age
+                            else 3
+                        )
+                    )
+                )
+
+
+            injury_marker_colors = [
+                "#F1C66A"
+                if age == selected_age
+                else "#8EA8C6"
+
+                for age
+                in injury_plot_df[
+                    "age_group"
+                ]
+            ]
+
+
+            fig_injury.add_trace(
+                go.Scatter(
+
+                    x=injury_plot_df[
+                        "injuries"
+                    ],
+
+                    y=injury_plot_df[
+                        "age_group"
+                    ],
+
+                    mode="markers",
+
+                    marker=dict(
+                        size=[
+                            18
+                            if age == selected_age
+                            else 12
+
+                            for age
+                            in injury_plot_df[
+                                "age_group"
+                            ]
+                        ],
+
+                        color=injury_marker_colors,
+
+                        line=dict(
+                            color="#E7ECF3",
+                            width=1.2
+                        )
+                    ),
+
+                    customdata=injury_plot_df[
+                        [
+                            "accidents",
+                            "injury_per_accident",
+                        ]
+                    ],
+
+                    hovertemplate=(
+                        "<b>%{y}</b>"
+                        "<br>"
+                        "부상자: %{x:,}명"
+                        "<br>"
+                        "사고건수: %{customdata[0]:,}건"
+                        "<br>"
+                        "사고 1건당 부상자: %{customdata[1]:.2f}명"
+                        "<extra></extra>"
+                    ),
+
+                    showlegend=False
+                )
+            )
+
+
+            # 값 라벨은 별도 annotation으로 배치해 겹침 방지
+            for _, row in injury_plot_df.iterrows():
+
+                fig_injury.add_annotation(
+
+                    x=float(
+                        row["injuries"]
+                    ),
+
+                    y=row[
+                        "age_group"
+                    ],
+
+                    text=(
+                        f"<b>{int(row['injuries']):,}명</b>"
+                    ),
+
+                    showarrow=False,
+
+                    xshift=42,
+
+                    xanchor="left",
+
+                    yanchor="middle",
+
+                    font=dict(
+                        color="#FFFFFF",
+                        size=12
+                    ),
+
+                    bgcolor="rgba(18,26,43,0.88)",
+
+                    bordercolor=(
+                        "#F1C66A"
+                        if row["age_group"] == selected_age
+                        else "#3D4964"
+                    ),
+
+                    borderwidth=1,
+
+                    borderpad=3
+                )
+
+
+            max_injuries = (
+                float(
+                    injury_plot_df[
+                        "injuries"
+                    ].max()
+                )
+                if not injury_plot_df.empty
+                else 1
+            )
+
+
+            fig_injury.update_layout(
+
+                title=dict(
+                    text="연령대별 부상자 수",
+                    font=dict(
+                        color="#FFFFFF",
+                        size=16
+                    ),
+                    x=0
+                ),
+
+                height=500,
+
+                margin=dict(
+                    l=90,
+                    r=165,
+                    t=60,
+                    b=65
+                ),
+
+                paper_bgcolor="#182035",
+
+                plot_bgcolor="#182035",
+
+                font=dict(
+                    color="#E8EDF5"
+                ),
+
+                xaxis=dict(
+                    title="부상자 수(명)",
+                    gridcolor="#303B55",
+                    zeroline=False,
+                    tickformat=",",
+                    range=[
+                        0,
+                        max(
+                            max_injuries * 1.42,
+                            1
+                        )
+                    ]
+                ),
+
+                yaxis=dict(
+                    title=None,
+                    categoryorder="array",
+                    categoryarray=injury_plot_df[
+                        "age_group"
+                    ].tolist(),
+                    tickfont=dict(
+                        color="#F0F2F6",
+                        size=12
+                    )
+                )
+            )
+
+
+            st.plotly_chart(
+                fig_injury,
+                use_container_width=True,
+                config={
+                    "displayModeBar": False
+                }
+            )
+
+
+        st.html(
+            """
+            <div class="severity-note">
+                ※ 사망자와 부상자는 서로 다른 피해 지표이므로 각각 독립된 그래프로 표현합니다.
+                금색은 현재 선택한 연령대를 의미합니다.
+            </div>
+            """
         )
 
 
-        st.plotly_chart(
-            fig_severity,
-            use_container_width=True,
-            config={
-                "displayModeBar": False
-            }
-        )
-
+        # ====================================================
+        # 3. 자동 요약
+        # ====================================================
 
         if not severity_df.empty:
 
@@ -2313,11 +2657,42 @@ with st.container(
             )
 
 
+            selected_fatal_rank = (
+                severity_df[
+                    "fatality_per_100"
+                ]
+                .rank(
+                    method="min",
+                    ascending=False
+                )
+            )
+
+
+            selected_idx = severity_df.index[
+                severity_df[
+                    "age_group"
+                ] == selected_age
+            ]
+
+
+            if len(selected_idx) > 0:
+
+                selected_rank = int(
+                    selected_fatal_rank.loc[
+                        selected_idx[0]
+                    ]
+                )
+
+            else:
+
+                selected_rank = 0
+
+
             st.html(
                 f"""
                 <div class="info-box">
 
-                    <b>{selected_year}년 연령대별 심각도 분석</b>
+                    <b>{selected_year}년 연령대별 사고 심각도 분석</b>
 
                     <br><br>
 
@@ -2331,13 +2706,18 @@ with st.container(
                     <b>{injury_top["age_group"]}</b>으로
                     <b>{injury_top["injury_per_accident"]:.2f}명</b>입니다.
 
+                    <br>
+
+                    선택한 <b>{selected_age}</b>의
+                    사고 100건당 사망자는
+                    <b>{selected_age_fatality_per_100:.2f}명</b>으로,
+                    전체 연령대 중
+                    <b>{selected_rank}위</b>입니다.
+
                     <br><br>
 
-                    선택한 <b>{selected_age}</b>은
-                    사고 100건당 사망자
-                    <b>{selected_age_fatality_per_100:.2f}명</b>,
-                    사고 1건당 부상자
-                    <b>{selected_age_injury_per_accident:.2f}명</b>입니다.
+                    ※ 금색 막대는 현재 선택한 연령대,
+                    주황색 막대는 해당 지표가 가장 높은 연령대를 의미합니다.
 
                 </div>
                 """
@@ -2410,7 +2790,7 @@ with st.container(
             bar_colors = [
 
                 "#4F8F78"
-                if age_sort_key(age) >= 60
+                if age_sort_key(age) >= 65
 
                 else "#E17663"
                 if age == selected_age
@@ -2469,9 +2849,9 @@ with st.container(
             )
 
 
-            # 60세 이상 구간을 금색 점선으로 구분
+            # 65세 이상 구간을 금색 점선으로 구분
             senior_bar_count = sum(
-                age_sort_key(age) >= 60
+                age_sort_key(age) >= 65
                 for age in bar_df["age_group"]
             )
 
@@ -2482,7 +2862,7 @@ with st.container(
                     line_dash="dot",
                     line_color="#F0B95C",
                     line_width=3,
-                    annotation_text="60세 이상",
+                    annotation_text="65세 이상",
                     annotation_position="top right",
                     annotation_font=dict(
                         color="#F0B95C",
@@ -2868,7 +3248,7 @@ with st.container(
                                 year,
                                 "#4F8F78"
                             )
-                            if age_sort_key(age) >= 60
+                            if age_sort_key(age) >= 65
                             else YEAR_COLORS.get(
                                 year,
                                 "#8FA0B8"
@@ -2891,11 +3271,11 @@ with st.container(
             )
 
 
-        # 60세 이상 구간을 금색 점선으로 구분
+        # 65세 이상 구간을 금색 점선으로 구분
         senior_start_positions = [
             index
             for index, age in enumerate(driver_age_groups)
-            if age_sort_key(age) >= 60
+            if age_sort_key(age) >= 65
         ]
 
         if senior_start_positions:
@@ -2905,7 +3285,7 @@ with st.container(
                 line_dash="dot",
                 line_color="#F0B95C",
                 line_width=3,
-                annotation_text="60세 이상",
+                annotation_text="65세 이상",
                 annotation_position="top right",
                 annotation_font=dict(
                     color="#F0B95C",

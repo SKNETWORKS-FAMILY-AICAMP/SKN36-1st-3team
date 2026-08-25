@@ -874,40 +874,6 @@ div[role="radiogroup"] label p {
 
 
 /* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background: #182035 !important;
-
-    border: 1px solid #46536F !important;
-
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-}
-
-
-/* ==========================================================
    PLOT
 ========================================================== */
 
@@ -952,6 +918,104 @@ div[role="radiogroup"] label p {
         rgba(92,107,137,.9) 82%,
         rgba(92,107,137,0)
     );
+}
+
+
+
+/* ==========================================================
+   DETAIL TOGGLE
+========================================================== */
+
+.st-key-weather_detail_toggle button {
+    width: 100% !important;
+    min-height: 52px !important;
+    background: #182035 !important;
+    color: #E7EAF0 !important;
+    border: 1px solid #394560 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    justify-content: flex-start !important;
+    padding-left: 18px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-weather_detail_toggle button * {
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-weather_detail_toggle button:hover {
+    background: #202A42 !important;
+    border-color: #D6A348 !important;
+    color: #F1C66A !important;
+}
+
+.st-key-weather_detail_toggle button:hover * {
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+.st-key-weather_detail_panel {
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 10px;
+}
+
+.weather-dark-table-wrap {
+    width: 100%;
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: #182035;
+    border: 1px solid #3A4662;
+    border-radius: 12px;
+}
+
+.weather-dark-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #182035;
+    color: #E7EAF0;
+    font-size: 13px;
+}
+
+.weather-dark-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.weather-dark-table th {
+    background: #202A42;
+    color: #D6A348;
+    font-weight: 900;
+    text-align: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #4A5670;
+    white-space: nowrap;
+}
+
+.weather-dark-table td {
+    background: #182035;
+    color: #E7EAF0;
+    font-weight: 600;
+    text-align: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #303B55;
+    white-space: nowrap;
+}
+
+.weather-dark-table tbody tr:nth-child(even) td {
+    background: #1B243A;
+}
+
+.weather-dark-table tbody tr:hover td {
+    background: #222D47;
+    color: #FFFFFF;
 }
 
 </style>
@@ -1125,9 +1189,24 @@ with st.container(
 
     with f2:
 
+        weather_age_options = [
+            "전체"
+        ] + age_groups
+
+
+        default_weather_age_index = (
+            weather_age_options.index(
+                "65세 이상"
+            )
+            if "65세 이상" in weather_age_options
+            else 0
+        )
+
+
         selected_age = st.selectbox(
             "연령대",
-            ["전체"] + age_groups,
+            weather_age_options,
+            index=default_weather_age_index,
             key="weather_age"
         )
 
@@ -1936,18 +2015,30 @@ with st.container(
 
         with p1:
 
+            predict_age_options = [
+                "전체"
+            ] + age_groups
+
+
+            predict_age_index = (
+                predict_age_options.index(
+                    selected_age
+                )
+                if selected_age in predict_age_options
+                else (
+                    predict_age_options.index(
+                        "65세 이상"
+                    )
+                    if "65세 이상" in predict_age_options
+                    else 0
+                )
+            )
+
+
             predict_age = st.selectbox(
                 "예측 연령대",
-                ["전체"] + age_groups,
-                index=(
-                    0
-                    if selected_age == "전체"
-                    else (
-                        ["전체"] + age_groups
-                    ).index(
-                        selected_age
-                    )
-                ),
+                predict_age_options,
+                index=predict_age_index,
                 key="weather_predict_age"
             )
 
@@ -2750,86 +2841,149 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "기상상태별 교통사고 데이터 상세 보기"
+    if "show_weather_detail" not in st.session_state:
+
+        st.session_state[
+            "show_weather_detail"
+        ] = False
+
+
+    with st.container(
+        key="weather_detail_toggle"
     ):
 
-        detail_df = (
-            df[
-                [
-                    "year",
-                    "age_group",
-                    "weather",
-                    "accidents"
-                ]
-            ]
-            .copy()
-            .sort_values(
-                [
-                    "year",
-                    "age_group",
-                    "weather"
-                ],
-                ascending=[
-                    False,
-                    True,
-                    True
-                ]
-            )
-        )
-
-
-        detail_df.columns = [
-            "연도",
-            "연령대",
-            "기상상태",
-            "사고건수"
+        detail_open = st.session_state[
+            "show_weather_detail"
         ]
 
 
-        detail_df[
-            "사고건수"
-        ] = (
+        detail_label = (
+            "▲ 연령별 교통사고 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 교통사고 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_label,
+            key="weather_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_weather_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_weather_detail"
+    ]:
+
+        with st.container(
+            key="weather_detail_panel"
+        ):
+
+            detail_df = (
+                df[
+                    [
+                        "year",
+                        "age_group",
+                        "weather",
+                        "accidents",
+                    ]
+                ]
+                .copy()
+                .sort_values(
+                    [
+                        "year",
+                        "age_group",
+                        "weather",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        True,
+                    ]
+                )
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            detail_df.columns = [
+                "연도",
+                "연령대",
+                "기상상태",
+                "사고건수",
+            ]
+
+
+            detail_df[
+                "연도"
+            ] = (
+                detail_df[
+                    "연도"
+                ]
+                .astype(int)
+                .astype(str)
+                + "년"
+            )
+
+
             detail_df[
                 "사고건수"
-            ]
-            .round()
-            .astype(int)
-        )
+            ] = (
+                detail_df[
+                    "사고건수"
+                ]
+                .round()
+                .astype(int)
+                .map(
+                    lambda value:
+                        f"{value:,}건"
+                )
+            )
 
 
-        st.dataframe(
+            table_rows = ""
 
-            detail_df,
 
-            use_container_width=True,
+            for _, row in detail_df.iterrows():
 
-            hide_index=True,
+                table_rows += f"""
+                    <tr>
+                        <td>{row["연도"]}</td>
+                        <td>{row["연령대"]}</td>
+                        <td>{weather_with_icon(row["기상상태"])}</td>
+                        <td>{row["사고건수"]}</td>
+                    </tr>
+                """
 
-            height=470,
 
-            column_config={
+            st.html(
+                f"""
+                <div class="weather-dark-table-wrap">
 
-                "연도":
-                    st.column_config.NumberColumn(
-                        "연도",
-                        format="%d년"
-                    ),
+                    <table class="weather-dark-table">
 
-                "연령대":
-                    st.column_config.TextColumn(
-                        "연령대"
-                    ),
+                        <thead>
+                            <tr>
+                                <th>연도</th>
+                                <th>연령대</th>
+                                <th>기상상태</th>
+                                <th>사고건수</th>
+                            </tr>
+                        </thead>
 
-                "기상상태":
-                    st.column_config.TextColumn(
-                        "기상상태"
-                    ),
+                        <tbody>
+                            {table_rows}
+                        </tbody>
 
-                "사고건수":
-                    st.column_config.NumberColumn(
-                        "사고건수",
-                        format="%d건"
-                    ),
-            }
-        )
+                    </table>
+
+                </div>
+                """
+            )
