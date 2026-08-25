@@ -30,6 +30,10 @@ def go_faq():
     st.switch_page("pages/FAQ.py")
 
 
+def go_forecast():
+    st.switch_page("pages/forecast.py")
+
+
 # ============================================================
 # CSS
 # ============================================================
@@ -572,10 +576,7 @@ with st.container(key="top_nav"):
             use_container_width=True,
         ):
 
-            st.toast(
-                "미래 전망 페이지는 준비 중입니다.",
-                icon="📈",
-            )
+            go_forecast()
 
 
 # ============================================================

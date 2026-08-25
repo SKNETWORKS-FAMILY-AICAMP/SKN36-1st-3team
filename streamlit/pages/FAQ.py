@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from html import escape
 
 import pandas as pd
 import streamlit as st
@@ -128,6 +129,38 @@ df["no"] = pd.to_numeric(
     df["no"],
     errors="coerce"
 )
+
+
+def html_text(
+    value,
+    default="-"
+):
+
+    value = str(
+        value
+    ).strip()
+
+
+    if value.lower() in [
+        "",
+        "nan",
+        "none",
+        "null",
+    ]:
+
+        value = default
+
+
+    return (
+        escape(
+            value,
+            quote=True
+        )
+        .replace(
+            "\n",
+            "<br>"
+        )
+    )
 
 
 # ============================================================
@@ -811,6 +844,107 @@ footer {
         1.8;
 }
 
+
+
+/* ==========================================================
+   SELECTED CATEGORY
+========================================================== */
+
+.selected-category-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    padding: 5px 10px;
+
+    background: rgba(214,163,72,.11);
+    border: 1px solid rgba(214,163,72,.34);
+    border-radius: 999px;
+
+    color: #E9BF6B;
+    font-size: 12px;
+    font-weight: 800;
+
+    vertical-align: middle;
+}
+
+
+/* ==========================================================
+   FAQ RESULT SUMMARY
+========================================================== */
+
+.faq-result-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+
+    margin-top: 30px;
+    margin-bottom: 14px;
+
+    padding: 14px 16px;
+
+    background: #151D30;
+    border: 1px solid #35415C;
+    border-radius: 14px;
+}
+
+.faq-result-count {
+    color: #C5CDDA;
+    font-size: 13px;
+}
+
+.faq-result-count strong {
+    color: #F1C66A;
+    font-size: 19px;
+    font-weight: 900;
+}
+
+.faq-result-filter {
+    color: #AEB8C8;
+    font-size: 12px;
+}
+
+
+/* ==========================================================
+   FAQ EXPANDER POLISH
+========================================================== */
+
+[data-testid="stExpander"] {
+    transition:
+        border-color .15s ease,
+        transform .15s ease,
+        background .15s ease;
+}
+
+[data-testid="stExpander"]:hover {
+    border-color: #53617D;
+    background: #1A2338;
+}
+
+[data-testid="stExpander"] summary svg {
+    color: #D6A348 !important;
+    fill: #D6A348 !important;
+}
+
+
+/* ==========================================================
+   ANSWER CONTENT
+========================================================== */
+
+.answer-text {
+    color: #D5DBE5;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.answer-source-note {
+    color: #8792A7;
+    font-size: 11px;
+    margin-top: 12px;
+}
+
 </style>
 """
 )
@@ -976,6 +1110,45 @@ with st.container(
     )
 
 
+    # 현재 선택된 카테고리 버튼을 골드로 강조
+    try:
+
+        selected_category_index = (
+            category_list.index(
+                st.session_state.faq_category
+            )
+        )
+
+        st.html(
+            f"""
+            <style>
+
+            .st-key-faq_category_wrap_{selected_category_index} button {{
+                background: #D6A348 !important;
+                border-color: #E7BC67 !important;
+                color: #172035 !important;
+            }}
+
+            .st-key-faq_category_wrap_{selected_category_index} button * {{
+                color: #172035 !important;
+                -webkit-text-fill-color: #172035 !important;
+                font-weight: 900 !important;
+            }}
+
+            .st-key-faq_category_wrap_{selected_category_index} button:hover {{
+                background: #E2B45A !important;
+                border-color: #F1C66A !important;
+            }}
+
+            </style>
+            """
+        )
+
+    except ValueError:
+
+        pass
+
+
     with st.container(
         key="category_buttons"
     ):
@@ -1001,22 +1174,26 @@ with st.container(
 
             with cols[column_index]:
 
-                label = (
-                    f"✓ {category}"
-                    if st.session_state.faq_category == category
-                    else category
-                )
-
-
-                if st.button(
-                    label,
-                    key=f"faq_category_{index}",
-                    use_container_width=True,
+                with st.container(
+                    key=f"faq_category_wrap_{index}"
                 ):
 
-                    st.session_state.faq_category = category
+                    label = (
+                        f"✓ {category}"
+                        if st.session_state.faq_category == category
+                        else category
+                    )
 
-                    st.rerun()
+
+                    if st.button(
+                        label,
+                        key=f"faq_category_{index}",
+                        use_container_width=True,
+                    ):
+
+                        st.session_state.faq_category = category
+
+                        st.rerun()
 
 
     # ========================================================
@@ -1130,19 +1307,22 @@ with st.container(
 
     st.html(
         f"""
-        <div class="faq-result-info">
+        <div class="faq-result-wrap">
 
-            <strong>
-                {len(filtered_df):,}
-            </strong>
-            개의 질문을 찾았습니다.
+            <div class="faq-result-count">
+                검색 결과
+                <strong>
+                    {len(filtered_df):,}
+                </strong>
+                개
+            </div>
 
-            &nbsp;&nbsp;·&nbsp;&nbsp;
-
-            선택 카테고리:
-            <b>
-                {selected_category}
-            </b>
+            <div class="faq-result-filter">
+                선택 카테고리
+                <span class="selected-category-note">
+                    {html_text(selected_category)}
+                </span>
+            </div>
 
         </div>
         """
@@ -1171,57 +1351,72 @@ with st.container(
 
     else:
 
+        auto_expand_single = (
+            len(filtered_df) == 1
+            and bool(
+                search_word
+            )
+        )
+
+
         for index, row in filtered_df.iterrows():
 
-            question = (
-                str(
-                    row[
-                        "question"
-                    ]
-                ).strip()
+            question_raw = str(
+                row[
+                    "question"
+                ]
+            ).strip()
+
+
+            answer_raw = str(
+                row[
+                    "answer"
+                ]
+            ).strip()
+
+
+            category_raw = str(
+                row[
+                    "category"
+                ]
+            ).strip()
+
+
+            source_url = str(
+                row[
+                    "source_url"
+                ]
+            ).strip()
+
+
+            question = html_text(
+                question_raw,
+                default="질문"
             )
 
 
-            answer = (
-                str(
-                    row[
-                        "answer"
-                    ]
-                ).strip()
+            answer = html_text(
+                answer_raw,
+                default="등록된 답변이 없습니다."
             )
 
 
-            category = (
-                str(
-                    row[
-                        "category"
-                    ]
-                ).strip()
+            category = html_text(
+                category_raw,
+                default="기타"
             )
 
 
-            source_url = (
-                str(
-                    row[
-                        "source_url"
-                    ]
-                ).strip()
-            )
-
-
-            # -----------------------------------------------
-            # EXPANDER
-            # -----------------------------------------------
-
+            # 검색 결과가 1개면 답변을 바로 펼쳐줌
             with st.expander(
-                f"Q. {question}",
-                expanded=False,
+                f"Q. {question_raw}",
+                expanded=auto_expand_single,
             ):
 
                 st.html(
                     f"""
                     <div class="category-badge">
-                        {category if category else "기타"}
+                        {category}
                     </div>
 
                     <div class="answer-wrap">
@@ -1230,16 +1425,14 @@ with st.container(
                             A.
                         </div>
 
-                        {answer}
+                        <div class="answer-text">
+                            {answer}
+                        </div>
 
                     </div>
                     """
                 )
 
-
-                # -------------------------------------------
-                # SOURCE
-                # -------------------------------------------
 
                 if (
                     source_url
@@ -1258,6 +1451,7 @@ with st.container(
                         st.link_button(
                             "출처 확인 ↗",
                             source_url,
+                            use_container_width=False,
                         )
 
 
