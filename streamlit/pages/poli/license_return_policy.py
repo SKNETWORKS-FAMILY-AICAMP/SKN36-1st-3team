@@ -1541,29 +1541,367 @@ div[data-baseweb="popover"] li[aria-selected="true"] * {
 }
 
 
+
+
 /* ==========================================================
-   EXPANDER
+   GOVERNMENT SECTION
 ========================================================== */
 
-[data-testid="stExpander"] {
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 34px 0 14px 4px;
+    color: #FFFFFF;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: -1px;
+}
 
-    background: #182035 !important;
+.section-heading::before {
+    content: "";
+    width: 5px;
+    height: 27px;
+    border-radius: 4px;
+    background: #D9A64A;
+}
 
-    border: 1px solid #46536F !important;
+.section-sub-gov {
+    color: #AEB8C8;
+    font-size: 13px;
+    line-height: 1.75;
+    margin: -4px 0 16px 4px;
+}
 
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 14px !important;
+.section-divider-gov {
+    height: 1px;
+    margin: 38px 0 6px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
 }
 
 
-[data-testid="stExpander"] summary * {
+/* ==========================================================
+   KPI
+========================================================== */
 
-    color: #FFFFFF !important;
+.gov-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 14px;
+    margin-bottom: 8px;
+}
 
+.gov-kpi {
+    background: #192136;
+    border: 1px solid #394560;
+    border-radius: 17px;
+    padding: 18px 20px;
+    min-height: 112px;
+}
+
+.gov-kpi-label {
+    color: #C4CCD9;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+.gov-kpi-value {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 900;
+    word-break: keep-all;
+}
+
+.gov-kpi-value.gold {
+    color: #F1C66A;
+}
+
+
+/* ==========================================================
+   POLICY REVIEW 2 COLUMN
+========================================================== */
+
+.st-key-return_policy_detail_column,
+.st-key-return_policy_metric_column {
+    background: #151D30;
+    border: 1px solid #3A4662;
+    border-radius: 22px;
+    padding: 22px 22px 24px 22px;
+    margin-top: 8px;
+
+    /* 두 정책 검토 박스 높이를 동일하게 맞춤 */
+    height: 760px;
+    min-height: 760px;
+
+    overflow: hidden;
+}
+
+
+/* 펼쳐진 내용이 길어져도 바깥 박스 높이는 동일하게 유지 */
+.st-key-return_policy_detail_body,
+.st-key-return_policy_metric_body {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+}
+
+
+/* 내부 스크롤바도 네이비/골드 스타일 */
+.st-key-return_policy_detail_body::-webkit-scrollbar,
+.st-key-return_policy_metric_body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.st-key-return_policy_detail_body::-webkit-scrollbar-track,
+.st-key-return_policy_metric_body::-webkit-scrollbar-track {
+    background: #121A2B;
+    border-radius: 999px;
+}
+
+.st-key-return_policy_detail_body::-webkit-scrollbar-thumb,
+.st-key-return_policy_metric_body::-webkit-scrollbar-thumb {
+    background: #46536F;
+    border-radius: 999px;
+}
+
+.st-key-return_policy_detail_body::-webkit-scrollbar-thumb:hover,
+.st-key-return_policy_metric_body::-webkit-scrollbar-thumb:hover {
+    background: #D6A348;
+}
+
+.review-box-title {
+    color: #FFFFFF;
+    font-size: 21px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.review-box-sub {
+    color: #B8C2D2;
+    font-size: 12px;
+    line-height: 1.75;
+    min-height: 64px;
+    margin-bottom: 14px;
+}
+
+.review-box-sub b {
+    color: #F3C867;
+}
+
+
+/* ==========================================================
+   COLLAPSE BUTTONS
+========================================================== */
+
+.st-key-return_policy_detail_toggle button,
+.st-key-return_policy_metric_toggle button,
+.st-key-return_compare_toggle button,
+.st-key-return_verify_toggle button,
+.st-key-return_detail_toggle button,
+.st-key-return_policy_cards_more button,
+.st-key-return_metric_more button {
+
+    width: 100% !important;
+    min-height: 48px !important;
+
+    background: #192238 !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #414D69 !important;
+    border-radius: 11px !important;
+
+    box-shadow: none !important;
+
+    font-size: 13px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-return_policy_detail_toggle button,
+.st-key-return_policy_metric_toggle button,
+.st-key-return_compare_toggle button,
+.st-key-return_verify_toggle button,
+.st-key-return_detail_toggle button {
+    justify-content: flex-start !important;
+    padding-left: 16px !important;
+}
+
+.st-key-return_policy_detail_toggle button *,
+.st-key-return_policy_metric_toggle button *,
+.st-key-return_compare_toggle button *,
+.st-key-return_verify_toggle button *,
+.st-key-return_detail_toggle button *,
+.st-key-return_policy_cards_more button *,
+.st-key-return_metric_more button * {
+
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
     opacity: 1 !important;
+}
+
+.st-key-return_policy_detail_toggle button:hover,
+.st-key-return_policy_metric_toggle button:hover,
+.st-key-return_compare_toggle button:hover,
+.st-key-return_verify_toggle button:hover,
+.st-key-return_detail_toggle button:hover,
+.st-key-return_policy_cards_more button:hover,
+.st-key-return_metric_more button:hover {
+
+    background: #232D46 !important;
+    border-color: #D6A348 !important;
+}
+
+.st-key-return_policy_detail_toggle button:hover *,
+.st-key-return_policy_metric_toggle button:hover *,
+.st-key-return_compare_toggle button:hover *,
+.st-key-return_verify_toggle button:hover *,
+.st-key-return_detail_toggle button:hover *,
+.st-key-return_policy_cards_more button:hover *,
+.st-key-return_metric_more button:hover * {
+
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   COLLAPSE BODY
+========================================================== */
+
+.st-key-return_policy_detail_body,
+.st-key-return_policy_metric_body,
+.st-key-return_compare_body,
+.st-key-return_verify_body,
+.st-key-return_detail_body {
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+    padding: 18px 20px 20px 20px;
+    margin-top: 10px;
+}
+
+
+/* 좌우 검토 박스 내부 높이 맞춤 */
+.st-key-return_policy_detail_body,
+.st-key-return_policy_metric_body {
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* ==========================================================
+   COMPACT CARDS
+========================================================== */
+
+.compact-return-policy-card {
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-return-policy-card .policy-name {
+    font-size: 17px;
+}
+
+.compact-return-policy-card .policy-meta,
+.compact-return-policy-card .support-value {
+    font-size: 12px;
+}
+
+.compact-return-safer-card {
+    padding: 18px 18px;
+    margin: 10px 0;
+}
+
+.compact-return-safer-card .safer-title {
+    font-size: 15px;
+}
+
+.compact-return-safer-card .safer-content {
+    font-size: 12px;
+}
+
+
+/* ==========================================================
+   DARK TABLE
+========================================================== */
+
+.return-dark-table-wrap {
+    width: 100%;
+    max-height: 560px;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    background: #182035;
+    border: 1px solid #3A4662;
+    border-radius: 12px;
+}
+
+.return-dark-table {
+    width: 100%;
+    min-width: 1650px;
+    border-collapse: collapse;
+
+    background: #182035;
+    color: #E7EAF0;
+    font-size: 12px;
+}
+
+.return-dark-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.return-dark-table th {
+    background: #202A42;
+    color: #D6A348;
+    font-weight: 900;
+    text-align: center;
+    padding: 13px 14px;
+    border-bottom: 1px solid #4A5670;
+    white-space: nowrap;
+}
+
+.return-dark-table td {
+    background: #182035;
+    color: #E7EAF0;
+    padding: 11px 13px;
+    border-bottom: 1px solid #303B55;
+    vertical-align: top;
+    line-height: 1.65;
+}
+
+.return-dark-table tbody tr:nth-child(even) td {
+    background: #1B243A;
+}
+
+.return-dark-table tbody tr:hover td {
+    background: #222D47;
+    color: #FFFFFF;
+}
+
+.return-dark-table a {
+    color: #F1C66A !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+@media(max-width:1000px) {
+    .gov-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .review-box-sub {
+        min-height: auto;
+    }
 }
 
 </style>
@@ -1726,403 +2064,34 @@ with st.container(key="return_policy_page"):
 
 
     # ========================================================
-    # REGION DETAIL
+    # SUMMARY DATA
     # ========================================================
 
-    with st.container(key="detail_panel"):
+    total_policy = len(
+        df
+    )
 
-        st.html(
-            f"""
-            <div class="panel-title">
-                지역별 자진반납 지원정책 상세
-            </div>
-
-            <div class="panel-sub">
-                현재 선택 지역 기준
-                <b>{len(filtered_df):,}개</b> 정책을 확인합니다.
-            </div>
-            """
-        )
-
-        if filtered_df.empty:
-
-            st.info(
-                "현재 선택한 지역에 해당하는 정책이 없습니다."
-            )
-
-        else:
-
-            for _, row in filtered_df.iterrows():
-
-                region = html_text(
-                    row["region_name"]
-                )
-
-                policy_name = html_text(
-                    row["policy_name"]
-                )
-
-                target = html_text(
-                    row["target_condition"]
-                )
-
-                general_support = html_text(
-                    row["general_support"]
-                )
-
-                active_support = html_text(
-                    row["active_driver_support"]
-                )
-
-                support_type = html_text(
-                    row["support_type"]
-                )
-
-                apply_method = html_text(
-                    row["apply_method"]
-                )
-
-                residence = html_text(
-                    row["residence_condition"]
-                )
-
-                status_raw = safe_text(
-                    row["status"]
-                )
-
-                status = escape(
-                    status_raw,
-                    quote=True
-                )
-
-                source_url_raw = safe_text(
-                    row["source_url"],
-                    default=""
-                )
-
-                source_url = escape(
-                    source_url_raw,
-                    quote=True
-                )
-
-                base_year = (
-                    f"{int(row['base_year'])}년"
-                    if pd.notna(
-                        row["base_year"]
-                    )
-                    else "-"
-                )
-
-                status_class = (
-                    "status-active"
-                    if any(
-                        x in status_raw
-                        for x in [
-                            "시행",
-                            "운영",
-                            "진행",
-                            "추진",
-                        ]
-                    )
-                    else "status-other"
-                )
-
-                if source_url_raw.startswith(
-                    (
-                        "http://",
-                        "https://"
-                    )
-                ):
-
-                    source_html = f"""
-                    <div class="policy-source">
-
-                        <span class="source-label">
-                            출처
-                        </span>
-
-                        <a
-                            href="{source_url}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="source-link"
-                        >
-                            정책 원문 확인 ↗
-                        </a>
-
-                    </div>
-                    """
-
-                else:
-
-                    source_html = """
-                    <div class="policy-source">
-
-                        <span class="source-label">
-                            출처
-                        </span>
-
-                        <span class="source-empty">
-                            출처 정보 없음
-                        </span>
-
-                    </div>
-                    """
-
-                st.html(
-                    f"""
-                    <div class="policy-card">
-
-                        <div class="region-badge">
-                            {region}
-                        </div>
-
-                        <div class="policy-name">
-                            {policy_name}
-                        </div>
-
-                        <div class="policy-meta">
-
-                            <b>기준연도</b> :
-                            {base_year}
-
-                            &nbsp;&nbsp; | &nbsp;&nbsp;
-
-                            <b>상태</b> :
-                            <span class="{status_class}">
-                                {status}
-                            </span>
-
-                            <br>
-
-                            <b>지원 대상</b> :
-                            {target}
-
-                            <br>
-
-                            <b>지원 유형</b> :
-                            {support_type}
-
-                            <br>
-
-                            <b>신청 방법</b> :
-                            {apply_method}
-
-                            <br>
-
-                            <b>거주 조건</b> :
-                            {residence}
-
-                        </div>
-
-                        <div class="support-grid">
-
-                            <div class="support-box">
-
-                                <div class="support-label">
-                                    일반 자진반납 지원
-                                </div>
-
-                                <div class="support-value">
-                                    {general_support}
-                                </div>
-
-                            </div>
-
-                            <div class="support-box active-support">
-
-                                <div class="support-label">
-                                    실제 운전자 추가지원
-                                </div>
-
-                                <div class="support-value">
-                                    {active_support}
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        {source_html}
-
-                    </div>
-                    """
-                )
-
-
-    st.html('<div class="section-divider"></div>')
-
-    # ========================================================
-    # REGION COMPARISON
-    # ========================================================
-
-    with st.container(key="compare_panel"):
-
-        st.html(
-            """
-            <div class="panel-title">
-                지역별 자진반납 지원정책 비교
-            </div>
-
-            <div class="panel-sub">
-                비교할 지역을 선택한 뒤 <b>비교하기</b>를 누르면
-                지역별 정책 내용을 한 화면에서 비교할 수 있습니다.
-            </div>
-            """
-        )
-
-        compare_regions = st.multiselect(
-            "비교 지역",
-            regions,
-            default=[],
-            placeholder="비교할 지역을 2개 이상 선택하세요"
-        )
-
-        compare_btn_col, compare_btn_empty = st.columns(
-            [1, 3]
-        )
-
-        with compare_btn_col:
-
-            compare_clicked = st.button(
-                "비교하기",
-                key="compare_regions_btn",
-                use_container_width=True
-            )
-
-        if compare_clicked:
-
-            if len(compare_regions) < 2:
-                st.warning("비교할 지역을 2개 이상 선택해주세요.")
-
-            else:
-                region_compare_df = df[
-                    df["region_name"].isin(compare_regions)
-                ][
-                    [
-                        "region_name",
-                        "policy_name",
-                        "general_support",
-                        "active_driver_support",
-                        "support_type",
-                        "target_condition",
-                        "apply_method",
-                        "residence_condition",
-                    ]
-                ].copy()
-
-                if region_compare_df.empty:
-                    st.info("선택한 지역의 자진반납 지원정책 데이터가 없습니다.")
-
-                else:
-                    region_compare_df.columns = [
-                        "지역",
-                        "정책명",
-                        "일반 지원",
-                        "실운전자 추가지원",
-                        "지원 유형",
-                        "지원 대상",
-                        "신청 방법",
-                        "거주 조건",
-                    ]
-
-                    compare_rows = ""
-
-                    for _, row in region_compare_df.iterrows():
-
-                        compare_rows += f"""
-                        <tr>
-
-                            <td>
-                                <span class="compare-region-pill">
-                                    {html_text(row["지역"])}
-                                </span>
-                            </td>
-
-                            <td class="compare-policy-name">
-                                {html_text(row["정책명"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["일반 지원"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["실운전자 추가지원"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["지원 유형"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["지원 대상"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["신청 방법"])}
-                            </td>
-
-                            <td>
-                                {html_text(row["거주 조건"])}
-                            </td>
-
-                        </tr>
-                        """
-
-                    st.html(
-                        f"""
-                        <div class="compare-result-wrap">
-
-                            <table class="compare-result-table">
-
-                                <thead>
-
-                                    <tr>
-                                        <th>지역</th>
-                                        <th>정책명</th>
-                                        <th>일반 지원</th>
-                                        <th>실운전자 추가지원</th>
-                                        <th>지원 유형</th>
-                                        <th>지원 대상</th>
-                                        <th>신청 방법</th>
-                                        <th>거주 조건</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-                                    {compare_rows}
-                                </tbody>
-
-                            </table>
-
-                        </div>
-                        """
-                    )
-
-
-
-
-    st.html('<div class="section-divider"></div>')
-
-    # ========================================================
-    # ANALYSIS
-    # ========================================================
-
-    total_policy = len(df)
 
     total_region = (
-        df["region_name"]
-        .replace("", pd.NA)
+        df[
+            "region_name"
+        ]
+        .replace(
+            "",
+            pd.NA
+        )
         .nunique()
     )
+
 
     active_support_total = (
         ~df[
             "active_driver_support"
-        ].isin(INVALID_VALUES)
+        ].isin(
+            INVALID_VALUES
+        )
     ).sum()
+
 
     active_rate = (
         active_support_total
@@ -2132,15 +2101,31 @@ with st.container(key="return_policy_page"):
         else 0
     )
 
+
     type_df = (
         df[
-            ~df["support_type"].isin(INVALID_VALUES)
+            ~df[
+                "support_type"
+            ].isin(
+                INVALID_VALUES
+            )
         ]
-        .groupby("support_type", as_index=False)
+        .groupby(
+            "support_type",
+            as_index=False
+        )
         .size()
-        .rename(columns={"size": "count"})
-        .sort_values("count", ascending=False)
+        .rename(
+            columns={
+                "size": "count"
+            }
+        )
+        .sort_values(
+            "count",
+            ascending=False
+        )
     )
+
 
     if not type_df.empty:
 
@@ -2161,6 +2146,613 @@ with st.container(key="return_policy_page"):
         top_type = "-"
         top_type_count = 0
 
+
+    selected_policy_count = len(
+        filtered_df
+    )
+
+
+    selected_metric_count = int(
+        (
+            ~filtered_df[
+                "saas_metric"
+            ].isin(
+                INVALID_VALUES
+            )
+        ).sum()
+    )
+
+
+    selected_active_support_count = int(
+        (
+            ~filtered_df[
+                "active_driver_support"
+            ].isin(
+                INVALID_VALUES
+            )
+        ).sum()
+    )
+
+
+    selected_label = (
+        selected_region
+        if selected_region != "전체"
+        else "전국"
+    )
+
+
+    # ========================================================
+    # KPI
+    # ========================================================
+
+    st.html(
+        f"""
+        <div class="gov-kpi-grid">
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    현재 조회 지역
+                </div>
+                <div class="gov-kpi-value gold">
+                    {selected_label}
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    조회 정책 수
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_policy_count:,}개
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    실운전자 추가지원 정책
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_active_support_count:,}개
+                </div>
+            </div>
+
+            <div class="gov-kpi">
+                <div class="gov-kpi-label">
+                    SAFER 분석 지표
+                </div>
+                <div class="gov-kpi-value">
+                    {selected_metric_count:,}건
+                </div>
+            </div>
+
+        </div>
+        """
+    )
+
+
+    # ========================================================
+    # POLICY REVIEW
+    # ========================================================
+
+    st.html(
+        """
+        <div class="section-heading">정책 검토</div>
+        <div class="section-sub-gov">
+            실제 자진반납 지원정책과 SAFER 분석 지표를 나란히 확인합니다.
+        </div>
+        """
+    )
+
+
+    review_left, review_right = st.columns(
+        [1, 1],
+        gap="medium"
+    )
+
+
+    # ========================================================
+    # LEFT : POLICY DETAIL
+    # ========================================================
+
+    with review_left:
+
+        with st.container(
+            key="return_policy_detail_column"
+        ):
+
+            st.html(
+                f"""
+                <div class="review-box-title">
+                    자진반납 지원정책 세부 현황
+                </div>
+
+                <div class="review-box-sub">
+                    현재 선택 지역 기준 <b>{len(filtered_df):,}개</b> 정책의
+                    지원대상·지원금·신청방법·거주조건을 확인합니다.
+                </div>
+                """
+            )
+
+
+            if "show_return_policy_detail" not in st.session_state:
+
+                st.session_state[
+                    "show_return_policy_detail"
+                ] = True
+
+
+            with st.container(
+                key="return_policy_detail_toggle"
+            ):
+
+                policy_open = st.session_state[
+                    "show_return_policy_detail"
+                ]
+
+
+                policy_label = (
+                    "▲ 자진반납 지원정책 세부 현황 접기"
+                    if policy_open
+                    else "▼ 자진반납 지원정책 세부 현황 펼치기"
+                )
+
+
+                if st.button(
+                    policy_label,
+                    key="return_policy_detail_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_return_policy_detail"
+                    ] = not policy_open
+
+                    st.rerun()
+
+
+            if st.session_state[
+                "show_return_policy_detail"
+            ]:
+
+                with st.container(
+                    key="return_policy_detail_body"
+                ):
+
+                    if filtered_df.empty:
+
+                        st.info(
+                            "현재 선택한 지역에 해당하는 정책이 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_return_policy_cards" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_return_policy_cards"
+                            ] = False
+
+
+                        display_policy_df = (
+                            filtered_df
+                            if st.session_state[
+                                "show_all_return_policy_cards"
+                            ]
+                            else filtered_df.head(5)
+                        )
+
+
+                        for _, row in display_policy_df.iterrows():
+
+                            region = html_text(
+                                row["region_name"]
+                            )
+
+                            policy_name = html_text(
+                                row["policy_name"]
+                            )
+
+                            target = html_text(
+                                row["target_condition"]
+                            )
+
+                            general_support = html_text(
+                                row["general_support"]
+                            )
+
+                            active_support = html_text(
+                                row["active_driver_support"]
+                            )
+
+                            support_type = html_text(
+                                row["support_type"]
+                            )
+
+                            apply_method = html_text(
+                                row["apply_method"]
+                            )
+
+                            residence = html_text(
+                                row["residence_condition"]
+                            )
+
+                            status_raw = safe_text(
+                                row["status"]
+                            )
+
+                            status = escape(
+                                status_raw,
+                                quote=True
+                            )
+
+                            source_url_raw = safe_text(
+                                row["source_url"],
+                                default=""
+                            )
+
+                            source_url = escape(
+                                source_url_raw,
+                                quote=True
+                            )
+
+                            base_year = (
+                                f"{int(row['base_year'])}년"
+                                if pd.notna(
+                                    row["base_year"]
+                                )
+                                else "-"
+                            )
+
+
+                            status_class = (
+                                "status-active"
+                                if any(
+                                    x in status_raw
+                                    for x in [
+                                        "시행",
+                                        "운영",
+                                        "진행",
+                                        "추진",
+                                    ]
+                                )
+                                else "status-other"
+                            )
+
+
+                            if source_url_raw.startswith(
+                                (
+                                    "http://",
+                                    "https://",
+                                )
+                            ):
+
+                                source_html = f"""
+                                <div class="policy-source">
+
+                                    <span class="source-label">
+                                        출처
+                                    </span>
+
+                                    <a
+                                        href="{source_url}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="source-link"
+                                    >
+                                        정책 원문 확인 ↗
+                                    </a>
+
+                                </div>
+                                """
+
+                            else:
+
+                                source_html = """
+                                <div class="policy-source">
+
+                                    <span class="source-label">
+                                        출처
+                                    </span>
+
+                                    <span class="source-empty">
+                                        출처 정보 없음
+                                    </span>
+
+                                </div>
+                                """
+
+
+                            st.html(
+                                f"""
+                                <div class="policy-card compact-return-policy-card">
+
+                                    <div class="region-badge">
+                                        {region}
+                                    </div>
+
+                                    <div class="policy-name">
+                                        {policy_name}
+                                    </div>
+
+                                    <div class="policy-meta">
+
+                                        <b>기준연도</b> :
+                                        {base_year}
+
+                                        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                                        <b>상태</b> :
+                                        <span class="{status_class}">
+                                            {status}
+                                        </span>
+
+                                        <br>
+
+                                        <b>지원 대상</b> :
+                                        {target}
+
+                                        <br>
+
+                                        <b>지원 유형</b> :
+                                        {support_type}
+
+                                        <br>
+
+                                        <b>신청 방법</b> :
+                                        {apply_method}
+
+                                        <br>
+
+                                        <b>거주 조건</b> :
+                                        {residence}
+
+                                    </div>
+
+                                    <div class="support-grid">
+
+                                        <div class="support-box">
+
+                                            <div class="support-label">
+                                                일반 자진반납 지원
+                                            </div>
+
+                                            <div class="support-value">
+                                                {general_support}
+                                            </div>
+
+                                        </div>
+
+                                        <div class="support-box active-support">
+
+                                            <div class="support-label">
+                                                실제 운전자 추가지원
+                                            </div>
+
+                                            <div class="support-value">
+                                                {active_support}
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    {source_html}
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(filtered_df) > 5:
+
+                            more_label = (
+                                "정책 목록 줄이기"
+                                if st.session_state[
+                                    "show_all_return_policy_cards"
+                                ]
+                                else f"전체 {len(filtered_df):,}개 정책 보기"
+                            )
+
+
+                            with st.container(
+                                key="return_policy_cards_more"
+                            ):
+
+                                if st.button(
+                                    more_label,
+                                    key="return_policy_cards_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_return_policy_cards"
+                                    ] = not st.session_state[
+                                        "show_all_return_policy_cards"
+                                    ]
+
+                                    st.rerun()
+
+
+    # ========================================================
+    # RIGHT : SAFER METRIC
+    # ========================================================
+
+    with review_right:
+
+        with st.container(
+            key="return_policy_metric_column"
+        ):
+
+            safer_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "saas_metric"
+                    ].isin(
+                        INVALID_VALUES
+                    )
+                ]
+                .copy()
+            )
+
+
+            st.html(
+                f"""
+                <div class="review-box-title">
+                    SAFER 정책 분석 지표
+                </div>
+
+                <div class="review-box-sub">
+                    자진반납 정책을 비교·분석할 때 활용할 수 있는
+                    SAFER 분석 지표 <b>{len(safer_df):,}건</b>을 확인합니다.
+
+                    <br>
+
+                    <span style="color:#F3C867;font-weight:800;">
+                        ※ 실제 지원내용과 구분되는 SAFER 서비스 분석용 지표입니다.
+                    </span>
+                </div>
+                """
+            )
+
+
+            if "show_return_policy_metric" not in st.session_state:
+
+                st.session_state[
+                    "show_return_policy_metric"
+                ] = True
+
+
+            with st.container(
+                key="return_policy_metric_toggle"
+            ):
+
+                metric_open = st.session_state[
+                    "show_return_policy_metric"
+                ]
+
+
+                metric_label = (
+                    "▲ SAFER 정책 분석 지표 접기"
+                    if metric_open
+                    else "▼ SAFER 정책 분석 지표 펼치기"
+                )
+
+
+                if st.button(
+                    metric_label,
+                    key="return_policy_metric_button",
+                    use_container_width=True
+                ):
+
+                    st.session_state[
+                        "show_return_policy_metric"
+                    ] = not metric_open
+
+                    st.rerun()
+
+
+            if st.session_state[
+                "show_return_policy_metric"
+            ]:
+
+                with st.container(
+                    key="return_policy_metric_body"
+                ):
+
+                    if safer_df.empty:
+
+                        st.info(
+                            "현재 조건에 해당하는 SAFER 분석 지표가 없습니다."
+                        )
+
+                    else:
+
+                        if "show_all_return_metrics" not in st.session_state:
+
+                            st.session_state[
+                                "show_all_return_metrics"
+                            ] = False
+
+
+                        display_metric_df = (
+                            safer_df
+                            if st.session_state[
+                                "show_all_return_metrics"
+                            ]
+                            else safer_df.head(5)
+                        )
+
+
+                        for _, row in display_metric_df.iterrows():
+
+                            st.html(
+                                f"""
+                                <div class="safer-card compact-return-safer-card">
+
+                                    <div class="safer-label">
+                                        SAFER POLICY METRIC
+                                    </div>
+
+                                    <div class="safer-title">
+                                        {html_text(row["region_name"])}
+                                        ·
+                                        {html_text(row["policy_name"])}
+                                    </div>
+
+                                    <div class="safer-content">
+                                        {html_text(row["saas_metric"])}
+                                    </div>
+
+                                </div>
+                                """
+                            )
+
+
+                        if len(safer_df) > 5:
+
+                            metric_more_label = (
+                                "분석 지표 줄이기"
+                                if st.session_state[
+                                    "show_all_return_metrics"
+                                ]
+                                else f"전체 {len(safer_df):,}개 분석 지표 보기"
+                            )
+
+
+                            with st.container(
+                                key="return_metric_more"
+                            ):
+
+                                if st.button(
+                                    metric_more_label,
+                                    key="return_metric_more_button",
+                                    use_container_width=True
+                                ):
+
+                                    st.session_state[
+                                        "show_all_return_metrics"
+                                    ] = not st.session_state[
+                                        "show_all_return_metrics"
+                                    ]
+
+                                    st.rerun()
+
+
+    # ========================================================
+    # ANALYSIS SUMMARY
+    # ========================================================
+
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">정책 현황 요약</div>
+        <div class="section-sub-gov">
+            전국 자진반납 정책의 지원 구조와 실운전자 추가지원 현황을 요약합니다.
+        </div>
+        """
+    )
+
+
     st.html(
         f"""
         <div class="analysis-box">
@@ -2171,13 +2763,12 @@ with st.container(key="return_policy_page"):
 
             현재 DB에는
             <b>{total_region:,}개 지역</b>에서
-            총 <b>{total_policy:,}개의 자진반납 정책</b>이
+            총 <b>{total_policy:,}개 자진반납 정책</b>이
             수집되어 있습니다.
 
             <br>
 
-            이 중 실제 운전자에 대한 별도 추가지원 내용이
-            기록된 정책은
+            실제 운전자에 대한 별도 추가지원 내용이 기록된 정책은
             <b>{active_support_total:,}개</b>로,
             전체의 약 <b>{active_rate:.1f}%</b>입니다.
 
@@ -2185,146 +2776,285 @@ with st.container(key="return_policy_page"):
 
             현재 가장 많이 확인되는 지원 유형은
             <b>{escape(str(top_type))}</b>이며,
-            총 <b>{top_type_count:,}개 정책</b>에서
-            확인됩니다.
+            총 <b>{top_type_count:,}개 정책</b>에서 확인됩니다.
 
             <br><br>
 
-            단, 이 결과는 전국 모든 지자체의 정책 존재 여부를
-            확정하는 통계가 아니라 현재
-            <b>return_license_policy</b> 테이블에
-            수집된 데이터를 기준으로 한 비교 결과입니다.
+            ※ 본 결과는 현재
+            <b>return_license_policy</b> 테이블에 수집된 데이터를
+            기준으로 한 비교 결과입니다.
 
         </div>
         """
     )
 
 
-    st.html('<div class="section-divider"></div>')
-
     # ========================================================
-    # SAFER METRIC
+    # REGION COMPARISON
     # ========================================================
 
-    with st.container(key="safer_panel"):
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">지역별 정책 비교</div>
+        <div class="section-sub-gov">
+            필요한 경우 2개 이상의 지역을 선택해 지원내용과 조건을 비교합니다.
+        </div>
+        """
+    )
 
-        st.html(
-            """
-            <div class="panel-title">
-                SAFER 정책 분석 지표
-            </div>
 
-            <div class="panel-sub">
-                자진반납 정책을 비교·분석할 때 활용할 수 있도록
-                데이터에 정의된 SAFER 분석 지표를 제공합니다.
+    if "show_return_compare" not in st.session_state:
 
-                <br>
+        st.session_state[
+            "show_return_compare"
+        ] = False
 
-                <b style="color:#F3C867;">
-                    아래 내용은 정책의 실제 지원내용과 구분되는
-                    SAFER 서비스 분석용 지표입니다.
-                </b>
-            </div>
-            """
+
+    with st.container(
+        key="return_compare_toggle"
+    ):
+
+        compare_open = st.session_state[
+            "show_return_compare"
+        ]
+
+
+        compare_label = (
+            "▲ 지역별 자진반납 정책 비교 닫기"
+            if compare_open
+            else "▼ 지역별 자진반납 정책 비교 보기"
         )
 
-        safer_df = (
-            filtered_df[
-                ~filtered_df[
-                    "saas_metric"
-                ].isin(INVALID_VALUES)
-            ]
-        )
 
-        if safer_df.empty:
+        if st.button(
+            compare_label,
+            key="return_compare_toggle_button",
+            use_container_width=True
+        ):
 
-            st.info(
-                "현재 조건에 해당하는 SAFER 분석 지표가 없습니다."
+            st.session_state[
+                "show_return_compare"
+            ] = not compare_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_return_compare"
+    ]:
+
+        with st.container(
+            key="return_compare_body"
+        ):
+
+            compare_regions = st.multiselect(
+                "비교 지역",
+                regions,
+                default=[],
+                placeholder="비교할 지역을 2개 이상 선택하세요",
+                key="return_policy_compare_regions"
             )
 
-        else:
 
-            for _, row in safer_df.iterrows():
+            compare_btn_col, _ = st.columns(
+                [1, 3]
+            )
 
-                st.html(
-                    f"""
-                    <div class="safer-card">
 
-                        <div class="safer-label">
-                            SAFER POLICY METRIC
-                        </div>
+            with compare_btn_col:
 
-                        <div class="safer-title">
-                            {html_text(row["region_name"])}
-                            ·
-                            {html_text(row["policy_name"])}
-                        </div>
-
-                        <div class="safer-content">
-                            {html_text(row["saas_metric"])}
-                        </div>
-
-                    </div>
-                    """
+                compare_clicked = st.button(
+                    "비교하기",
+                    key="compare_regions_btn",
+                    use_container_width=True
                 )
 
 
-    st.html('<div class="section-divider"></div>')
+            if compare_clicked:
+
+                if len(compare_regions) < 2:
+
+                    st.warning(
+                        "비교할 지역을 2개 이상 선택해주세요."
+                    )
+
+                else:
+
+                    region_compare_df = (
+                        df[
+                            df[
+                                "region_name"
+                            ].isin(
+                                compare_regions
+                            )
+                        ][
+                            [
+                                "region_name",
+                                "policy_name",
+                                "general_support",
+                                "active_driver_support",
+                                "support_type",
+                                "target_condition",
+                                "apply_method",
+                                "residence_condition",
+                            ]
+                        ]
+                        .copy()
+                    )
+
+
+                    compare_rows = ""
+
+
+                    for _, row in region_compare_df.iterrows():
+
+                        compare_rows += f"""
+                            <tr>
+                                <td>{html_text(row["region_name"])}</td>
+                                <td>{html_text(row["policy_name"])}</td>
+                                <td>{html_text(row["general_support"])}</td>
+                                <td>{html_text(row["active_driver_support"])}</td>
+                                <td>{html_text(row["support_type"])}</td>
+                                <td>{html_text(row["target_condition"])}</td>
+                                <td>{html_text(row["apply_method"])}</td>
+                                <td>{html_text(row["residence_condition"])}</td>
+                            </tr>
+                        """
+
+
+                    st.html(
+                        f"""
+                        <div class="return-dark-table-wrap">
+
+                            <table class="return-dark-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>지역</th>
+                                        <th>정책명</th>
+                                        <th>일반 지원</th>
+                                        <th>실운전자 추가지원</th>
+                                        <th>지원 유형</th>
+                                        <th>지원 대상</th>
+                                        <th>신청 방법</th>
+                                        <th>거주 조건</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    {compare_rows}
+                                </tbody>
+
+                            </table>
+
+                        </div>
+                        """
+                    )
+
+
+    # ========================================================
+    # SUPPORTING INFO
+    # ========================================================
+
+    st.html(
+        """
+        <div class="section-divider-gov"></div>
+        <div class="section-heading">정책 검증·원본 데이터</div>
+        <div class="section-sub-gov">
+            데이터 검증 메모와 전체 원본 데이터는 필요할 때만 펼쳐서 확인합니다.
+        </div>
+        """
+    )
+
 
     # ========================================================
     # VERIFY MEMO
     # ========================================================
 
-    with st.container(key="verify_panel"):
+    if "show_return_verify" not in st.session_state:
 
-        st.html(
-            """
-            <div class="panel-title">
-                데이터 검증 메모
-            </div>
+        st.session_state[
+            "show_return_verify"
+        ] = False
 
-            <div class="panel-sub">
-                정책 데이터 수집 과정에서 확인한
-                검증·주의사항을 표시합니다.
-            </div>
-            """
+
+    with st.container(
+        key="return_verify_toggle"
+    ):
+
+        verify_open = st.session_state[
+            "show_return_verify"
+        ]
+
+
+        verify_label = (
+            "▲ 데이터 검증 메모 닫기"
+            if verify_open
+            else "▼ 데이터 검증 메모 보기"
         )
 
-        verify_df = (
-            filtered_df[
-                ~filtered_df[
-                    "verify_memo"
-                ].isin(INVALID_VALUES)
-            ]
-        )
 
-        if verify_df.empty:
+        if st.button(
+            verify_label,
+            key="return_verify_button",
+            use_container_width=True
+        ):
 
-            st.info(
-                "현재 조건에 별도의 검증 메모가 없습니다."
+            st.session_state[
+                "show_return_verify"
+            ] = not verify_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_return_verify"
+    ]:
+
+        with st.container(
+            key="return_verify_body"
+        ):
+
+            verify_df = (
+                filtered_df[
+                    ~filtered_df[
+                        "verify_memo"
+                    ].isin(
+                        INVALID_VALUES
+                    )
+                ]
+                .copy()
             )
 
-        else:
 
-            for _, row in verify_df.iterrows():
+            if verify_df.empty:
 
-                st.html(
-                    f"""
-                    <div class="verify-card">
-
-                        <div class="verify-title">
-                            {html_text(row["region_name"])}
-                            ·
-                            {html_text(row["policy_name"])}
-                        </div>
-
-                        <div class="verify-text">
-                            {html_text(row["verify_memo"])}
-                        </div>
-
-                    </div>
-                    """
+                st.info(
+                    "현재 조건에 별도의 검증 메모가 없습니다."
                 )
+
+            else:
+
+                for _, row in verify_df.iterrows():
+
+                    st.html(
+                        f"""
+                        <div class="verify-card">
+
+                            <div class="verify-title">
+                                {html_text(row["region_name"])}
+                                ·
+                                {html_text(row["policy_name"])}
+                            </div>
+
+                            <div class="verify-text">
+                                {html_text(row["verify_memo"])}
+                            </div>
+
+                        </div>
+                        """
+                    )
 
 
     # ========================================================
@@ -2333,126 +3063,133 @@ with st.container(key="return_policy_page"):
 
     st.write("")
 
-    with st.expander(
-        "운전면허 자진반납 지원정책 전체 데이터 보기"
+
+    if "show_return_detail" not in st.session_state:
+
+        st.session_state[
+            "show_return_detail"
+        ] = False
+
+
+    with st.container(
+        key="return_detail_toggle"
     ):
 
-        detail_df = filtered_df[
-            [
-                "region_name",
-                "policy_name",
-                "base_year",
-                "target_condition",
-                "general_support",
-                "active_driver_support",
-                "support_type",
-                "apply_method",
-                "residence_condition",
-                "status",
-                "saas_metric",
-                "verify_memo",
-                "source_url",
-            ]
-        ].copy()
-
-        detail_df.columns = [
-            "지역",
-            "정책명",
-            "기준연도",
-            "지원대상",
-            "일반지원",
-            "실운전자 추가지원",
-            "지원유형",
-            "신청방법",
-            "거주조건",
-            "상태",
-            "SAFER 분석지표",
-            "검증메모",
-            "출처",
+        detail_open = st.session_state[
+            "show_return_detail"
         ]
 
-        st.dataframe(
-            detail_df,
-            use_container_width=True,
-            hide_index=True,
-            height=520,
 
-            column_config={
-
-                "지역":
-                    st.column_config.TextColumn(
-                        "지역"
-                    ),
-
-                "정책명":
-                    st.column_config.TextColumn(
-                        "정책명",
-                        width="large"
-                    ),
-
-                "기준연도":
-                    st.column_config.NumberColumn(
-                        "기준연도",
-                        format="%d년"
-                    ),
-
-                "지원대상":
-                    st.column_config.TextColumn(
-                        "지원대상",
-                        width="large"
-                    ),
-
-                "일반지원":
-                    st.column_config.TextColumn(
-                        "일반지원",
-                        width="large"
-                    ),
-
-                "실운전자 추가지원":
-                    st.column_config.TextColumn(
-                        "실운전자 추가지원",
-                        width="large"
-                    ),
-
-                "지원유형":
-                    st.column_config.TextColumn(
-                        "지원유형",
-                        width="medium"
-                    ),
-
-                "신청방법":
-                    st.column_config.TextColumn(
-                        "신청방법",
-                        width="large"
-                    ),
-
-                "거주조건":
-                    st.column_config.TextColumn(
-                        "거주조건",
-                        width="large"
-                    ),
-
-                "상태":
-                    st.column_config.TextColumn(
-                        "상태"
-                    ),
-
-                "SAFER 분석지표":
-                    st.column_config.TextColumn(
-                        "SAFER 분석지표",
-                        width="large"
-                    ),
-
-                "검증메모":
-                    st.column_config.TextColumn(
-                        "검증메모",
-                        width="large"
-                    ),
-
-                "출처":
-                    st.column_config.LinkColumn(
-                        "출처",
-                        display_text="원문 보기"
-                    ),
-            }
+        detail_label = (
+            "▲ 운전면허 자진반납 지원정책 데이터 닫기"
+            if detail_open
+            else "▼ 운전면허 자진반납 지원정책 데이터 상세 보기"
         )
+
+
+        if st.button(
+            detail_label,
+            key="return_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_return_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_return_detail"
+    ]:
+
+        with st.container(
+            key="return_detail_body"
+        ):
+
+            detail_rows = ""
+
+
+            for _, row in filtered_df.iterrows():
+
+                base_year_text = (
+                    f"{int(row['base_year'])}년"
+                    if pd.notna(
+                        row["base_year"]
+                    )
+                    else "-"
+                )
+
+
+                source_value = safe_text(
+                    row["source_url"],
+                    default=""
+                )
+
+
+                source_html = (
+                    f'<a href="{escape(source_value, quote=True)}" '
+                    f'target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>'
+                    if source_value.startswith(
+                        (
+                            "http://",
+                            "https://",
+                        )
+                    )
+                    else "-"
+                )
+
+
+                detail_rows += f"""
+                    <tr>
+                        <td>{html_text(row["region_name"])}</td>
+                        <td>{html_text(row["policy_name"])}</td>
+                        <td>{base_year_text}</td>
+                        <td>{html_text(row["target_condition"])}</td>
+                        <td>{html_text(row["general_support"])}</td>
+                        <td>{html_text(row["active_driver_support"])}</td>
+                        <td>{html_text(row["support_type"])}</td>
+                        <td>{html_text(row["apply_method"])}</td>
+                        <td>{html_text(row["residence_condition"])}</td>
+                        <td>{html_text(row["status"])}</td>
+                        <td>{html_text(row["saas_metric"])}</td>
+                        <td>{html_text(row["verify_memo"])}</td>
+                        <td>{source_html}</td>
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <div class="return-dark-table-wrap">
+
+                    <table class="return-dark-table">
+
+                        <thead>
+                            <tr>
+                                <th>지역</th>
+                                <th>정책명</th>
+                                <th>기준연도</th>
+                                <th>지원대상</th>
+                                <th>일반지원</th>
+                                <th>실운전자 추가지원</th>
+                                <th>지원유형</th>
+                                <th>신청방법</th>
+                                <th>거주조건</th>
+                                <th>상태</th>
+                                <th>SAFER 분석지표</th>
+                                <th>검증메모</th>
+                                <th>출처</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {detail_rows}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )
