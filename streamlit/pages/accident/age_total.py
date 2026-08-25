@@ -69,7 +69,9 @@ def load_accident_age():
             id,
             age_group,
             year,
-            accidents
+            accidents,
+            deaths,
+            injuries
         FROM accident_age
         ORDER BY year, age_group
         """
@@ -145,6 +147,18 @@ age_df["year"] = pd.to_numeric(
 
 age_df["accidents"] = pd.to_numeric(
     age_df["accidents"],
+    errors="coerce"
+).fillna(0)
+
+
+age_df["deaths"] = pd.to_numeric(
+    age_df["deaths"],
+    errors="coerce"
+).fillna(0)
+
+
+age_df["injuries"] = pd.to_numeric(
+    age_df["injuries"],
     errors="coerce"
 ).fillna(0)
 
@@ -337,7 +351,13 @@ age_df = (
             "age_group",
         ],
         as_index=False
-    )["accidents"]
+    )[
+        [
+            "accidents",
+            "deaths",
+            "injuries",
+        ]
+    ]
     .sum()
 )
 
@@ -814,6 +834,8 @@ div[role="radiogroup"] label p {
 
 .st-key-age_size_panel,
 .st-key-age_trend_panel,
+.st-key-age_severity_panel,
+.st-key-age_severity_trend_panel,
 .st-key-driver_compare_panel,
 .st-key-predict_panel,
 .st-key-model_compare_panel {
@@ -1245,21 +1267,80 @@ div[role="radiogroup"] label p {
 }
 
 
+
 /* ==========================================================
-   EXPANDER
+   DETAIL TOGGLE BUTTON
 ========================================================== */
 
-[data-testid="stExpander"] {
+.st-key-age_accident_detail_toggle button {
 
-    background:
-        #182035;
+    width: 100% !important;
 
-    border:
-        1px solid
-        #394560;
+    min-height: 52px !important;
 
-    border-radius:
-        14px;
+    background: #182035 !important;
+
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
+}
+
+
+.st-key-age_accident_detail_toggle button * {
+
+    color: #E7EAF0 !important;
+
+    -webkit-text-fill-color: #E7EAF0 !important;
+
+    opacity: 1 !important;
+}
+
+
+.st-key-age_accident_detail_toggle button:hover {
+
+    background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
+}
+
+
+.st-key-age_accident_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   DETAIL TABLE PANEL
+========================================================== */
+
+.st-key-age_accident_detail_panel {
+
+    background: #182035;
+
+    border: 1px solid #394560;
+
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
 }
 
 /* ==========================================================
@@ -1295,6 +1376,49 @@ div[role="radiogroup"] label p {
         rgba(92,107,137,.9) 82%,
         rgba(92,107,137,0)
     );
+}
+
+
+
+/* ==========================================================
+   AGE SEVERITY
+========================================================== */
+
+.severity-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 16px;
+    margin-bottom: 18px;
+}
+
+.severity-kpi-card {
+    background: #121A2B;
+    border: 1px solid #394560;
+    border-radius: 15px;
+    padding: 17px 18px;
+}
+
+.severity-kpi-label {
+    color: #AEB8C8;
+    font-size: 11px;
+    margin-bottom: 9px;
+}
+
+.severity-kpi-value {
+    color: #FFFFFF;
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.severity-kpi-value.gold {
+    color: #F1C66A;
+}
+
+@media(max-width:1000px) {
+    .severity-kpi-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 </style>
@@ -1512,9 +1636,18 @@ with st.container(
 
     with f2:
 
+        default_age_index = (
+            age_groups.index(
+                "65세 이상"
+            )
+            if "65세 이상" in age_groups
+            else 0
+        )
+
         selected_age = st.selectbox(
             "연령대",
             age_groups,
+            index=default_age_index,
             key="age_accident_group"
         )
 
@@ -1588,6 +1721,45 @@ with st.container(
             ]
         )
         if not current_row.empty
+        else 0
+    )
+
+
+    selected_age_deaths = (
+        int(
+            current_row.iloc[0][
+                "deaths"
+            ]
+        )
+        if not current_row.empty
+        else 0
+    )
+
+
+    selected_age_injuries = (
+        int(
+            current_row.iloc[0][
+                "injuries"
+            ]
+        )
+        if not current_row.empty
+        else 0
+    )
+
+
+    selected_age_fatality_per_100 = (
+        selected_age_deaths
+        / selected_age_accidents
+        * 100
+        if selected_age_accidents > 0
+        else 0
+    )
+
+
+    selected_age_injury_per_accident = (
+        selected_age_injuries
+        / selected_age_accidents
+        if selected_age_accidents > 0
         else 0
     )
 
@@ -1761,6 +1933,415 @@ with st.container(
         <div class="section-heading">분석</div>
         """
     )
+
+
+    # ========================================================
+    # AGE SEVERITY SUMMARY
+    # ========================================================
+
+    with st.container(
+        key="age_severity_panel"
+    ):
+
+        st.html(
+            f"""
+            <div class="panel-title">
+                {selected_year}년 {selected_age} 사고 심각도
+            </div>
+
+            <div class="panel-sub">
+                선택한 연령대의 사고건수뿐 아니라 사망·부상 인명피해까지 함께 확인합니다.
+            </div>
+
+            <div class="severity-kpi-grid">
+
+                <div class="severity-kpi-card">
+                    <div class="severity-kpi-label">
+                        사고건수
+                    </div>
+                    <div class="severity-kpi-value">
+                        {selected_age_accidents:,}건
+                    </div>
+                </div>
+
+                <div class="severity-kpi-card">
+                    <div class="severity-kpi-label">
+                        사망자
+                    </div>
+                    <div class="severity-kpi-value">
+                        {selected_age_deaths:,}명
+                    </div>
+                </div>
+
+                <div class="severity-kpi-card">
+                    <div class="severity-kpi-label">
+                        부상자
+                    </div>
+                    <div class="severity-kpi-value">
+                        {selected_age_injuries:,}명
+                    </div>
+                </div>
+
+                <div class="severity-kpi-card">
+                    <div class="severity-kpi-label">
+                        사고 100건당 사망자
+                    </div>
+                    <div class="severity-kpi-value gold">
+                        {selected_age_fatality_per_100:.2f}명
+                    </div>
+                </div>
+
+            </div>
+            """
+        )
+
+
+        severity_df = (
+            selected_year_df[
+                [
+                    "age_group",
+                    "accidents",
+                    "deaths",
+                    "injuries",
+                ]
+            ]
+            .copy()
+        )
+
+
+        severity_df[
+            "fatality_per_100"
+        ] = np.where(
+            severity_df[
+                "accidents"
+            ] > 0,
+            severity_df[
+                "deaths"
+            ]
+            / severity_df[
+                "accidents"
+            ]
+            * 100,
+            0
+        )
+
+
+        severity_df[
+            "injury_per_accident"
+        ] = np.where(
+            severity_df[
+                "accidents"
+            ] > 0,
+            severity_df[
+                "injuries"
+            ]
+            / severity_df[
+                "accidents"
+            ],
+            0
+        )
+
+
+        severity_df[
+            "marker_size"
+        ] = np.sqrt(
+            severity_df[
+                "injuries"
+            ].clip(
+                lower=0
+            )
+        )
+
+
+        max_marker = (
+            float(
+                severity_df[
+                    "marker_size"
+                ].max()
+            )
+            if not severity_df.empty
+            else 1
+        )
+
+
+        if max_marker <= 0:
+            max_marker = 1
+
+
+        severity_df[
+            "marker_size"
+        ] = (
+            severity_df[
+                "marker_size"
+            ]
+            / max_marker
+            * 34
+            + 12
+        )
+
+
+        avg_accidents = (
+            float(
+                severity_df[
+                    "accidents"
+                ].mean()
+            )
+            if not severity_df.empty
+            else 0
+        )
+
+
+        avg_fatality = (
+            float(
+                severity_df[
+                    "fatality_per_100"
+                ].mean()
+            )
+            if not severity_df.empty
+            else 0
+        )
+
+
+        fig_severity = go.Figure(
+            go.Scatter(
+
+                x=severity_df[
+                    "accidents"
+                ],
+
+                y=severity_df[
+                    "fatality_per_100"
+                ],
+
+                mode="markers+text",
+
+                text=severity_df[
+                    "age_group"
+                ],
+
+                textposition="top center",
+
+                textfont=dict(
+                    color="#E8EDF5",
+                    size=11
+                ),
+
+                customdata=severity_df[
+                    [
+                        "deaths",
+                        "injuries",
+                        "injury_per_accident",
+                    ]
+                ],
+
+                marker=dict(
+                    size=severity_df[
+                        "marker_size"
+                    ],
+
+                    color=severity_df[
+                        "injury_per_accident"
+                    ],
+
+                    colorscale=[
+                        [0.00, "#315B7A"],
+                        [0.40, "#79B69B"],
+                        [0.72, "#D9A64A"],
+                        [1.00, "#D86A45"],
+                    ],
+
+                    showscale=True,
+
+                    colorbar=dict(
+                        title=dict(
+                            text="사고 1건당<br>부상자",
+                            font=dict(
+                                color="#FFFFFF"
+                            )
+                        ),
+                        tickfont=dict(
+                            color="#FFFFFF"
+                        )
+                    ),
+
+                    line=dict(
+                        color=[
+                            "#F3C867"
+                            if age == selected_age
+                            else "#E4E9F1"
+                            for age
+                            in severity_df[
+                                "age_group"
+                            ]
+                        ],
+                        width=[
+                            4
+                            if age == selected_age
+                            else 1
+                            for age
+                            in severity_df[
+                                "age_group"
+                            ]
+                        ]
+                    ),
+
+                    opacity=.94
+                ),
+
+                hovertemplate=(
+                    "<b>%{text}</b>"
+                    "<br>"
+                    "사고: %{x:,}건"
+                    "<br>"
+                    "사망자: %{customdata[0]:,}명"
+                    "<br>"
+                    "부상자: %{customdata[1]:,}명"
+                    "<br>"
+                    "사고 100건당 사망자: %{y:.2f}명"
+                    "<br>"
+                    "사고 1건당 부상자: %{customdata[2]:.2f}명"
+                    "<extra></extra>"
+                )
+            )
+        )
+
+
+        if avg_accidents > 0:
+
+            fig_severity.add_vline(
+                x=avg_accidents,
+                line_dash="dot",
+                line_color="#69768E",
+                line_width=1.5
+            )
+
+
+        if avg_fatality > 0:
+
+            fig_severity.add_hline(
+                y=avg_fatality,
+                line_dash="dot",
+                line_color="#69768E",
+                line_width=1.5
+            )
+
+
+        fig_severity.add_annotation(
+            x=1,
+            y=1,
+            xref="paper",
+            yref="paper",
+            text="사고 多 · 치명도 高",
+            showarrow=False,
+            xanchor="right",
+            yanchor="top",
+            font=dict(
+                color="#F3C867",
+                size=12
+            ),
+            bgcolor="rgba(18,26,43,.78)",
+            bordercolor="#D6A348",
+            borderwidth=1,
+            borderpad=6
+        )
+
+
+        fig_severity.update_layout(
+
+            height=560,
+
+            margin=dict(
+                l=85,
+                r=120,
+                t=40,
+                b=75
+            ),
+
+            paper_bgcolor="#182035",
+
+            plot_bgcolor="#182035",
+
+            showlegend=False,
+
+            font=dict(
+                color="#E8EDF5"
+            ),
+
+            xaxis=dict(
+                title="교통사고 건수(건)",
+                gridcolor="#35405A",
+                tickformat=",",
+                rangemode="tozero"
+            ),
+
+            yaxis=dict(
+                title="사고 100건당 사망자 수(명)",
+                gridcolor="#35405A",
+                rangemode="tozero"
+            )
+        )
+
+
+        st.plotly_chart(
+            fig_severity,
+            use_container_width=True,
+            config={
+                "displayModeBar": False
+            }
+        )
+
+
+        if not severity_df.empty:
+
+            fatal_top = (
+                severity_df
+                .sort_values(
+                    "fatality_per_100",
+                    ascending=False
+                )
+                .iloc[0]
+            )
+
+
+            injury_top = (
+                severity_df
+                .sort_values(
+                    "injury_per_accident",
+                    ascending=False
+                )
+                .iloc[0]
+            )
+
+
+            st.html(
+                f"""
+                <div class="info-box">
+
+                    <b>{selected_year}년 연령대별 심각도 분석</b>
+
+                    <br><br>
+
+                    사고 100건당 사망자가 가장 높은 연령대는
+                    <b>{fatal_top["age_group"]}</b>으로
+                    <b>{fatal_top["fatality_per_100"]:.2f}명</b>입니다.
+
+                    <br>
+
+                    사고 1건당 부상자가 가장 높은 연령대는
+                    <b>{injury_top["age_group"]}</b>으로
+                    <b>{injury_top["injury_per_accident"]:.2f}명</b>입니다.
+
+                    <br><br>
+
+                    선택한 <b>{selected_age}</b>은
+                    사고 100건당 사망자
+                    <b>{selected_age_fatality_per_100:.2f}명</b>,
+                    사고 1건당 부상자
+                    <b>{selected_age_injury_per_accident:.2f}명</b>입니다.
+
+                </div>
+                """
+            )
 
 
     # ========================================================
@@ -2071,10 +2652,21 @@ with st.container(
                         size=10,
                     ),
 
+                    customdata=trend_df[
+                        [
+                            "deaths",
+                            "injuries",
+                        ]
+                    ],
+
                     hovertemplate=(
                         "<b>%{x}년</b>"
                         "<br>"
                         "사고: %{y:,}건"
+                        "<br>"
+                        "사망자: %{customdata[0]:,}명"
+                        "<br>"
+                        "부상자: %{customdata[1]:,}명"
                         "<extra></extra>"
                     ),
                 )
@@ -3316,159 +3908,437 @@ with st.container(
 
 
     # ========================================================
-    # DETAIL
+    # DETAIL TABLE
     # ========================================================
 
     st.write("")
 
 
-    with st.expander(
-        "연령별 교통사고 데이터 상세 보기"
+    # --------------------------------------------------------
+    # DETAIL STATE
+    # --------------------------------------------------------
+
+    if "show_age_accident_detail" not in st.session_state:
+
+        st.session_state[
+            "show_age_accident_detail"
+        ] = False
+
+
+    # --------------------------------------------------------
+    # DETAIL TOGGLE
+    # --------------------------------------------------------
+
+    with st.container(
+        key="age_accident_detail_toggle"
     ):
 
-        tab1, tab2 = st.tabs(
-            [
-                "연령대별 교통사고",
-                "가해운전자 연령대별 사고",
-            ]
+        detail_open = st.session_state[
+            "show_age_accident_detail"
+        ]
+
+
+        detail_button_label = (
+            "▲ 연령별 교통사고 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 교통사고 데이터 상세 보기"
         )
 
 
-        # ====================================================
-        # AGE DETAIL
-        # ====================================================
+        if st.button(
+            detail_button_label,
+            key="age_accident_detail_button",
+            use_container_width=True
+        ):
 
-        with tab1:
-
-            detail_age = (
-                age_df
-                .sort_values(
-                    [
-                        "year",
-                        "age_group",
-                    ],
-                    ascending=[
-                        False,
-                        True,
-                    ]
-                )
-                .copy()
-            )
-
-
-            detail_age.columns = [
-                "연도",
-                "연령대",
-                "사고건수",
-            ]
-
-
-            detail_age[
-                "사고건수"
+            st.session_state[
+                "show_age_accident_detail"
             ] = (
-                detail_age[
-                    "사고건수"
+                not detail_open
+            )
+
+            st.rerun()
+
+
+    # --------------------------------------------------------
+    # DETAIL CONTENT
+    # --------------------------------------------------------
+
+    if st.session_state[
+        "show_age_accident_detail"
+    ]:
+
+        with st.container(
+            key="age_accident_detail_panel"
+        ):
+
+            detail_tab1, detail_tab2 = st.tabs(
+                [
+                    "연령대별 교통사고",
+                    "가해운전자 연령대별 사고",
                 ]
-                .round()
-                .astype(int)
             )
 
 
-            st.dataframe(
+            # ====================================================
+            # TAB 1
+            # ====================================================
 
-                detail_age,
+            with detail_tab1:
 
-                use_container_width=True,
-
-                hide_index=True,
-
-                column_config={
-
-                    "연도":
-                        st.column_config.NumberColumn(
-                            "연도",
-                            format="%d년"
-                        ),
-
-                    "연령대":
-                        st.column_config.TextColumn(
-                            "연령대"
-                        ),
-
-                    "사고건수":
-                        st.column_config.NumberColumn(
-                            "사고건수",
-                            format="%d건"
-                        ),
-                }
-            )
-
-
-        # ====================================================
-        # DRIVER DETAIL
-        # ====================================================
-
-        with tab2:
-
-            detail_driver = (
-                driver_long
-                .sort_values(
-                    [
-                        "year",
-                        "age_group",
-                    ],
-                    ascending=[
-                        False,
-                        True,
+                detail_age_df = (
+                    age_df[
+                        [
+                            "year",
+                            "age_group",
+                            "accidents",
+                            "deaths",
+                            "injuries",
+                        ]
                     ]
+                    .copy()
+                    .sort_values(
+                        [
+                            "year",
+                            "age_group",
+                        ],
+                        key=lambda column:
+                            column.map(age_sort_key)
+                            if column.name == "age_group"
+                            else column,
+                    )
+                    .reset_index(
+                        drop=True
+                    )
                 )
-                .copy()
-            )
 
 
-            detail_driver.columns = [
-                "연도",
-                "연령대",
-                "사고건수",
-            ]
-
-
-            detail_driver[
-                "사고건수"
-            ] = (
-                detail_driver[
-                    "사고건수"
+                detail_age_df.columns = [
+                    "연도",
+                    "연령대",
+                    "사고건수",
+                    "사망자",
+                    "부상자",
                 ]
-                .round()
-                .astype(int)
-            )
 
 
-            st.dataframe(
+                detail_age_df[
+                    "연도"
+                ] = (
+                    detail_age_df[
+                        "연도"
+                    ]
+                    .astype(int)
+                    .astype(str)
+                    + "년"
+                )
 
-                detail_driver,
 
-                use_container_width=True,
+                detail_age_df[
+                    "사고건수"
+                ] = (
+                    detail_age_df[
+                        "사고건수"
+                    ]
+                    .map(
+                        lambda value:
+                            f"{int(value):,}건"
+                    )
+                )
 
-                hide_index=True,
 
-                column_config={
+                detail_age_df[
+                    "사망자"
+                ] = (
+                    detail_age_df[
+                        "사망자"
+                    ]
+                    .map(
+                        lambda value:
+                            f"{int(value):,}명"
+                    )
+                )
 
-                    "연도":
-                        st.column_config.NumberColumn(
-                            "연도",
-                            format="%d년"
-                        ),
 
-                    "연령대":
-                        st.column_config.TextColumn(
-                            "연령대"
-                        ),
+                detail_age_df[
+                    "부상자"
+                ] = (
+                    detail_age_df[
+                        "부상자"
+                    ]
+                    .map(
+                        lambda value:
+                            f"{int(value):,}명"
+                    )
+                )
 
-                    "사고건수":
-                        st.column_config.NumberColumn(
-                            "사고건수",
-                            format="%d건"
-                        ),
-                }
-            )
+
+                rows_html = ""
+
+
+                for _, row in detail_age_df.iterrows():
+
+                    senior_class = (
+                        "senior-row"
+                        if age_sort_key(
+                            row["연령대"]
+                        ) >= 65
+                        else ""
+                    )
+
+
+                    rows_html += f"""
+                        <tr class="{senior_class}">
+                            <td>{row["연도"]}</td>
+                            <td>{row["연령대"]}</td>
+                            <td>{row["사고건수"]}</td>
+                            <td>{row["사망자"]}</td>
+                            <td>{row["부상자"]}</td>
+                        </tr>
+                    """
+
+
+                st.html(
+                    f"""
+                    <style>
+
+                    .age-accident-dark-table-wrap {{
+
+                        width: 100%;
+
+                        max-height: 560px;
+
+                        overflow-y: auto;
+
+                        overflow-x: auto;
+
+                        background: #182035;
+
+                        border: 1px solid #3A4662;
+
+                        border-radius: 12px;
+                    }}
+
+
+                    .age-accident-dark-table {{
+
+                        width: 100%;
+
+                        border-collapse: collapse;
+
+                        background: #182035;
+
+                        color: #E7EAF0;
+
+                        font-size: 13px;
+                    }}
+
+
+                    .age-accident-dark-table thead {{
+
+                        position: sticky;
+
+                        top: 0;
+
+                        z-index: 2;
+                    }}
+
+
+                    .age-accident-dark-table th {{
+
+                        background: #202A42;
+
+                        color: #D6A348;
+
+                        font-weight: 900;
+
+                        text-align: center;
+
+                        padding: 14px 16px;
+
+                        border-bottom: 1px solid #4A5670;
+
+                        white-space: nowrap;
+                    }}
+
+
+                    .age-accident-dark-table td {{
+
+                        background: #182035;
+
+                        color: #E7EAF0;
+
+                        font-weight: 600;
+
+                        text-align: center;
+
+                        padding: 12px 16px;
+
+                        border-bottom: 1px solid #303B55;
+
+                        white-space: nowrap;
+                    }}
+
+
+                    .age-accident-dark-table tbody tr:nth-child(even) td {{
+
+                        background: #1B243A;
+                    }}
+
+
+                    .age-accident-dark-table tbody tr.senior-row td {{
+
+                        color: #F1C66A;
+                    }}
+
+
+                    .age-accident-dark-table tbody tr:hover td {{
+
+                        background: #222D47;
+
+                        color: #FFFFFF;
+                    }}
+
+
+                    .age-accident-dark-table tbody tr:last-child td {{
+
+                        border-bottom: none;
+                    }}
+
+                    </style>
+
+
+                    <div class="age-accident-dark-table-wrap">
+
+                        <table class="age-accident-dark-table">
+
+                            <thead>
+                                <tr>
+                                    <th>연도</th>
+                                    <th>연령대</th>
+                                    <th>사고건수</th>
+                                    <th>사망자</th>
+                                    <th>부상자</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {rows_html}
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                    """
+                )
+
+
+            # ====================================================
+            # TAB 2
+            # ====================================================
+
+            with detail_tab2:
+
+                detail_driver_df = (
+                    driver_long[
+                        [
+                            "year",
+                            "age_group",
+                            "accidents",
+                        ]
+                    ]
+                    .copy()
+                    .sort_values(
+                        [
+                            "year",
+                            "age_group",
+                        ],
+                        key=lambda column:
+                            column.map(age_sort_key)
+                            if column.name == "age_group"
+                            else column,
+                    )
+                    .reset_index(
+                        drop=True
+                    )
+                )
+
+
+                detail_driver_df.columns = [
+                    "연도",
+                    "연령대",
+                    "사고건수",
+                ]
+
+
+                detail_driver_df[
+                    "연도"
+                ] = (
+                    detail_driver_df[
+                        "연도"
+                    ]
+                    .astype(int)
+                    .astype(str)
+                    + "년"
+                )
+
+
+                detail_driver_df[
+                    "사고건수"
+                ] = (
+                    detail_driver_df[
+                        "사고건수"
+                    ]
+                    .map(
+                        lambda value:
+                            f"{int(value):,}건"
+                    )
+                )
+
+
+                driver_rows_html = ""
+
+
+                for _, row in detail_driver_df.iterrows():
+
+                    senior_class = (
+                        "senior-row"
+                        if age_sort_key(
+                            row["연령대"]
+                        ) >= 65
+                        else ""
+                    )
+
+
+                    driver_rows_html += f"""
+                        <tr class="{senior_class}">
+                            <td>{row["연도"]}</td>
+                            <td>{row["연령대"]}</td>
+                            <td>{row["사고건수"]}</td>
+                        </tr>
+                    """
+
+
+                st.html(
+                    f"""
+                    <div class="age-accident-dark-table-wrap">
+
+                        <table class="age-accident-dark-table">
+
+                            <thead>
+                                <tr>
+                                    <th>연도</th>
+                                    <th>연령대</th>
+                                    <th>사고건수</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {driver_rows_html}
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                    """
+                )

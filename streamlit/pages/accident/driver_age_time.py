@@ -641,7 +641,7 @@ div[data-baseweb="select"] span {
 .st-key-age_time_panel,
 .st-key-total_time_panel,
 .st-key-heatmap_panel,
-.st-key-age_compare_panel {
+.st-key-insight_panel {
 
     background: #182035;
 
@@ -723,112 +723,234 @@ div[data-baseweb="select"] span {
 }
 
 
+
+
 /* ==========================================================
-   EXPANDER
+   SECTION HEADING
 ========================================================== */
 
-[data-testid="stExpander"] {
+.section-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin: 34px 0 14px 4px;
+
+    color: #FFFFFF;
+
+    font-size: 25px;
+
+    font-weight: 900;
+
+    letter-spacing: -1px;
+}
+
+
+.section-heading::before {
+
+    content: "";
+
+    width: 5px;
+
+    height: 27px;
+
+    border-radius: 4px;
+
+    background: #D9A64A;
+}
+
+
+.section-divider {
+
+    height: 1px;
+
+    margin: 42px 0 4px 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.9) 18%,
+        rgba(92,107,137,.9) 82%,
+        rgba(92,107,137,0)
+    );
+}
+
+
+/* ==========================================================
+   DETAIL TOGGLE BUTTON
+========================================================== */
+
+.st-key-driver_time_detail_toggle button {
+
+    width: 100% !important;
+
+    min-height: 52px !important;
 
     background: #182035 !important;
 
-    border: 1px solid #46536F !important;
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
 
     border-radius: 14px !important;
 
-    overflow: hidden !important;
+    box-shadow: none !important;
 
-    margin-top: 10px !important;
-}
+    justify-content: flex-start !important;
 
-
-/* expander summary 전체 */
-[data-testid="stExpander"] details summary {
-
-    background: #182035 !important;
-
-    color: #FFFFFF !important;
-
-    padding: 14px 18px !important;
-
-    cursor: pointer !important;
-}
-
-
-/* expander 제목 */
-[data-testid="stExpander"] details summary p {
-
-    color: #FFFFFF !important;
+    padding-left: 18px !important;
 
     font-size: 14px !important;
 
-    font-weight: 700 !important;
+    font-weight: 800 !important;
+}
+
+
+.st-key-driver_time_detail_toggle button * {
+
+    color: #E7EAF0 !important;
+
+    -webkit-text-fill-color: #E7EAF0 !important;
 
     opacity: 1 !important;
 }
 
 
-/* Streamlit 버전별 span 대응 */
-[data-testid="stExpander"] details summary span {
-
-    color: #FFFFFF !important;
-
-    font-size: 14px !important;
-
-    font-weight: 700 !important;
-
-    opacity: 1 !important;
-}
-
-
-/* expander 내부 모든 텍스트 */
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-/* 화살표 */
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-
-    opacity: 1 !important;
-}
-
-
-/* hover */
-[data-testid="stExpander"] details summary:hover {
+.st-key-driver_time_detail_toggle button:hover {
 
     background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
 }
 
 
-/* 펼친 내부 */
-[data-testid="stExpanderDetails"] {
+.st-key-driver_time_detail_toggle button:hover * {
 
-    background: #182035 !important;
+    color: #F1C66A !important;
 
-    color: #FFFFFF !important;
-
-    padding: 10px 16px 18px 16px !important;
+    -webkit-text-fill-color: #F1C66A !important;
 }
 
 
 /* ==========================================================
-   DATAFRAME
+   DETAIL TABLE PANEL
 ========================================================== */
 
-[data-testid="stDataFrame"] {
+.st-key-driver_time_detail_panel {
 
-    border: 1px solid #3C4863;
+    background: #182035;
 
-    border-radius: 10px;
+    border: 1px solid #394560;
 
-    overflow: hidden;
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
+}
+
+
+/* ==========================================================
+   INSIGHT / PREDICTION PANEL
+========================================================== */
+
+.st-key-insight_panel {
+
+    background: #182035;
+
+    border: 1px solid #3A4662;
+
+    border-radius: 24px;
+
+    padding: 24px 26px 22px 26px;
+
+    margin-top: 24px;
+}
+
+
+.insight-grid {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 14px;
+
+    margin-top: 18px;
+}
+
+
+.insight-card {
+
+    background: #131B2E;
+
+    border: 1px solid #394560;
+
+    border-radius: 16px;
+
+    padding: 18px 20px;
+
+    min-height: 128px;
+}
+
+
+.insight-index {
+
+    color: #D6A348;
+
+    font-size: 11px;
+
+    font-weight: 900;
+
+    margin-bottom: 8px;
+}
+
+
+.insight-title {
+
+    color: #FFFFFF;
+
+    font-size: 14px;
+
+    font-weight: 800;
+
+    margin-bottom: 8px;
+}
+
+
+.insight-body {
+
+    color: #B8C0CF;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width:1000px) {
+
+    .insight-grid {
+
+        grid-template-columns: 1fr;
+    }
 }
 
 </style>
@@ -1000,9 +1122,18 @@ with st.container(
 
     with f1:
 
+        default_age_index = (
+            age_groups.index(
+                "65세 이상"
+            )
+            if "65세 이상" in age_groups
+            else 0
+        )
+
         selected_age = st.selectbox(
             "연령대",
             age_groups,
+            index=default_age_index,
             key="driver_time_age"
         )
 
@@ -1158,6 +1289,15 @@ with st.container(
     )
 
 
+    st.html(
+        """
+        <div class="section-heading">
+            분석
+        </div>
+        """
+    )
+
+
     # ========================================================
     # KPI
     # ========================================================
@@ -1213,11 +1353,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    전체 사고 최다 연령대
+                    {peak_time} 사고 건수
                 </div>
 
                 <div class="kpi-value">
-                    {overall_top_age}
+                    {peak_accidents:,}건
                 </div>
 
             </div>
@@ -1336,6 +1476,35 @@ with st.container(
                 max_value = 1
 
 
+            average_accidents = (
+                float(
+                    selected_df[
+                        "accidents"
+                    ].mean()
+                )
+                if not selected_df.empty
+                else 0
+            )
+
+
+            if average_accidents > 0:
+
+                fig_selected.add_hline(
+                    y=average_accidents,
+                    line_dash="dot",
+                    line_color="#F0B95C",
+                    line_width=2,
+                    annotation_text=(
+                        f"평균 {average_accidents:,.0f}건"
+                    ),
+                    annotation_position="top right",
+                    annotation_font=dict(
+                        color="#F0B95C",
+                        size=11,
+                    ),
+                )
+
+
             fig_selected.update_layout(
 
                 height=520,
@@ -1407,7 +1576,7 @@ with st.container(
 
 
     # ========================================================
-    # ALL AGE TIME CHART
+    # SELECTED AGE VS ALL AGE SHARE
     # ========================================================
 
     with right:
@@ -1417,79 +1586,160 @@ with st.container(
         ):
 
             st.html(
-                """
+                f"""
                 <div class="panel-title">
-                    전체 연령 시간대별 사고 규모
+                    {selected_age} vs 전체 연령 시간대별 사고 비중
                 </div>
 
                 <div class="panel-sub">
-                    모든 연령대의 사고를 합산하여 시간대별 사고 집중 구간을 확인합니다.
+                    사고건수 자체가 아니라 각 집단 내부에서
+                    시간대별 사고가 차지하는 비율을 비교합니다.
                 </div>
                 """
             )
 
 
-            overall_peak = (
-                total_time_df
-                .sort_values(
-                    "accidents",
-                    ascending=False
-                )
-                .iloc[0]["time_slot"]
+            selected_share_df = (
+                selected_df[
+                    [
+                        "time_slot",
+                        "accidents",
+                    ]
+                ]
+                .copy()
             )
 
 
-            fig_total = go.Figure(
+            selected_share_total = (
+                selected_share_df[
+                    "accidents"
+                ].sum()
+            )
+
+
+            selected_share_df[
+                "share"
+            ] = (
+                selected_share_df[
+                    "accidents"
+                ]
+                / selected_share_total
+                * 100
+
+                if selected_share_total > 0
+
+                else 0
+            )
+
+
+            overall_share_df = (
+                total_time_df[
+                    [
+                        "time_slot",
+                        "accidents",
+                    ]
+                ]
+                .copy()
+            )
+
+
+            overall_share_total = (
+                overall_share_df[
+                    "accidents"
+                ].sum()
+            )
+
+
+            overall_share_df[
+                "share"
+            ] = (
+                overall_share_df[
+                    "accidents"
+                ]
+                / overall_share_total
+                * 100
+
+                if overall_share_total > 0
+
+                else 0
+            )
+
+
+            fig_compare = go.Figure()
+
+
+            fig_compare.add_trace(
                 go.Scatter(
 
-                    x=total_time_df["time_slot"],
+                    x=overall_share_df[
+                        "time_slot"
+                    ],
 
-                    y=total_time_df["accidents"],
+                    y=overall_share_df[
+                        "share"
+                    ],
 
-                    mode="lines+markers+text",
+                    mode="lines+markers",
+
+                    name="전체 연령",
 
                     line=dict(
-                        color="#91C7AA",
-                        width=4,
+                        color="#8EA2B8",
+                        width=3,
                     ),
 
                     marker=dict(
-                        size=9,
-
-                        color=[
-                            "#D9A64A"
-                            if time == overall_peak
-                            else "#91C7AA"
-
-                            for time
-                            in total_time_df["time_slot"]
-                        ],
-                    ),
-
-                    text=[
-                        f"{int(value):,}"
-                        for value
-                        in total_time_df["accidents"]
-                    ],
-
-                    textposition="top center",
-
-                    textfont=dict(
-                        color="#FFFFFF",
-                        size=9,
+                        size=7,
+                        color="#8EA2B8",
                     ),
 
                     hovertemplate=(
                         "<b>%{x}</b>"
                         "<br>"
-                        "사고: %{y:,}건"
+                        "전체 연령 비중: %{y:.1f}%"
                         "<extra></extra>"
                     ),
                 )
             )
 
 
-            fig_total.update_layout(
+            fig_compare.add_trace(
+                go.Scatter(
+
+                    x=selected_share_df[
+                        "time_slot"
+                    ],
+
+                    y=selected_share_df[
+                        "share"
+                    ],
+
+                    mode="lines+markers",
+
+                    name=selected_age,
+
+                    line=dict(
+                        color="#D9A64A",
+                        width=4,
+                    ),
+
+                    marker=dict(
+                        size=8,
+                        color="#D9A64A",
+                    ),
+
+                    hovertemplate=(
+                        "<b>%{x}</b>"
+                        "<br>"
+                        f"{selected_age} 비중: "
+                        "%{y:.1f}%"
+                        "<extra></extra>"
+                    ),
+                )
+            )
+
+
+            fig_compare.update_layout(
 
                 height=520,
 
@@ -1504,38 +1754,35 @@ with st.container(
 
                 plot_bgcolor="#182035",
 
-                showlegend=False,
-
                 font=dict(
                     color="#E8EDF5",
                     size=12,
                 ),
 
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1,
+                    bgcolor="rgba(0,0,0,0)",
+                ),
+
                 xaxis=dict(
-
                     title="시간대",
-
                     showgrid=False,
-
                     tickangle=-35,
-
                     tickfont=dict(
                         color="#D7DEE9",
                     ),
                 ),
 
                 yaxis=dict(
-
-                    title="교통사고 건수(건)",
-
+                    title="사고 비중(%)",
                     showgrid=True,
-
                     gridcolor="#35405A",
-
                     zeroline=False,
-
-                    tickformat=",",
-
+                    ticksuffix="%",
                     tickfont=dict(
                         color="#D7DEE9",
                     ),
@@ -1544,10 +1791,8 @@ with st.container(
 
 
             st.plotly_chart(
-                fig_total,
-
+                fig_compare,
                 use_container_width=True,
-
                 config={
                     "displayModeBar": False
                 }
@@ -1701,192 +1946,182 @@ with st.container(
 
 
     # ========================================================
-    # AGE COMPARISON
+    # AUTOMATED INSIGHTS
     # ========================================================
 
+    selected_share_lookup = (
+        selected_share_df
+        .set_index(
+            "time_slot"
+        )[
+            "share"
+        ]
+        .to_dict()
+    )
+
+
+    overall_share_lookup = (
+        overall_share_df
+        .set_index(
+            "time_slot"
+        )[
+            "share"
+        ]
+        .to_dict()
+    )
+
+
+    share_gap_df = (
+        selected_share_df[
+            [
+                "time_slot",
+                "share",
+            ]
+        ]
+        .rename(
+            columns={
+                "share":
+                    "selected_share"
+            }
+        )
+        .merge(
+            overall_share_df[
+                [
+                    "time_slot",
+                    "share",
+                ]
+            ].rename(
+                columns={
+                    "share":
+                        "overall_share"
+                }
+            ),
+            on="time_slot",
+            how="left"
+        )
+    )
+
+
+    share_gap_df[
+        "gap"
+    ] = (
+        share_gap_df[
+            "selected_share"
+        ]
+        - share_gap_df[
+            "overall_share"
+        ]
+    )
+
+
+    if not share_gap_df.empty:
+
+        highest_gap_row = (
+            share_gap_df
+            .sort_values(
+                "gap",
+                ascending=False
+            )
+            .iloc[0]
+        )
+
+        highest_gap_time = str(
+            highest_gap_row[
+                "time_slot"
+            ]
+        )
+
+        highest_gap = float(
+            highest_gap_row[
+                "gap"
+            ]
+        )
+
+    else:
+
+        highest_gap_time = "-"
+        highest_gap = 0
+
+
     with st.container(
-        key="age_compare_panel"
+        key="insight_panel"
     ):
 
         st.html(
-            """
+            f"""
             <div class="panel-title">
-                시간대별 연령대 사고 비교
+                주요 분석 결과
             </div>
 
             <div class="panel-sub">
-                시간대마다 어떤 연령대의 사고 규모가 높은지 비교합니다.
-                확인할 시간대를 선택하세요.
+                선택한 연령대의 시간대별 사고 패턴을
+                자동으로 요약한 결과입니다.
+            </div>
+
+
+            <div class="insight-grid">
+
+                <div class="insight-card">
+
+                    <div class="insight-index">
+                        01
+                    </div>
+
+                    <div class="insight-title">
+                        사고 집중 시간
+                    </div>
+
+                    <div class="insight-body">
+                        {selected_age} 사고는
+                        <b>{peak_time}</b>에 가장 많이 발생했으며,
+                        사고건수는
+                        <b>{peak_accidents:,}건</b>입니다.
+                    </div>
+
+                </div>
+
+
+                <div class="insight-card">
+
+                    <div class="insight-index">
+                        02
+                    </div>
+
+                    <div class="insight-title">
+                        야간 사고
+                    </div>
+
+                    <div class="insight-body">
+                        00~06시 및 20~24시 사고는
+                        전체 {selected_age} 사고의
+                        <b>{night_ratio:.1f}%</b>입니다.
+                    </div>
+
+                </div>
+
+
+                <div class="insight-card">
+
+                    <div class="insight-index">
+                        03
+                    </div>
+
+                    <div class="insight-title">
+                        전체 연령과의 차이
+                    </div>
+
+                    <div class="insight-body">
+                        전체 연령 대비 {selected_age} 사고 비중이
+                        가장 크게 높은 시간대는
+                        <b>{highest_gap_time}</b>이며,
+                        차이는
+                        <b>{highest_gap:+.1f}%p</b>입니다.
+                    </div>
+
+                </div>
+
             </div>
             """
-        )
-
-
-        c1, empty = st.columns(
-            [
-                1,
-                4,
-            ]
-        )
-
-
-        with c1:
-
-            selected_time = st.selectbox(
-                "시간대",
-                TIME_ORDER,
-                key="driver_selected_time"
-            )
-
-
-        time_age_df = (
-            long_df[
-                long_df["time_slot"] == selected_time
-            ]
-            .copy()
-        )
-
-
-        time_age_df["age_order"] = (
-            time_age_df["age_group"]
-            .apply(age_sort_key)
-        )
-
-
-        time_age_df = (
-            time_age_df
-            .sort_values(
-                "age_order",
-                ascending=True
-            )
-        )
-
-
-        max_time_age = (
-            time_age_df["accidents"].max()
-            if not time_age_df.empty
-            else 1
-        )
-
-
-        if max_time_age <= 0:
-            max_time_age = 1
-
-
-        top_time_age = (
-            time_age_df
-            .sort_values(
-                "accidents",
-                ascending=False
-            )
-            .iloc[0]["age_group"]
-
-            if not time_age_df.empty
-
-            else "-"
-        )
-
-
-        fig_age_compare = go.Figure(
-            go.Bar(
-
-                x=time_age_df["accidents"],
-
-                y=time_age_df["age_group"],
-
-                orientation="h",
-
-                marker_color=[
-                    "#D9A64A"
-                    if age == top_time_age
-                    else "#79B69B"
-
-                    for age
-                    in time_age_df["age_group"]
-                ],
-
-                text=[
-                    f"{int(value):,}건"
-                    for value
-                    in time_age_df["accidents"]
-                ],
-
-                textposition="outside",
-
-                textfont=dict(
-                    color="#FFFFFF",
-                    size=11,
-                ),
-
-                cliponaxis=False,
-
-                hovertemplate=(
-                    "<b>%{y}</b>"
-                    "<br>"
-                    "사고: %{x:,}건"
-                    "<extra></extra>"
-                ),
-            )
-        )
-
-
-        fig_age_compare.update_layout(
-
-            height=520,
-
-            margin=dict(
-                l=90,
-                r=110,
-                t=40,
-                b=65,
-            ),
-
-            paper_bgcolor="#182035",
-
-            plot_bgcolor="#182035",
-
-            showlegend=False,
-
-            font=dict(
-                color="#E8EDF5",
-                size=12,
-            ),
-
-            xaxis=dict(
-
-                title="교통사고 건수(건)",
-
-                showgrid=True,
-
-                gridcolor="#35405A",
-
-                zeroline=False,
-
-                tickformat=",",
-
-                range=[
-                    0,
-                    max_time_age * 1.20
-                ],
-            ),
-
-            yaxis=dict(
-
-                title=None,
-
-                showgrid=False,
-            ),
-        )
-
-
-        st.plotly_chart(
-            fig_age_compare,
-
-            use_container_width=True,
-
-            config={
-                "displayModeBar": False
-            }
         )
 
 
@@ -1939,99 +2174,291 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "가해운전자 시간대별 사고 데이터 상세 보기"
+    if "show_driver_time_detail" not in st.session_state:
+
+        st.session_state[
+            "show_driver_time_detail"
+        ] = False
+
+
+    with st.container(
+        key="driver_time_detail_toggle"
     ):
 
-        detail_df = (
-            long_df[
-                [
-                    "age_group",
-                    "time_slot",
-                    "accidents",
-                ]
-            ]
-            .copy()
-        )
-
-
-        detail_df["age_order"] = (
-            detail_df["age_group"]
-            .apply(age_sort_key)
-        )
-
-
-        detail_df["time_order"] = (
-            detail_df["time_slot"]
-            .apply(
-                lambda x:
-                TIME_ORDER.index(x)
-                if x in TIME_ORDER
-                else 999
-            )
-        )
-
-
-        detail_df = (
-            detail_df
-            .sort_values(
-                [
-                    "age_order",
-                    "time_order",
-                ]
-            )
-            .drop(
-                columns=[
-                    "age_order",
-                    "time_order",
-                ]
-            )
-            .reset_index(drop=True)
-        )
-
-
-        detail_df.columns = [
-            "연령대",
-            "시간대",
-            "사고건수",
+        detail_open = st.session_state[
+            "show_driver_time_detail"
         ]
 
 
-        detail_df["사고건수"] = (
-            detail_df["사고건수"]
-            .round()
-            .astype(int)
+        detail_button_label = (
+            "▲ 연령별 교통사고 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 교통사고 데이터 상세 보기"
         )
 
 
-        st.dataframe(
+        if st.button(
+            detail_button_label,
+            key="driver_time_detail_button",
+            use_container_width=True
+        ):
 
-            detail_df,
+            st.session_state[
+                "show_driver_time_detail"
+            ] = (
+                not detail_open
+            )
 
-            use_container_width=True,
+            st.rerun()
 
-            hide_index=True,
 
-            height=420,
+    if st.session_state[
+        "show_driver_time_detail"
+    ]:
 
-            column_config={
+        with st.container(
+            key="driver_time_detail_panel"
+        ):
 
-                "연령대":
-                    st.column_config.TextColumn(
-                        "연령대",
-                        width="medium"
-                    ),
+            detail_df = (
+                long_df[
+                    [
+                        "age_group",
+                        "time_slot",
+                        "accidents",
+                    ]
+                ]
+                .copy()
+            )
 
-                "시간대":
-                    st.column_config.TextColumn(
-                        "시간대",
-                        width="medium"
-                    ),
 
-                "사고건수":
-                    st.column_config.NumberColumn(
-                        "사고건수",
-                        format="%d건"
-                    ),
-            }
-        )
+            detail_df[
+                "age_order"
+            ] = (
+                detail_df[
+                    "age_group"
+                ]
+                .apply(
+                    age_sort_key
+                )
+            )
+
+
+            detail_df[
+                "time_order"
+            ] = (
+                detail_df[
+                    "time_slot"
+                ]
+                .apply(
+                    lambda value:
+                        TIME_ORDER.index(
+                            value
+                        )
+                        if value in TIME_ORDER
+                        else 999
+                )
+            )
+
+
+            detail_df = (
+                detail_df
+                .sort_values(
+                    [
+                        "age_order",
+                        "time_order",
+                    ]
+                )
+                .drop(
+                    columns=[
+                        "age_order",
+                        "time_order",
+                    ]
+                )
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            detail_df.columns = [
+                "연령대",
+                "시간대",
+                "사고건수",
+            ]
+
+
+            detail_df[
+                "사고건수"
+            ] = (
+                detail_df[
+                    "사고건수"
+                ]
+                .round()
+                .astype(int)
+            )
+
+
+            display_df = (
+                detail_df
+                .copy()
+            )
+
+
+            display_df[
+                "사고건수"
+            ] = (
+                display_df[
+                    "사고건수"
+                ]
+                .map(
+                    lambda value:
+                        f"{int(value):,}건"
+                )
+            )
+
+
+            table_rows = ""
+
+
+            for _, row in display_df.iterrows():
+
+                senior_class = (
+                    "senior-row"
+                    if age_sort_key(
+                        row["연령대"]
+                    ) >= 65
+                    else ""
+                )
+
+
+                table_rows += f"""
+                    <tr class="{senior_class}">
+                        <td>{row["연령대"]}</td>
+                        <td>{row["시간대"]}</td>
+                        <td>{row["사고건수"]}</td>
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <style>
+
+                .driver-time-dark-table-wrap {{
+
+                    width: 100%;
+
+                    max-height: 520px;
+
+                    overflow-y: auto;
+
+                    overflow-x: auto;
+
+                    background: #182035;
+
+                    border: 1px solid #3A4662;
+
+                    border-radius: 12px;
+                }}
+
+
+                .driver-time-dark-table {{
+
+                    width: 100%;
+
+                    border-collapse: collapse;
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-size: 13px;
+                }}
+
+
+                .driver-time-dark-table thead {{
+
+                    position: sticky;
+
+                    top: 0;
+
+                    z-index: 2;
+                }}
+
+
+                .driver-time-dark-table th {{
+
+                    background: #202A42;
+
+                    color: #D6A348;
+
+                    font-weight: 900;
+
+                    text-align: center;
+
+                    padding: 14px 16px;
+
+                    border-bottom: 1px solid #4A5670;
+                }}
+
+
+                .driver-time-dark-table td {{
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-weight: 600;
+
+                    text-align: center;
+
+                    padding: 12px 16px;
+
+                    border-bottom: 1px solid #303B55;
+                }}
+
+
+                .driver-time-dark-table tbody tr:nth-child(even) td {{
+
+                    background: #1B243A;
+                }}
+
+
+                .driver-time-dark-table tbody tr.senior-row td {{
+
+                    color: #F1C66A;
+                }}
+
+
+                .driver-time-dark-table tbody tr:hover td {{
+
+                    background: #222D47;
+
+                    color: #FFFFFF;
+                }}
+
+                </style>
+
+
+                <div class="driver-time-dark-table-wrap">
+
+                    <table class="driver-time-dark-table">
+
+                        <thead>
+                            <tr>
+                                <th>연령대</th>
+                                <th>시간대</th>
+                                <th>사고건수</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {table_rows}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

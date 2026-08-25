@@ -71,9 +71,14 @@ def load_accident_region():
             sido,
             sigungu,
             year,
-            accidents
+            accidents,
+            deaths,
+            injuries
         FROM accident_region
-        ORDER BY year, sido, sigungu
+        ORDER BY
+            year,
+            sido,
+            sigungu
         """
     )
 
@@ -168,6 +173,44 @@ df["year"] = (
     df["year"]
     .astype(int)
 )
+
+
+# ============================================================
+# SEVERITY COLUMNS
+# ============================================================
+
+# accident_region 테이블의 실제 스키마에 맞춰 고정 사용
+death_col = "deaths"
+injury_col = "injuries"
+
+# 현재 원본 데이터에는 중상 / 경상 개별 컬럼이 없음
+serious_col = None
+minor_col = None
+
+severity_columns = [
+    death_col,
+    injury_col,
+]
+
+
+for column in [
+    "year",
+    "accidents",
+    "deaths",
+    "injuries",
+]:
+
+    df[column] = (
+        pd.to_numeric(
+            df[column],
+            errors="coerce"
+        )
+        .fillna(0)
+        .astype(int)
+    )
+
+
+has_severity_data = True
 
 
 # ============================================================
@@ -586,6 +629,8 @@ div[role="radiogroup"] label p {
 .st-key-rank_panel,
 .st-key-sigungu_panel,
 .st-key-trend_panel,
+.st-key-severity_panel,
+.st-key-severity_rate_panel,
 .st-key-predict_panel,
 .st-key-model_compare_panel {
 
@@ -834,38 +879,6 @@ div[role="radiogroup"] label p {
 }
 
 
-/* EXPANDER */
-
-[data-testid="stExpander"] {
-
-    background: #182035 !important;
-
-    border: 1px solid #46536F !important;
-
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-}
-
-
 /* PLOT */
 
 .js-plotly-plot .plotly .legendtext,
@@ -874,6 +887,109 @@ div[role="radiogroup"] label p {
 .js-plotly-plot .plotly .annotation-text {
 
     fill: #E8EDF5 !important;
+}
+
+
+/* SECTION DIVIDER */
+
+.section-divider {
+    height: 1px;
+    margin: 44px 0 8px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.95) 18%,
+        rgba(85,101,134,.9) 82%,
+        rgba(85,101,134,0)
+    );
+}
+
+
+/* SEVERITY KPI */
+
+.severity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.severity-card {
+    background: #121A2B;
+    border: 1px solid #394560;
+    border-radius: 16px;
+    padding: 18px 20px;
+}
+
+.severity-label {
+    color: #AEB8C8;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.severity-value {
+    color: #FFFFFF;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.severity-value.gold {
+    color: #F1C66A;
+}
+
+.severity-note {
+    margin-top: 14px;
+    color: #8E99AD;
+    font-size: 11px;
+    line-height: 1.7;
+}
+
+
+/* DETAIL TOGGLE */
+
+.st-key-region_total_detail_toggle button {
+    width: 100% !important;
+    min-height: 52px !important;
+    background: #182035 !important;
+    color: #E7EAF0 !important;
+    border: 1px solid #394560 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    justify-content: flex-start !important;
+    padding-left: 18px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-region_total_detail_toggle button * {
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-region_total_detail_toggle button:hover {
+    background: #202A42 !important;
+    border-color: #D6A348 !important;
+    color: #F1C66A !important;
+}
+
+.st-key-region_total_detail_toggle button:hover * {
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+.st-key-region_total_detail_panel {
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+    padding: 18px;
+    margin-top: 10px;
+}
+
+@media(max-width:1000px) {
+    .severity-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 </style>
@@ -1078,6 +1194,93 @@ with st.container(
     year_df = df[
         df["year"] == selected_year
     ].copy()
+
+
+    # ========================================================
+    # SEVERITY SUMMARY
+    # ========================================================
+
+    severity_group_columns = [
+        "sido_name",
+        "accidents",
+    ]
+
+    for column in severity_columns:
+
+        if column not in severity_group_columns:
+            severity_group_columns.append(column)
+
+
+    severity_year_df = (
+        year_df[
+            severity_group_columns
+        ]
+        .copy()
+    )
+
+
+    severity_agg = {
+        "accidents": "sum"
+    }
+
+    for column in severity_columns:
+        severity_agg[column] = "sum"
+
+
+    severity_sido_summary = (
+        severity_year_df
+        .groupby(
+            "sido_name",
+            as_index=False
+        )
+        .agg(
+            severity_agg
+        )
+    )
+
+
+    total_deaths = (
+        int(
+            severity_year_df[
+                death_col
+            ].sum()
+        )
+        if death_col is not None
+        else None
+    )
+
+
+    total_injuries = (
+        int(
+            severity_year_df[
+                injury_col
+            ].sum()
+        )
+        if injury_col is not None
+        else None
+    )
+
+
+    total_serious = (
+        int(
+            severity_year_df[
+                serious_col
+            ].sum()
+        )
+        if serious_col is not None
+        else None
+    )
+
+
+    total_minor = (
+        int(
+            severity_year_df[
+                minor_col
+            ].sum()
+        )
+        if minor_col is not None
+        else None
+    )
 
 
     sido_summary = (
@@ -1602,6 +1805,586 @@ with st.container(
 
 
     # ========================================================
+    # SEVERITY ANALYSIS
+    # ========================================================
+
+    if has_severity_data:
+
+        with st.container(
+            key="severity_panel"
+        ):
+
+            st.html(
+                f"""
+                <div class="panel-title">
+                    {selected_year}년 사고 심각도 분석
+                </div>
+
+                <div class="panel-sub">
+                    단순 사고건수뿐 아니라 사망·부상 인명피해를 함께 비교합니다.
+                </div>
+                """
+            )
+
+
+            fatality_per_100 = (
+                total_deaths
+                / national_total
+                * 100
+                if (
+                    total_deaths is not None
+                    and national_total > 0
+                )
+                else None
+            )
+
+
+            injury_per_accident = (
+                total_injuries
+                / national_total
+                if (
+                    total_injuries is not None
+                    and national_total > 0
+                )
+                else None
+            )
+
+
+            st.html(
+                f"""
+                <div class="severity-grid">
+
+                    <div class="severity-card">
+                        <div class="severity-label">
+                            사고건수
+                        </div>
+                        <div class="severity-value">
+                            {national_total:,}건
+                        </div>
+                    </div>
+
+                    <div class="severity-card">
+                        <div class="severity-label">
+                            사망자
+                        </div>
+                        <div class="severity-value">
+                            {
+                                f"{total_deaths:,}명"
+                                if total_deaths is not None
+                                else "-"
+                            }
+                        </div>
+                    </div>
+
+                    <div class="severity-card">
+                        <div class="severity-label">
+                            부상자
+                        </div>
+                        <div class="severity-value">
+                            {
+                                f"{total_injuries:,}명"
+                                if total_injuries is not None
+                                else "-"
+                            }
+                        </div>
+                    </div>
+
+                    <div class="severity-card">
+                        <div class="severity-label">
+                            사고 100건당 사망자
+                        </div>
+                        <div class="severity-value gold">
+                            {
+                                f"{fatality_per_100:.2f}명"
+                                if fatality_per_100 is not None
+                                else "-"
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="severity-note">
+                    ※ 사고 100건당 사망자 =
+                    사망자 수 ÷ 사고건수 × 100
+                </div>
+                """
+            )
+
+
+        if (
+            death_col is not None
+            or injury_col is not None
+        ):
+
+            with st.container(
+                key="severity_rate_panel"
+            ):
+
+                st.html(
+                    f"""
+                    <div class="panel-title">
+                        {selected_year}년 시도별 사고 심각도 비교
+                    </div>
+
+                    <div class="panel-sub">
+                        단순 사고건수와 별개로
+                        사고 100건당 사망자 수와
+                        사고 1건당 부상자 수를 비교합니다.
+                    </div>
+                    """
+                )
+
+
+                severity_rate_df = (
+                    severity_sido_summary
+                    .copy()
+                )
+
+
+                if death_col is not None:
+
+                    severity_rate_df[
+                        "fatality_per_100"
+                    ] = np.where(
+                        severity_rate_df[
+                            "accidents"
+                        ] > 0,
+
+                        severity_rate_df[
+                            death_col
+                        ]
+                        / severity_rate_df[
+                            "accidents"
+                        ]
+                        * 100,
+
+                        0
+                    )
+
+
+                if injury_col is not None:
+
+                    severity_rate_df[
+                        "injury_per_accident"
+                    ] = np.where(
+                        severity_rate_df[
+                            "accidents"
+                        ] > 0,
+
+                        severity_rate_df[
+                            injury_col
+                        ]
+                        / severity_rate_df[
+                            "accidents"
+                        ],
+
+                        0
+                    )
+
+
+                severity_left, severity_right = st.columns(
+                    2,
+                    gap="medium"
+                )
+
+
+                # --------------------------------------------
+                # 사망 심각도
+                # --------------------------------------------
+
+                with severity_left:
+
+                    if death_col is not None:
+
+                        fatality_df = (
+                            severity_rate_df
+                            .sort_values(
+                                "fatality_per_100",
+                                ascending=True
+                            )
+                            .copy()
+                        )
+
+
+                        max_fatality_rate = (
+                            float(
+                                fatality_df[
+                                    "fatality_per_100"
+                                ].max()
+                            )
+                            if not fatality_df.empty
+                            else 1
+                        )
+
+
+                        fig_fatality = go.Figure(
+                            go.Bar(
+
+                                x=fatality_df[
+                                    "fatality_per_100"
+                                ],
+
+                                y=fatality_df[
+                                    "sido_name"
+                                ],
+
+                                orientation="h",
+
+                                marker_color=[
+                                    "#D9A64A"
+                                    if value == max_fatality_rate
+                                    else "#79B69B"
+
+                                    for value
+                                    in fatality_df[
+                                        "fatality_per_100"
+                                    ]
+                                ],
+
+                                text=[
+                                    f"{value:.2f}명"
+                                    for value
+                                    in fatality_df[
+                                        "fatality_per_100"
+                                    ]
+                                ],
+
+                                textposition="outside",
+
+                                cliponaxis=False,
+
+                                hovertemplate=(
+                                    "<b>%{y}</b>"
+                                    "<br>"
+                                    "사고 100건당 사망자: "
+                                    "%{x:.2f}명"
+                                    "<extra></extra>"
+                                )
+                            )
+                        )
+
+
+                        fig_fatality.update_layout(
+
+                            title=dict(
+                                text="사고 100건당 사망자",
+                                font=dict(
+                                    color="#FFFFFF",
+                                    size=16
+                                )
+                            ),
+
+                            height=590,
+
+                            margin=dict(
+                                l=75,
+                                r=90,
+                                t=60,
+                                b=65
+                            ),
+
+                            paper_bgcolor="#182035",
+
+                            plot_bgcolor="#182035",
+
+                            showlegend=False,
+
+                            font=dict(
+                                color="#E8EDF5"
+                            ),
+
+                            xaxis=dict(
+                                title="사망자 수(명 / 사고 100건)",
+                                gridcolor="#35405A",
+                                range=[
+                                    0,
+                                    max(
+                                        max_fatality_rate * 1.30,
+                                        1
+                                    )
+                                ]
+                            ),
+
+                            yaxis=dict(
+                                title=None
+                            )
+                        )
+
+
+                        st.plotly_chart(
+                            fig_fatality,
+                            use_container_width=True,
+                            config={
+                                "displayModeBar": False
+                            }
+                        )
+
+                    else:
+
+                        st.info(
+                            "사망자 데이터가 없습니다."
+                        )
+
+
+                # --------------------------------------------
+                # 부상 심각도
+                # --------------------------------------------
+
+                with severity_right:
+
+                    if injury_col is not None:
+
+                        injury_rate_df = (
+                            severity_rate_df
+                            .sort_values(
+                                "injury_per_accident",
+                                ascending=True
+                            )
+                            .copy()
+                        )
+
+
+                        max_injury_rate = (
+                            float(
+                                injury_rate_df[
+                                    "injury_per_accident"
+                                ].max()
+                            )
+                            if not injury_rate_df.empty
+                            else 1
+                        )
+
+
+                        fig_injury = go.Figure(
+                            go.Bar(
+
+                                x=injury_rate_df[
+                                    "injury_per_accident"
+                                ],
+
+                                y=injury_rate_df[
+                                    "sido_name"
+                                ],
+
+                                orientation="h",
+
+                                marker_color=[
+                                    "#D9A64A"
+                                    if value == max_injury_rate
+                                    else "#8EA8C6"
+
+                                    for value
+                                    in injury_rate_df[
+                                        "injury_per_accident"
+                                    ]
+                                ],
+
+                                text=[
+                                    f"{value:.2f}명"
+                                    for value
+                                    in injury_rate_df[
+                                        "injury_per_accident"
+                                    ]
+                                ],
+
+                                textposition="outside",
+
+                                cliponaxis=False,
+
+                                hovertemplate=(
+                                    "<b>%{y}</b>"
+                                    "<br>"
+                                    "사고 1건당 부상자: "
+                                    "%{x:.2f}명"
+                                    "<extra></extra>"
+                                )
+                            )
+                        )
+
+
+                        fig_injury.update_layout(
+
+                            title=dict(
+                                text="사고 1건당 부상자",
+                                font=dict(
+                                    color="#FFFFFF",
+                                    size=16
+                                )
+                            ),
+
+                            height=590,
+
+                            margin=dict(
+                                l=75,
+                                r=90,
+                                t=60,
+                                b=65
+                            ),
+
+                            paper_bgcolor="#182035",
+
+                            plot_bgcolor="#182035",
+
+                            showlegend=False,
+
+                            font=dict(
+                                color="#E8EDF5"
+                            ),
+
+                            xaxis=dict(
+                                title="부상자 수(명 / 사고 1건)",
+                                gridcolor="#35405A",
+                                range=[
+                                    0,
+                                    max(
+                                        max_injury_rate * 1.30,
+                                        1
+                                    )
+                                ]
+                            ),
+
+                            yaxis=dict(
+                                title=None
+                            )
+                        )
+
+
+                        st.plotly_chart(
+                            fig_injury,
+                            use_container_width=True,
+                            config={
+                                "displayModeBar": False
+                            }
+                        )
+
+                    else:
+
+                        st.info(
+                            "부상자 데이터가 없습니다."
+                        )
+
+
+                # --------------------------------------------
+                # 자동 심각도 분석 문장
+                # --------------------------------------------
+
+                severity_analysis_lines = []
+
+
+                if death_col is not None:
+
+                    fatality_top_row = (
+                        severity_rate_df
+                        .sort_values(
+                            "fatality_per_100",
+                            ascending=False
+                        )
+                        .iloc[0]
+                    )
+
+                    severity_analysis_lines.append(
+                        f"""
+                        사고 100건당 사망자가 가장 많은 지역은
+                        <b>{fatality_top_row["sido_name"]}</b>으로
+                        <b>{fatality_top_row["fatality_per_100"]:.2f}명</b>입니다.
+                        """
+                    )
+
+
+                if injury_col is not None:
+
+                    injury_top_row = (
+                        severity_rate_df
+                        .sort_values(
+                            "injury_per_accident",
+                            ascending=False
+                        )
+                        .iloc[0]
+                    )
+
+                    severity_analysis_lines.append(
+                        f"""
+                        사고 1건당 부상자가 가장 많은 지역은
+                        <b>{injury_top_row["sido_name"]}</b>으로
+                        <b>{injury_top_row["injury_per_accident"]:.2f}명</b>입니다.
+                        """
+                    )
+
+
+                severity_analysis_html = (
+                    "<br><br>".join(
+                        severity_analysis_lines
+                    )
+                )
+
+
+                st.html(
+                    f"""
+                    <div class="analysis-box">
+
+                        <div class="analysis-title">
+                            {selected_year}년 사고 심각도 분석 요약
+                        </div>
+
+                        {severity_analysis_html}
+
+                        <br><br>
+
+                        ※ 사고건수가 많은 지역과
+                        사고 한 건의 피해 정도가 큰 지역은
+                        서로 다를 수 있으므로
+                        발생량과 심각도를 함께 확인하는 것이 중요합니다.
+
+                    </div>
+                    """
+                )
+
+
+        if (
+            serious_col is not None
+            or minor_col is not None
+        ):
+
+            serious_text = (
+                f"중상자 <b>{total_serious:,}명</b>"
+                if total_serious is not None
+                else ""
+            )
+
+            minor_text = (
+                f"경상자 <b>{total_minor:,}명</b>"
+                if total_minor is not None
+                else ""
+            )
+
+            separator = (
+                "<br>"
+                if serious_text and minor_text
+                else ""
+            )
+
+
+            st.html(
+                f"""
+                <div class="analysis-box">
+
+                    <div class="analysis-title">
+                        부상 심각도 구성
+                    </div>
+
+                    {serious_text}
+
+                    {separator}
+
+                    {minor_text}
+
+                </div>
+                """
+            )
+
+
+    # ========================================================
     # SIGUNGU + TREND
     # ========================================================
 
@@ -1888,6 +2671,13 @@ with st.container(
                     "displayModeBar": False
                 }
             )
+
+
+    st.html(
+        """
+        <div class="section-divider"></div>
+        """
+    )
 
 
     # ========================================================
@@ -2673,57 +3463,256 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "지역별 교통사고 데이터 상세 보기"
+    if "show_region_total_detail" not in st.session_state:
+
+        st.session_state[
+            "show_region_total_detail"
+        ] = False
+
+
+    with st.container(
+        key="region_total_detail_toggle"
     ):
 
-        detail_df = (
-            df[
-                [
-                    "year",
-                    "sido_name",
-                    "sigungu",
-                    "accidents"
-                ]
-            ]
-            .copy()
-            .sort_values(
-                [
-                    "year",
-                    "sido_name",
-                    "sigungu"
-                ],
-                ascending=[
-                    False,
-                    True,
-                    True
-                ]
-            )
-        )
-
-
-        detail_df.columns = [
-            "연도",
-            "시도",
-            "시군구",
-            "사고건수"
+        detail_open = st.session_state[
+            "show_region_total_detail"
         ]
 
 
-        detail_df[
-            "사고건수"
-        ] = (
-            detail_df[
-                "사고건수"
+        detail_button_label = (
+            "▲ 연령별 교통사고 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 교통사고 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_button_label,
+            key="region_total_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_region_total_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_region_total_detail"
+    ]:
+
+        with st.container(
+            key="region_total_detail_panel"
+        ):
+
+            detail_columns = [
+                "year",
+                "sido_name",
+                "sigungu",
+                "accidents",
             ]
-            .round()
-            .astype(int)
-        )
 
 
-        st.dataframe(
-            detail_df,
-            use_container_width=True,
-            hide_index=True,
-            height=460
-        )
+            for column in severity_columns:
+
+                if column not in detail_columns:
+                    detail_columns.append(column)
+
+
+            detail_df = (
+                df[
+                    detail_columns
+                ]
+                .copy()
+                .sort_values(
+                    [
+                        "year",
+                        "sido_name",
+                        "sigungu",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        True,
+                    ]
+                )
+                .reset_index(drop=True)
+            )
+
+
+            rename_map = {
+                "year": "연도",
+                "sido_name": "시도",
+                "sigungu": "시군구",
+                "accidents": "사고건수",
+            }
+
+
+            if death_col is not None:
+                rename_map[death_col] = "사망자"
+
+            if injury_col is not None:
+                rename_map[injury_col] = "부상자"
+
+            if serious_col is not None:
+                rename_map[serious_col] = "중상자"
+
+            if minor_col is not None:
+                rename_map[minor_col] = "경상자"
+
+
+            detail_df = (
+                detail_df
+                .rename(
+                    columns=rename_map
+                )
+            )
+
+
+            detail_df["연도"] = (
+                detail_df["연도"]
+                .astype(int)
+                .astype(str)
+                + "년"
+            )
+
+
+            numeric_labels = [
+                "사고건수",
+                "사망자",
+                "부상자",
+                "중상자",
+                "경상자",
+            ]
+
+
+            for label in numeric_labels:
+
+                if label in detail_df.columns:
+
+                    suffix = (
+                        "건"
+                        if label == "사고건수"
+                        else "명"
+                    )
+
+                    detail_df[label] = (
+                        pd.to_numeric(
+                            detail_df[label],
+                            errors="coerce"
+                        )
+                        .fillna(0)
+                        .round()
+                        .astype(int)
+                        .map(
+                            lambda value,
+                            suffix=suffix:
+                                f"{value:,}{suffix}"
+                        )
+                    )
+
+
+            headers = "".join(
+                f"<th>{column}</th>"
+                for column
+                in detail_df.columns
+            )
+
+
+            table_rows = ""
+
+
+            for _, row in detail_df.iterrows():
+
+                cells = "".join(
+                    f"<td>{row[column]}</td>"
+                    for column
+                    in detail_df.columns
+                )
+
+                table_rows += (
+                    f"<tr>{cells}</tr>"
+                )
+
+
+            st.html(
+                f"""
+                <style>
+
+                .region-total-dark-table-wrap {{
+                    width: 100%;
+                    max-height: 560px;
+                    overflow-y: auto;
+                    overflow-x: auto;
+                    background: #182035;
+                    border: 1px solid #3A4662;
+                    border-radius: 12px;
+                }}
+
+                .region-total-dark-table {{
+                    width: 100%;
+                    min-width: 850px;
+                    border-collapse: collapse;
+                    background: #182035;
+                    color: #E7EAF0;
+                    font-size: 13px;
+                }}
+
+                .region-total-dark-table thead {{
+                    position: sticky;
+                    top: 0;
+                    z-index: 2;
+                }}
+
+                .region-total-dark-table th {{
+                    background: #202A42;
+                    color: #D6A348;
+                    font-weight: 900;
+                    text-align: center;
+                    padding: 14px 16px;
+                    border-bottom: 1px solid #4A5670;
+                    white-space: nowrap;
+                }}
+
+                .region-total-dark-table td {{
+                    background: #182035;
+                    color: #E7EAF0;
+                    font-weight: 600;
+                    text-align: center;
+                    padding: 12px 16px;
+                    border-bottom: 1px solid #303B55;
+                    white-space: nowrap;
+                }}
+
+                .region-total-dark-table tbody tr:nth-child(even) td {{
+                    background: #1B243A;
+                }}
+
+                .region-total-dark-table tbody tr:hover td {{
+                    background: #222D47;
+                    color: #FFFFFF;
+                }}
+
+                </style>
+
+                <div class="region-total-dark-table-wrap">
+
+                    <table class="region-total-dark-table">
+
+                        <thead>
+                            <tr>
+                                {headers}
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {table_rows}
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

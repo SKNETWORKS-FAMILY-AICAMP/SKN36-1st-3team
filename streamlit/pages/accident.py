@@ -159,6 +159,213 @@ def load_table(table_name: str):
     return df
 
 
+
+# ============================================================
+# SENIOR POPULATION / LICENSE DATA
+# ============================================================
+
+@st.cache_data(ttl=600)
+def load_senior_compare_data():
+
+    engine = get_engine()
+
+    population_query = text(
+        """
+        SELECT
+            region,
+            year,
+            gender,
+            age_group,
+            population
+        FROM age_population
+        """
+    )
+
+    license_query = text(
+        """
+        SELECT *
+        FROM license_holder_age
+        """
+    )
+
+    with engine.connect() as conn:
+
+        population_df = pd.read_sql(
+            population_query,
+            conn,
+        )
+
+        license_df = pd.read_sql(
+            license_query,
+            conn,
+        )
+
+    population_df.columns = (
+        population_df.columns
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+
+    license_df.columns = (
+        license_df.columns
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+
+    return population_df, license_df
+
+
+def find_column(
+    df: pd.DataFrame,
+    candidates: list[str],
+):
+
+    for column in candidates:
+
+        if column in df.columns:
+            return column
+
+    return None
+
+
+def parse_age_range(
+    value,
+):
+
+    """
+    연령 문자열을 (최소연령, 최대연령) 형태로 변환합니다.
+
+    예)
+    65        -> (65, 65)
+    65세      -> (65, 65)
+    60~69세   -> (60, 69)
+    65세 이상 -> (65, None)
+    """
+
+    import re
+
+    text_value = str(
+        value
+    ).strip()
+
+    numbers = [
+        int(number)
+        for number
+        in re.findall(
+            r"\d+",
+            text_value,
+        )
+    ]
+
+    if not numbers:
+        return None, None
+
+    if (
+        "이상"
+        in text_value
+    ):
+
+        return (
+            numbers[0],
+            None,
+        )
+
+    if len(numbers) >= 2:
+
+        return (
+            numbers[0],
+            numbers[1],
+        )
+
+    return (
+        numbers[0],
+        numbers[0],
+    )
+
+
+def population_65_weight(
+    age_value,
+):
+
+    """
+    65세 이상 인구 계산용 가중치입니다.
+
+    age_population이 60~69세처럼 구간으로 제공되는 경우
+    65~69세에 해당하는 비율만 추정하여 반영합니다.
+
+    예)
+    60~69세 -> 5 / 10 = 0.5
+    70~79세 -> 1.0
+    50~59세 -> 0.0
+    """
+
+    minimum_age, maximum_age = (
+        parse_age_range(
+            age_value
+        )
+    )
+
+    if minimum_age is None:
+        return 0.0
+
+    if maximum_age is None:
+
+        return (
+            1.0
+            if minimum_age >= 65
+            else 0.0
+        )
+
+    if maximum_age < 65:
+        return 0.0
+
+    if minimum_age >= 65:
+        return 1.0
+
+    total_ages = (
+        maximum_age
+        - minimum_age
+        + 1
+    )
+
+    senior_ages = (
+        maximum_age
+        - 65
+        + 1
+    )
+
+    if total_ages <= 0:
+        return 0.0
+
+    return max(
+        0.0,
+        min(
+            senior_ages
+            / total_ages,
+            1.0,
+        ),
+    )
+
+
+def is_license_age_65_plus(
+    age_value,
+):
+
+    minimum_age, maximum_age = (
+        parse_age_range(
+            age_value
+        )
+    )
+
+    if minimum_age is None:
+        return False
+
+    return minimum_age >= 65
+
+
+
 # ============================================================
 # DB STATUS
 # ============================================================
@@ -549,6 +756,228 @@ footer {
     margin-top: 23px;
 }
 
+
+
+/* ==========================================================
+   SENIOR POPULATION · LICENSE COMPARISON
+========================================================== */
+
+.st-key-senior_license_compare {
+
+    background:
+        #182035;
+
+    border:
+        1px solid
+        #3A4662;
+
+    border-radius:
+        22px;
+
+    padding:
+        22px
+        24px
+        24px
+        24px;
+
+    margin-top:
+        8px;
+
+    margin-bottom:
+        28px;
+}
+
+
+.senior-compare-title {
+
+    color:
+        #FFFFFF;
+
+    font-size:
+        20px;
+
+    font-weight:
+        900;
+
+    margin-bottom:
+        7px;
+}
+
+
+.senior-compare-sub {
+
+    color:
+        #98A3B7;
+
+    font-size:
+        12px;
+
+    line-height:
+        1.65;
+
+    margin-bottom:
+        20px;
+}
+
+
+.senior-compare-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap:
+        14px;
+
+    margin-bottom:
+        20px;
+}
+
+
+.senior-compare-card {
+
+    background:
+        #131B2E;
+
+    border:
+        1px solid
+        #394560;
+
+    border-radius:
+        15px;
+
+    padding:
+        17px
+        19px;
+}
+
+
+.senior-compare-label {
+
+    color:
+        #A8B1C1;
+
+    font-size:
+        11px;
+
+    margin-bottom:
+        10px;
+}
+
+
+.senior-compare-value {
+
+    color:
+        #FFFFFF;
+
+    font-size:
+        24px;
+
+    font-weight:
+        900;
+}
+
+
+.senior-compare-value.gold {
+
+    color:
+        #F1C66A;
+}
+
+
+.senior-progress-head {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    color:
+        #DCE3ED;
+
+    font-size:
+        12px;
+
+    font-weight:
+        700;
+
+    margin-bottom:
+        8px;
+}
+
+
+.senior-progress-track {
+
+    width:
+        100%;
+
+    height:
+        14px;
+
+    background:
+        #0F1726;
+
+    border:
+        1px solid
+        #35415A;
+
+    border-radius:
+        999px;
+
+    overflow:
+        hidden;
+}
+
+
+.senior-progress-fill {
+
+    height:
+        100%;
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #8E7656 0%,
+            #D6A348 100%
+        );
+}
+
+
+.senior-compare-note {
+
+    margin-top:
+        13px;
+
+    color:
+        #7F8A9F;
+
+    font-size:
+        10px;
+
+    line-height:
+        1.6;
+}
+
+
+@media(max-width:900px) {
+
+    .senior-compare-grid {
+
+        grid-template-columns:
+            1fr;
+    }
+}
+
+
 </style>
 """
 )
@@ -678,6 +1107,548 @@ with st.container(
         </div>
         """
     )
+
+
+    # ========================================================
+    # 65+ POPULATION · LICENSE COMPARISON
+    # ========================================================
+
+    try:
+
+        senior_population_df, senior_license_df = (
+            load_senior_compare_data()
+        )
+
+
+        # ----------------------------------------------------
+        # POPULATION CLEAN
+        # ----------------------------------------------------
+
+        senior_population_df[
+            "year"
+        ] = pd.to_numeric(
+            senior_population_df[
+                "year"
+            ],
+            errors="coerce",
+        )
+
+
+        senior_population_df[
+            "population"
+        ] = pd.to_numeric(
+            senior_population_df[
+                "population"
+            ],
+            errors="coerce",
+        ).fillna(0)
+
+
+        senior_population_df[
+            "region"
+        ] = (
+            senior_population_df[
+                "region"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
+
+
+        senior_population_df[
+            "gender"
+        ] = (
+            senior_population_df[
+                "gender"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
+
+
+        senior_population_df[
+            "age_group"
+        ] = (
+            senior_population_df[
+                "age_group"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
+
+
+        senior_population_df = (
+            senior_population_df[
+                senior_population_df[
+                    "year"
+                ].notna()
+            ]
+            .copy()
+        )
+
+
+        senior_population_df[
+            "year"
+        ] = (
+            senior_population_df[
+                "year"
+            ]
+            .astype(int)
+        )
+
+
+        # ----------------------------------------------------
+        # LICENSE COLUMN FIND
+        # ----------------------------------------------------
+
+        license_year_col = find_column(
+            senior_license_df,
+            [
+                "year",
+                "base_year",
+            ],
+        )
+
+
+        license_age_col = find_column(
+            senior_license_df,
+            [
+                "age_group",
+                "age",
+                "age_range",
+            ],
+        )
+
+
+        license_count_col = find_column(
+            senior_license_df,
+            [
+                "count",
+                "license_count",
+                "holders",
+                "holder_count",
+            ],
+        )
+
+
+        if (
+            license_year_col is None
+            or license_age_col is None
+            or license_count_col is None
+        ):
+
+            raise ValueError(
+                "license_holder_age 테이블에서 "
+                "연도·연령·면허 소지자 수 컬럼을 찾을 수 없습니다."
+            )
+
+
+        senior_license_df[
+            license_year_col
+        ] = pd.to_numeric(
+            senior_license_df[
+                license_year_col
+            ],
+            errors="coerce",
+        )
+
+
+        senior_license_df[
+            license_count_col
+        ] = pd.to_numeric(
+            senior_license_df[
+                license_count_col
+            ],
+            errors="coerce",
+        ).fillna(0)
+
+
+        senior_license_df[
+            license_age_col
+        ] = (
+            senior_license_df[
+                license_age_col
+            ]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+        )
+
+
+        senior_license_df = (
+            senior_license_df[
+                senior_license_df[
+                    license_year_col
+                ].notna()
+            ]
+            .copy()
+        )
+
+
+        senior_license_df[
+            license_year_col
+        ] = (
+            senior_license_df[
+                license_year_col
+            ]
+            .astype(int)
+        )
+
+
+        # ----------------------------------------------------
+        # YEAR MATCH
+        #
+        # 우선 동일 연도를 찾고,
+        # 공통 연도가 없으면 각 데이터의 최신 연도를 사용
+        # ----------------------------------------------------
+
+        population_years = sorted(
+            senior_population_df[
+                "year"
+            ]
+            .unique()
+            .tolist()
+        )
+
+
+        license_years = sorted(
+            senior_license_df[
+                license_year_col
+            ]
+            .unique()
+            .tolist()
+        )
+
+
+        common_years = sorted(
+            set(
+                population_years
+            )
+            &
+            set(
+                license_years
+            )
+        )
+
+
+        if common_years:
+
+            population_compare_year = (
+                common_years[-1]
+            )
+
+            license_compare_year = (
+                common_years[-1]
+            )
+
+            same_year = True
+
+
+        else:
+
+            population_compare_year = (
+                population_years[-1]
+                if population_years
+                else None
+            )
+
+            license_compare_year = (
+                license_years[-1]
+                if license_years
+                else None
+            )
+
+            same_year = False
+
+
+        # ----------------------------------------------------
+        # POPULATION YEAR FILTER
+        # ----------------------------------------------------
+
+        population_compare_df = (
+            senior_population_df[
+                senior_population_df[
+                    "year"
+                ]
+                == population_compare_year
+            ]
+            .copy()
+        )
+
+
+        # 성별 계가 있으면 계만 사용
+        if (
+            "계"
+            in population_compare_df[
+                "gender"
+            ].unique()
+        ):
+
+            population_compare_df = (
+                population_compare_df[
+                    population_compare_df[
+                        "gender"
+                    ] == "계"
+                ]
+                .copy()
+            )
+
+
+        # 전국/합계 행과 지역별 행의 중복 합산 방지
+        regional_population_df = (
+            population_compare_df[
+                ~population_compare_df[
+                    "region"
+                ].isin(
+                    [
+                        "",
+                        "전국",
+                        "계",
+                        "합계",
+                        "총계",
+                    ]
+                )
+            ]
+            .copy()
+        )
+
+
+        if not regional_population_df.empty:
+
+            population_compare_df = (
+                regional_population_df
+            )
+
+
+        # ----------------------------------------------------
+        # 65+ POPULATION
+        # ----------------------------------------------------
+
+        population_compare_df[
+            "senior_weight"
+        ] = (
+            population_compare_df[
+                "age_group"
+            ]
+            .apply(
+                population_65_weight
+            )
+        )
+
+
+        senior_population_65 = int(
+            round(
+                (
+                    population_compare_df[
+                        "population"
+                    ]
+                    *
+                    population_compare_df[
+                        "senior_weight"
+                    ]
+                )
+                .sum()
+            )
+        )
+
+
+        # ----------------------------------------------------
+        # 65+ LICENSE HOLDERS
+        # ----------------------------------------------------
+
+        license_compare_df = (
+            senior_license_df[
+                senior_license_df[
+                    license_year_col
+                ]
+                == license_compare_year
+            ]
+            .copy()
+        )
+
+
+        license_compare_df[
+            "is_65_plus"
+        ] = (
+            license_compare_df[
+                license_age_col
+            ]
+            .apply(
+                is_license_age_65_plus
+            )
+        )
+
+
+        senior_license_65 = int(
+            license_compare_df.loc[
+                license_compare_df[
+                    "is_65_plus"
+                ],
+                license_count_col,
+            ]
+            .sum()
+        )
+
+
+        # ----------------------------------------------------
+        # RATIO
+        # ----------------------------------------------------
+
+        senior_license_ratio = (
+            senior_license_65
+            / senior_population_65
+            * 100
+
+            if senior_population_65 > 0
+
+            else 0
+        )
+
+
+        progress_width = max(
+            0,
+            min(
+                senior_license_ratio,
+                100,
+            ),
+        )
+
+
+        # ----------------------------------------------------
+        # LABEL
+        # ----------------------------------------------------
+
+        if same_year:
+
+            compare_year_text = (
+                f"{population_compare_year}년 기준"
+            )
+
+        else:
+
+            compare_year_text = (
+                f"인구 {population_compare_year}년 · "
+                f"면허 {license_compare_year}년 기준"
+            )
+
+
+        # ----------------------------------------------------
+        # PANEL
+        # ----------------------------------------------------
+
+        with st.container(
+            key="senior_license_compare"
+        ):
+
+            st.html(
+                f"""
+                <div class="senior-compare-title">
+                    65세 이상 인구 · 운전면허 보유 비교
+                </div>
+
+                <div class="senior-compare-sub">
+                    {compare_year_text} 전체 고령 인구와
+                    65세 이상 운전면허 소지자 규모를 비교합니다.
+                </div>
+
+
+                <div class="senior-compare-grid">
+
+                    <div class="senior-compare-card">
+
+                        <div class="senior-compare-label">
+                            65세 이상 전체 인구
+                        </div>
+
+                        <div class="senior-compare-value">
+                            {senior_population_65:,}명
+                        </div>
+
+                    </div>
+
+
+                    <div class="senior-compare-card">
+
+                        <div class="senior-compare-label">
+                            65세 이상 면허 소지자
+                        </div>
+
+                        <div class="senior-compare-value">
+                            {senior_license_65:,}명
+                        </div>
+
+                    </div>
+
+
+                    <div class="senior-compare-card">
+
+                        <div class="senior-compare-label">
+                            고령 인구 대비 면허 보유 비율
+                        </div>
+
+                        <div class="senior-compare-value gold">
+                            {senior_license_ratio:.1f}%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="senior-progress-head">
+
+                    <span>
+                        65세 이상 인구 대비 면허 보유 수준
+                    </span>
+
+                    <span>
+                        {senior_license_ratio:.1f}%
+                    </span>
+
+                </div>
+
+
+                <div class="senior-progress-track">
+
+                    <div
+                        class="senior-progress-fill"
+                        style="width:{progress_width:.1f}%;">
+                    </div>
+
+                </div>
+
+
+                <div class="senior-compare-note">
+                    ※ 인구 원자료가 10세 단위 연령 구간으로 제공되는 경우
+                    60~69세 구간 중 65~69세 인구는 구간 내 균등 분포를 가정한
+                    추정값을 사용합니다.
+                </div>
+                """
+            )
+
+
+        if (
+            not same_year
+            and population_compare_year is not None
+            and license_compare_year is not None
+        ):
+
+            st.info(
+                "인구 데이터와 면허 데이터에 동일한 연도가 없어 "
+                f"인구 {population_compare_year}년, "
+                f"면허 {license_compare_year}년 최신 자료를 비교합니다."
+            )
+
+
+    except Exception as e:
+
+        st.warning(
+            f"65세 이상 인구·면허 비교 데이터를 불러오지 못했습니다: {e}"
+        )
+
 
 
     # ========================================================

@@ -988,36 +988,81 @@ div[data-baseweb="select"] span {
 }
 
 
+
 /* ==========================================================
-   EXPANDER
+   DETAIL TOGGLE BUTTON
 ========================================================== */
 
-[data-testid="stExpander"] {
+.st-key-region_detail_toggle button {
 
-    background:
-        #182035;
+    width: 100% !important;
 
-    border:
-        1px solid
-        #394560;
+    min-height: 52px !important;
 
-    border-radius:
-        14px;
+    background: #182035 !important;
+
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
 }
 
 
-[data-testid="stExpander"] summary {
+.st-key-region_detail_toggle button * {
 
-    color:
-        #E7EAF0 !important;
+    color: #E7EAF0 !important;
 
-    font-size:
-        14px !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
 
-    font-weight:
-        600 !important;
+    opacity: 1 !important;
 }
 
+
+.st-key-region_detail_toggle button:hover {
+
+    background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
+}
+
+
+.st-key-region_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   DETAIL TABLE PANEL
+========================================================== */
+
+.st-key-region_detail_panel {
+
+    background: #182035;
+
+    border: 1px solid #394560;
+
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
+}
 
 /* ==========================================================
    RESPONSIVE
@@ -2362,119 +2407,333 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "지역별 자동차 등록 데이터 상세 보기"
+    # --------------------------------------------------------
+    # DETAIL STATE
+    # --------------------------------------------------------
+
+    if "show_registration_region_detail" not in st.session_state:
+
+        st.session_state[
+            "show_registration_region_detail"
+        ] = False
+
+
+    # --------------------------------------------------------
+    # DETAIL TOGGLE
+    # --------------------------------------------------------
+
+    with st.container(
+        key="region_detail_toggle"
     ):
 
-        table_df = (
-            ranking_df[
-                [
-                    "short_name",
-                    count_col,
-                ]
-            ]
-            .copy()
+        detail_open = st.session_state[
+            "show_registration_region_detail"
+        ]
+
+
+        detail_button_label = (
+            "▲ 지역별 자동차 등록 데이터 닫기"
+            if detail_open
+            else "▼ 지역별 자동차 등록 데이터 상세 보기"
         )
 
 
-        # ====================================================
-        # SHARE
-        # ====================================================
+        if st.button(
+            detail_button_label,
+            key="registration_region_detail_button",
+            use_container_width=True
+        ):
 
-        if total_count > 0:
+            st.session_state[
+                "show_registration_region_detail"
+            ] = (
+                not detail_open
+            )
+
+            st.rerun()
+
+
+    # --------------------------------------------------------
+    # DETAIL CONTENT
+    # --------------------------------------------------------
+
+    if st.session_state[
+        "show_registration_region_detail"
+    ]:
+
+        with st.container(
+            key="region_detail_panel"
+        ):
+
+            table_df = (
+                ranking_df[
+                    [
+                        "short_name",
+                        count_col,
+                    ]
+                ]
+                .copy()
+            )
+
+
+            # ====================================================
+            # SHARE
+            # ====================================================
+
+            if total_count > 0:
+
+                table_df[
+                    "share"
+                ] = (
+                    table_df[
+                        count_col
+                    ]
+                    / total_count
+                    * 100
+                )
+
+            else:
+
+                table_df[
+                    "share"
+                ] = 0
+
+
+            # ====================================================
+            # SORT
+            # ====================================================
+
+            table_df = (
+                table_df
+
+                .sort_values(
+                    count_col,
+                    ascending=False
+                )
+
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            # ====================================================
+            # FORMAT
+            # ====================================================
+
+            table_df[
+                count_col
+            ] = (
+                table_df[
+                    count_col
+                ]
+                .round()
+                .astype(int)
+            )
+
 
             table_df[
                 "share"
             ] = (
                 table_df[
-                    count_col
+                    "share"
                 ]
-                / total_count
-                * 100
+                .round(1)
             )
 
-        else:
 
-            table_df[
-                "share"
-            ] = 0
-
-
-        # ====================================================
-        # SORT
-        # ====================================================
-
-        table_df = (
-            table_df
-
-            .sort_values(
-                count_col,
-                ascending=False
-            )
-
-            .reset_index(
-                drop=True
-            )
-        )
-
-
-        # ====================================================
-        # FORMAT
-        # ====================================================
-
-        table_df[
-            count_col
-        ] = (
-            table_df[
-                count_col
+            table_df.columns = [
+                "지역",
+                "자동차 등록대수",
+                "전국 비중",
             ]
-            .round()
-            .astype(int)
-        )
 
 
-        table_df[
-            "share"
-        ] = (
-            table_df[
-                "share"
-            ]
-            .round(1)
-        )
+            display_df = (
+                table_df
+                .copy()
+            )
 
 
-        table_df.columns = [
-            "지역",
-            "자동차 등록대수",
-            "전국 비중",
-        ]
+            display_df[
+                "자동차 등록대수"
+            ] = (
+                display_df[
+                    "자동차 등록대수"
+                ]
+                .map(
+                    lambda value:
+                        f"{int(value):,}대"
+                )
+            )
 
 
-        st.dataframe(
+            display_df[
+                "전국 비중"
+            ] = (
+                display_df[
+                    "전국 비중"
+                ]
+                .map(
+                    lambda value:
+                        f"{value:.1f}%"
+                )
+            )
 
-            table_df,
 
-            use_container_width=True,
+            table_rows = ""
 
-            hide_index=True,
 
-            column_config={
+            for _, row in display_df.iterrows():
 
-                "지역":
-                    st.column_config.TextColumn(
-                        "지역"
-                    ),
+                table_rows += f"""
+                    <tr>
 
-                "자동차 등록대수":
-                    st.column_config.NumberColumn(
-                        "자동차 등록대수",
-                        format="%d대"
-                    ),
+                        <td>
+                            {row["지역"]}
+                        </td>
 
-                "전국 비중":
-                    st.column_config.NumberColumn(
-                        "전국 비중",
-                        format="%.1f%%"
-                    ),
-            },
-        )
+                        <td>
+                            {row["자동차 등록대수"]}
+                        </td>
+
+                        <td>
+                            {row["전국 비중"]}
+                        </td>
+
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <style>
+
+                .region-dark-table-wrap {{
+
+                    width: 100%;
+
+                    overflow-x: auto;
+
+                    background: #182035;
+
+                    border: 1px solid #3A4662;
+
+                    border-radius: 12px;
+                }}
+
+
+                .region-dark-table {{
+
+                    width: 100%;
+
+                    border-collapse: collapse;
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-size: 13px;
+                }}
+
+
+                .region-dark-table thead {{
+
+                    background: #202A42;
+                }}
+
+
+                .region-dark-table th {{
+
+                    background: #202A42;
+
+                    color: #D6A348;
+
+                    font-weight: 900;
+
+                    text-align: center;
+
+                    padding: 14px 16px;
+
+                    border-bottom: 1px solid #4A5670;
+
+                    white-space: nowrap;
+                }}
+
+
+                .region-dark-table td {{
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-weight: 600;
+
+                    text-align: center;
+
+                    padding: 13px 16px;
+
+                    border-bottom: 1px solid #303B55;
+
+                    white-space: nowrap;
+                }}
+
+
+                .region-dark-table tbody tr:nth-child(even) td {{
+
+                    background: #1B243A;
+                }}
+
+
+                .region-dark-table tbody tr:hover td {{
+
+                    background: #222D47;
+
+                    color: #FFFFFF;
+                }}
+
+
+                .region-dark-table tbody tr:last-child td {{
+
+                    border-bottom: none;
+                }}
+
+                </style>
+
+
+                <div class="region-dark-table-wrap">
+
+                    <table class="region-dark-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    지역
+                                </th>
+
+                                <th>
+                                    자동차 등록대수
+                                </th>
+
+                                <th>
+                                    전국 비중
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {table_rows}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

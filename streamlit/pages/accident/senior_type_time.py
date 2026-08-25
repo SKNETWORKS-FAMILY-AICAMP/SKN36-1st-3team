@@ -853,40 +853,6 @@ div[role="radiogroup"] label p {
 
 
 /* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background: #182035 !important;
-
-    border: 1px solid #46536F !important;
-
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-}
-
-
-/* ==========================================================
    PLOT
 ========================================================== */
 
@@ -897,6 +863,105 @@ div[role="radiogroup"] label p {
 
     fill: #E8EDF5 !important;
 }
+
+
+
+/* ==========================================================
+   ANALYSIS / PREDICTION DIVIDER
+========================================================== */
+
+.section-divider {
+
+    height: 1px;
+
+    margin: 46px 0 4px 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(217,166,74,0),
+            rgba(217,166,74,.95) 18%,
+            rgba(85,101,134,.9) 82%,
+            rgba(85,101,134,0)
+        );
+}
+
+
+/* ==========================================================
+   DETAIL TOGGLE BUTTON
+========================================================== */
+
+.st-key-senior_type_detail_toggle button {
+
+    width: 100% !important;
+
+    min-height: 52px !important;
+
+    background: #182035 !important;
+
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
+}
+
+
+.st-key-senior_type_detail_toggle button * {
+
+    color: #E7EAF0 !important;
+
+    -webkit-text-fill-color: #E7EAF0 !important;
+
+    opacity: 1 !important;
+}
+
+
+.st-key-senior_type_detail_toggle button:hover {
+
+    background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
+}
+
+
+.st-key-senior_type_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   DETAIL TABLE PANEL
+========================================================== */
+
+.st-key-senior_type_detail_panel {
+
+    background: #182035;
+
+    border: 1px solid #394560;
+
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
+}
+
 
 </style>
 """
@@ -1052,11 +1117,17 @@ with st.container(
 
 
     # ========================================================
-    # FILTER 1
+    # FILTER
     # ========================================================
 
-    f1, f2, f3, empty = st.columns(
-        [1, 1.3, 1.3, 1.4]
+    f1, f2, f3, f4 = st.columns(
+        [
+            1,
+            1.3,
+            1.3,
+            1.3,
+        ],
+        gap="medium"
     )
 
 
@@ -1147,11 +1218,6 @@ with st.container(
             .tolist()
             if value not in INVALID_VALUES
         ]
-    )
-
-
-    f4, empty2 = st.columns(
-        [1, 4]
     )
 
 
@@ -2109,6 +2175,8 @@ with st.container(
 
     st.html(
         """
+        <div class="section-divider"></div>
+
         <div class="section-heading">
             예측
         </div>
@@ -3040,104 +3108,298 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "고령운전자 사고유형·시간대 데이터 상세 보기"
+    # --------------------------------------------------------
+    # DETAIL STATE
+    # --------------------------------------------------------
+
+    if "show_senior_type_detail" not in st.session_state:
+
+        st.session_state[
+            "show_senior_type_detail"
+        ] = False
+
+
+    # --------------------------------------------------------
+    # DETAIL TOGGLE
+    # --------------------------------------------------------
+
+    with st.container(
+        key="senior_type_detail_toggle"
     ):
 
-        detail_df = (
-            df[
-                [
-                    "year",
-                    "accident_type_main",
-                    "accident_type_middle",
-                    "accident_type_sub",
-                    "time_slot",
-                    "accidents"
-                ]
-            ]
-            .copy()
-            .sort_values(
-                [
-                    "year",
-                    "accident_type_main",
-                    "accident_type_middle",
-                    "accident_type_sub",
-                    "time_slot"
-                ],
-                ascending=[
-                    False,
-                    True,
-                    True,
-                    True,
-                    True
-                ]
-            )
-        )
-
-
-        detail_df.columns = [
-            "연도",
-            "대분류",
-            "중분류",
-            "소분류",
-            "시간대",
-            "사고건수"
+        detail_open = st.session_state[
+            "show_senior_type_detail"
         ]
 
 
-        detail_df[
-            "사고건수"
-        ] = (
+        detail_button_label = (
+            "▲ 고령운전자 사고유형·시간대 데이터 닫기"
+            if detail_open
+            else "▼ 고령운전자 사고유형·시간대 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_button_label,
+            key="senior_type_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_senior_type_detail"
+            ] = (
+                not detail_open
+            )
+
+            st.rerun()
+
+
+    # --------------------------------------------------------
+    # DETAIL CONTENT
+    # --------------------------------------------------------
+
+    if st.session_state[
+        "show_senior_type_detail"
+    ]:
+
+        with st.container(
+            key="senior_type_detail_panel"
+        ):
+
+            detail_df = (
+                df[
+                    [
+                        "year",
+                        "accident_type_main",
+                        "accident_type_middle",
+                        "accident_type_sub",
+                        "time_slot",
+                        "accidents",
+                    ]
+                ]
+                .copy()
+                .sort_values(
+                    [
+                        "year",
+                        "accident_type_main",
+                        "accident_type_middle",
+                        "accident_type_sub",
+                        "time_slot",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        True,
+                        True,
+                        True,
+                    ]
+                )
+                .reset_index(
+                    drop=True
+                )
+            )
+
+
+            detail_df.columns = [
+                "연도",
+                "대분류",
+                "중분류",
+                "소분류",
+                "시간대",
+                "사고건수",
+            ]
+
+
+            detail_df[
+                "연도"
+            ] = (
+                detail_df[
+                    "연도"
+                ]
+                .astype(int)
+                .astype(str)
+                + "년"
+            )
+
+
             detail_df[
                 "사고건수"
-            ]
-            .round()
-            .astype(int)
-        )
+            ] = (
+                detail_df[
+                    "사고건수"
+                ]
+                .round()
+                .astype(int)
+                .map(
+                    lambda value:
+                        f"{value:,}건"
+                )
+            )
 
 
-        st.dataframe(
+            table_rows = ""
 
-            detail_df,
 
-            use_container_width=True,
+            for _, row in detail_df.iterrows():
 
-            hide_index=True,
+                table_rows += f"""
+                    <tr>
 
-            height=470,
+                        <td>{row["연도"]}</td>
 
-            column_config={
+                        <td>{row["대분류"]}</td>
 
-                "연도":
-                    st.column_config.NumberColumn(
-                        "연도",
-                        format="%d년"
-                    ),
+                        <td>{row["중분류"]}</td>
 
-                "대분류":
-                    st.column_config.TextColumn(
-                        "대분류"
-                    ),
+                        <td>{row["소분류"]}</td>
 
-                "중분류":
-                    st.column_config.TextColumn(
-                        "중분류"
-                    ),
+                        <td>{row["시간대"]}</td>
 
-                "소분류":
-                    st.column_config.TextColumn(
-                        "소분류"
-                    ),
+                        <td>{row["사고건수"]}</td>
 
-                "시간대":
-                    st.column_config.TextColumn(
-                        "시간대"
-                    ),
+                    </tr>
+                """
 
-                "사고건수":
-                    st.column_config.NumberColumn(
-                        "사고건수",
-                        format="%d건"
-                    ),
-            }
-        )
+
+            st.html(
+                f"""
+                <style>
+
+                .senior-type-dark-table-wrap {{
+
+                    width: 100%;
+
+                    max-height: 560px;
+
+                    overflow-y: auto;
+
+                    overflow-x: auto;
+
+                    background: #182035;
+
+                    border: 1px solid #3A4662;
+
+                    border-radius: 12px;
+                }}
+
+
+                .senior-type-dark-table {{
+
+                    width: 100%;
+
+                    min-width: 1000px;
+
+                    border-collapse: collapse;
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-size: 13px;
+                }}
+
+
+                .senior-type-dark-table thead {{
+
+                    position: sticky;
+
+                    top: 0;
+
+                    z-index: 2;
+                }}
+
+
+                .senior-type-dark-table th {{
+
+                    background: #202A42;
+
+                    color: #D6A348;
+
+                    font-weight: 900;
+
+                    text-align: center;
+
+                    padding: 14px 16px;
+
+                    border-bottom: 1px solid #4A5670;
+
+                    white-space: nowrap;
+                }}
+
+
+                .senior-type-dark-table td {{
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-weight: 600;
+
+                    text-align: center;
+
+                    padding: 12px 16px;
+
+                    border-bottom: 1px solid #303B55;
+
+                    white-space: nowrap;
+                }}
+
+
+                .senior-type-dark-table tbody tr:nth-child(even) td {{
+
+                    background: #1B243A;
+                }}
+
+
+                .senior-type-dark-table tbody tr:hover td {{
+
+                    background: #222D47;
+
+                    color: #FFFFFF;
+                }}
+
+
+                .senior-type-dark-table tbody tr:last-child td {{
+
+                    border-bottom: none;
+                }}
+
+                </style>
+
+
+                <div class="senior-type-dark-table-wrap">
+
+                    <table class="senior-type-dark-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>연도</th>
+
+                                <th>대분류</th>
+
+                                <th>중분류</th>
+
+                                <th>소분류</th>
+
+                                <th>시간대</th>
+
+                                <th>사고건수</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {table_rows}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

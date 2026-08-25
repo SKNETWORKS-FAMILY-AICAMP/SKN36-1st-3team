@@ -1,8 +1,13 @@
+# ============================================================
+# streamlit/pages/people.py
+# SAFER - 인구 분석 메인 페이지
+# ============================================================
+
 import streamlit as st
 
 
 # ============================================================
-# 페이지 이동 함수
+# PAGE MOVE
 # ============================================================
 
 def go_main():
@@ -29,518 +34,488 @@ def go_faq():
     st.switch_page("pages/FAQ.py")
 
 
+def go_local_population():
+    st.switch_page(
+        "pages/people/local_population.py"
+    )
+
+
+def go_age_population():
+    # 파일명은 기존 그대로 유지
+    st.switch_page(
+        "pages/people/resident_population_monthly.py"
+    )
+
+
 # ============================================================
 # CSS
 # ============================================================
 
 st.html(
     """
-    <style>
+<style>
 
-    /* =========================================================
-       전체 배경
-    ========================================================= */
+/* ==========================================================
+   전체 배경
+========================================================== */
 
-    html,
-    body,
-    [data-testid="stAppViewContainer"],
-    .stApp {
+html,
+body,
+[data-testid="stAppViewContainer"],
+.stApp {
 
-        min-height: 100vh;
+    min-height: 100vh;
 
-        background:
-            linear-gradient(
-                135deg,
-                #0B1626 0%,
-                #263B62 45%,
-                #A38E68 78%,
-                #E0A945 100%
-            );
+    background:
+        linear-gradient(
+            135deg,
+            #0B1626 0%,
+            #263B62 45%,
+            #A38E68 78%,
+            #E0A945 100%
+        );
 
-        background-attachment: fixed;
-    }
+    background-attachment: fixed;
+}
 
 
-    header[data-testid="stHeader"],
-    section[data-testid="stSidebar"],
-    #MainMenu,
-    footer {
+/* ==========================================================
+   Streamlit 기본 UI 제거
+========================================================== */
 
-        display: none;
-    }
+header[data-testid="stHeader"],
+section[data-testid="stSidebar"],
+#MainMenu,
+footer {
 
+    display: none;
+}
 
-    .block-container {
 
-        max-width: 1600px;
+/* ==========================================================
+   전체 폭
+========================================================== */
 
-        padding-top: 14px;
-        padding-left: 30px;
-        padding-right: 30px;
-        padding-bottom: 50px;
-    }
+.block-container {
 
+    max-width: 1600px;
 
-    /* =========================================================
-       상단 NAV
-    ========================================================= */
+    padding-top: 14px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 55px;
+}
 
-    .st-key-top_nav {
 
-        background:
-            rgba(255,255,255,.98);
+/* ==========================================================
+   TOP NAV
+========================================================== */
 
-        border-radius: 16px;
+.st-key-top_nav {
 
-        padding:
-            10px 20px;
+    background: rgba(255,255,255,.98);
 
-        margin-bottom:
-            20px;
+    border-radius: 16px;
 
-        box-shadow:
-            0 5px 20px
-            rgba(0,0,0,.10);
-    }
+    padding: 10px 20px;
 
+    margin-bottom: 28px;
 
-    .st-key-top_nav button {
+    box-shadow:
+        0 5px 20px
+        rgba(0,0,0,.10);
+}
 
-        background:
-            transparent !important;
 
-        color:
-            #30384D !important;
+.st-key-top_nav button {
 
-        border:
-            none !important;
+    background: transparent !important;
 
-        box-shadow:
-            none !important;
+    color: #30384D !important;
 
-        font-size:
-            16px !important;
+    border: none !important;
 
-        font-weight:
-            500 !important;
+    box-shadow: none !important;
 
-        min-height:
-            44px !important;
+    font-size: 16px !important;
 
-        white-space:
-            nowrap !important;
-    }
+    font-weight: 500 !important;
 
+    min-height: 44px !important;
 
-    .st-key-top_nav button:hover {
+    white-space: nowrap !important;
+}
 
-        color:
-            #D6A348 !important;
-    }
 
+.st-key-top_nav button:hover {
 
-    .st-key-nav_logo button {
+    background: transparent !important;
 
-        color:
-            #27314C !important;
+    color: #D6A348 !important;
+}
 
-        font-size:
-            31px !important;
 
-        font-weight:
-            900 !important;
+/* 로고 */
 
-        justify-content:
-            flex-start !important;
+.st-key-nav_logo button {
 
-        padding-left:
-            0 !important;
-    }
+    color: #27314C !important;
 
+    font-size: 30px !important;
 
-    /* 현재 페이지 */
-    .st-key-nav_people button {
+    font-weight: 900 !important;
 
-        color:
-            #D6A348 !important;
+    justify-content: flex-start !important;
 
-        font-weight:
-            800 !important;
-    }
+    padding-left: 0 !important;
+}
 
 
-    .st-key-nav_future button {
+/* 현재 메뉴 */
 
-        background:
-            #D9A64A !important;
+.st-key-nav_people button {
 
-        color:
-            #172035 !important;
+    color: #D6A348 !important;
 
-        font-weight:
-            800 !important;
+    font-weight: 900 !important;
+}
 
-        border-radius:
-            2px !important;
-    }
 
+/* 미래 전망 */
 
-    /* =========================================================
-       메인 페이지
-    ========================================================= */
+.st-key-nav_future button {
 
-    .st-key-people_page {
+    background: #D9A64A !important;
 
-        background:
-            #101625;
+    color: #172035 !important;
 
-        border:
-            1px solid
-            #34405A;
+    font-size: 15px !important;
 
-        border-radius:
-            20px;
+    font-weight: 800 !important;
 
-        padding:
-            34px 36px 50px 36px;
+    border-radius: 2px !important;
+}
 
-        box-shadow:
-            0 12px 36px
-            rgba(0,0,0,.18);
 
-        min-height:
-            760px;
-    }
+.st-key-nav_future button:hover {
 
+    background: #E5B557 !important;
 
-    /* =========================================================
-       HEADER
-    ========================================================= */
+    color: #101625 !important;
+}
 
-    .page-path {
 
-        color:
-            #D6A348;
+/* ==========================================================
+   PEOPLE PAGE
+========================================================== */
 
-        font-size:
-            13px;
+.st-key-people_page {
 
-        font-weight:
-            800;
+    background: #101625;
 
-        letter-spacing:
-            1.4px;
+    border: 1px solid #34405A;
 
-        margin-bottom:
-            10px;
-    }
+    border-radius: 20px;
 
+    padding:
+        42px
+        30px
+        55px
+        30px;
+}
 
-    .page-title {
 
-        color:
-            #FFFFFF;
+/* ==========================================================
+   HEADER
+========================================================== */
 
-        font-size:
-            43px;
+.safer-label {
 
-        font-weight:
-            900;
+    color: #D9A64A;
 
-        letter-spacing:
-            -2px;
+    font-size: 12px;
 
-        line-height:
-            1.15;
+    font-weight: 900;
 
-        margin-bottom:
-            16px;
-    }
+    letter-spacing: 1.3px;
 
+    margin-bottom: 12px;
+}
 
-    .page-sub {
 
-        color:
-            #B7C0D3;
+.page-title {
 
-        font-size:
-            15px;
+    color: #FFFFFF;
 
-        line-height:
-            1.8;
+    font-size: 43px;
 
-        margin-bottom:
-            26px;
-    }
+    font-weight: 900;
 
+    line-height: 1.15;
 
-    /* =========================================================
-       작은 카테고리 버튼
-    ========================================================= */
+    margin-bottom: 24px;
+}
 
-    .category-wrap {
 
-        display: flex;
+.page-description {
 
-        gap: 12px;
+    color: #C6D0DE;
 
-        margin-top: 4px;
+    font-size: 15px;
 
-        margin-bottom: 60px;
-    }
+    line-height: 1.8;
 
+    margin-bottom: 28px;
+}
 
-    .category-pill {
 
-        display: inline-flex;
+/* ==========================================================
+   TAG
+========================================================== */
 
-        align-items: center;
+.tag-wrap {
 
-        justify-content: center;
+    display: flex;
 
-        min-width: 105px;
+    gap: 12px;
 
-        height: 38px;
+    margin-top: 5px;
 
-        padding:
-            0 18px;
+    margin-bottom: 75px;
+}
 
-        border:
-            1px solid #414D69;
 
-        border-radius:
-            22px;
+.data-tag {
 
-        background:
-            #182035;
+    display: inline-flex;
 
-        color:
-            #CFD5E1;
+    align-items: center;
 
-        font-size:
-            13px;
+    justify-content: center;
 
-        font-weight:
-            700;
-    }
+    padding: 8px 26px;
 
+    min-height: 38px;
 
-    /* =========================================================
-       분석 항목
-    ========================================================= */
+    border: 1px solid #53607A;
 
-    .section-title {
+    border-radius: 30px;
 
-        color:
-            #FFFFFF;
+    background: #171E31;
 
-        font-size:
-            24px;
+    color: #E1E6EF;
 
-        font-weight:
-            900;
+    font-size: 14px;
 
-        margin-bottom:
-            8px;
-    }
+    font-weight: 800;
+}
 
 
-    .section-sub {
+/* ==========================================================
+   SECTION
+========================================================== */
 
-        color:
-            #8795B1;
+.section-title {
 
-        font-size:
-            13px;
+    color: #FFFFFF;
 
-        margin-bottom:
-            32px;
-    }
+    font-size: 25px;
 
+    font-weight: 900;
 
-    /* =========================================================
-       CARD BUTTON
-    ========================================================= */
+    margin-bottom: 12px;
+}
 
-    .st-key-local_population_card button,
-    .st-key-resident_population_card button {
 
-        width:
-            100% !important;
+.section-description {
 
-        height:
-            190px !important;
+    color: #8290AB;
 
-        min-height:
-            190px !important;
+    font-size: 14px;
 
-        background:
-            #1A2238 !important;
+    margin-bottom: 52px;
+}
 
-        border:
-            1px solid
-            #46516B !important;
 
-        border-radius:
-            22px !important;
+/* ==========================================================
+   큰 카드 버튼 공통
+========================================================== */
 
-        color:
-            #FFFFFF !important;
+.st-key-local_population_card button,
+.st-key-age_population_card button {
 
-        box-shadow:
-            none !important;
+    width: 100% !important;
 
-        transition:
-            all .18s ease !important;
-    }
+    height: 185px !important;
 
+    min-height: 185px !important;
 
-    .st-key-local_population_card button {
+    background: #1D2439 !important;
 
-        border-top:
-            5px solid
-            #86B79E !important;
-    }
+    border: 1px solid #4A5874 !important;
 
+    border-radius: 22px !important;
 
-    .st-key-resident_population_card button {
+    box-shadow: none !important;
 
-        border-top:
-            5px solid
-            #D6A348 !important;
-    }
+    color: #FFFFFF !important;
 
+    font-size: 18px !important;
 
-    .st-key-local_population_card button:hover,
-    .st-key-resident_population_card button:hover {
+    font-weight: 900 !important;
 
-        transform:
-            translateY(-4px);
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        border-color .15s ease !important;
+}
 
-        background:
-            #202A44 !important;
 
-        border-color:
-            #71809F !important;
+/* 버튼 안 텍스트 */
 
-        box-shadow:
-            0 10px 25px
-            rgba(0,0,0,.25) !important;
-    }
+.st-key-local_population_card button p,
+.st-key-age_population_card button p {
 
+    color: #FFFFFF !important;
 
-    .st-key-local_population_card button p,
-    .st-key-resident_population_card button p {
+    font-size: 18px !important;
 
-        color:
-            #FFFFFF !important;
+    font-weight: 900 !important;
 
-        font-size:
-            17px !important;
+    line-height: 2 !important;
 
-        font-weight:
-            800 !important;
+    text-align: center !important;
 
-        line-height:
-            1.7 !important;
+    white-space: pre-line !important;
+}
 
-        white-space:
-            pre-line !important;
-    }
 
+/* ==========================================================
+   왼쪽 카드
+========================================================== */
 
-    /* =========================================================
-       카드 설명
-    ========================================================= */
+.st-key-local_population_card button {
 
-    .card-description {
+    border-top:
+        5px solid #93B79E !important;
+}
 
-        color:
-            #8393B4;
 
-        font-size:
-            13px;
+.st-key-local_population_card button:hover {
 
-        text-align:
-            center;
+    background: #232C43 !important;
 
-        line-height:
-            1.7;
+    border-color: #93B79E !important;
 
-        padding-top:
-            13px;
-    }
+    transform: translateY(-3px);
+}
 
 
-    /* =========================================================
-       하단 설명
-    ========================================================= */
+/* ==========================================================
+   오른쪽 카드
+========================================================== */
 
-    .people-info {
+.st-key-age_population_card button {
 
-        margin-top:
-            55px;
+    border-top:
+        5px solid #D1A647 !important;
+}
 
-        padding:
-            22px 24px;
 
-        background:
-            #141C2F;
+.st-key-age_population_card button:hover {
 
-        border-left:
-            3px solid
-            #D6A348;
+    background: #232C43 !important;
 
-        border-radius:
-            4px;
+    border-color: #D1A647 !important;
 
-        color:
-            #9CA8BF;
+    transform: translateY(-3px);
+}
 
-        font-size:
-            13px;
 
-        line-height:
-            1.9;
-    }
+/* ==========================================================
+   카드 설명
+========================================================== */
 
+.card-desc {
 
-    .people-info-title {
+    color: #8FA0C0;
 
-        color:
-            #FFFFFF;
+    text-align: center;
 
-        font-size:
-            14px;
+    font-size: 14px;
 
-        font-weight:
-            800;
+    line-height: 1.85;
 
-        margin-bottom:
-            8px;
-    }
+    margin-top: 27px;
 
+    min-height: 70px;
+}
 
-    /* =========================================================
-       Streamlit button text fix
-    ========================================================= */
 
-    button p {
+/* ==========================================================
+   카드 클릭 안내
+========================================================== */
 
-        margin:
-            0 !important;
-    }
+.card-click {
 
-    </style>
-    """
+    color: #65728D;
+
+    text-align: center;
+
+    font-size: 12px;
+
+    margin-top: 3px;
+}
+
+
+/* ==========================================================
+   INFO
+========================================================== */
+
+.info-box {
+
+    margin-top: 48px;
+
+    background: #161D30;
+
+    border-left:
+        3px solid #D9A64A;
+
+    border-radius: 4px;
+
+    padding: 23px 25px;
+
+    color: #ADB8CA;
+
+    font-size: 14px;
+
+    line-height: 1.9;
+}
+
+
+.info-title {
+
+    color: #FFFFFF;
+
+    font-size: 16px;
+
+    font-weight: 900;
+
+    margin-bottom: 8px;
+}
+
+</style>
+"""
 )
 
 
 # ============================================================
-# 상단 NAV
+# TOP NAV
 # ============================================================
 
-with st.container(key="top_nav"):
+with st.container(
+    key="top_nav"
+):
 
     logo, n1, n2, n3, n4, n5, nf = st.columns(
         [
@@ -571,7 +546,7 @@ with st.container(key="top_nav"):
 
 
     # --------------------------------------------------------
-    # 인구
+    # PEOPLE
     # --------------------------------------------------------
 
     with n1:
@@ -585,7 +560,7 @@ with st.container(key="top_nav"):
 
 
     # --------------------------------------------------------
-    # 자동차
+    # CAR
     # --------------------------------------------------------
 
     with n2:
@@ -599,7 +574,7 @@ with st.container(key="top_nav"):
 
 
     # --------------------------------------------------------
-    # 교통사고
+    # ACCIDENT
     # --------------------------------------------------------
 
     with n3:
@@ -613,7 +588,7 @@ with st.container(key="top_nav"):
 
 
     # --------------------------------------------------------
-    # 제도
+    # POLICY
     # --------------------------------------------------------
 
     with n4:
@@ -641,7 +616,7 @@ with st.container(key="top_nav"):
 
 
     # --------------------------------------------------------
-    # 미래 전망
+    # FUTURE
     # --------------------------------------------------------
 
     with nf:
@@ -662,8 +637,9 @@ with st.container(key="top_nav"):
 # PEOPLE PAGE
 # ============================================================
 
-with st.container(key="people_page"):
-
+with st.container(
+    key="people_page"
+):
 
     # ========================================================
     # HEADER
@@ -671,7 +647,7 @@ with st.container(key="people_page"):
 
     st.html(
         """
-        <div class="page-path">
+        <div class="safer-label">
             SAFER DATA ANALYTICS
         </div>
 
@@ -679,20 +655,28 @@ with st.container(key="people_page"):
             인구 분석
         </div>
 
-        <div class="page-sub">
-            지역별 인구와 주민등록 인구 데이터를 통해
-            지역별 인구 규모와 최근 인구 변화 추이를 분석합니다.
+        <div class="page-description">
+            지역별 인구와 연령별 인구 데이터를 통해
+            지역별 인구 규모와 고연령 인구 구조를 분석합니다.
         </div>
+        """
+    )
 
 
-        <div class="category-wrap">
+    # ========================================================
+    # TAG
+    # ========================================================
 
-            <div class="category-pill">
+    st.html(
+        """
+        <div class="tag-wrap">
+
+            <div class="data-tag">
                 지역 인구
             </div>
 
-            <div class="category-pill">
-                주민등록 인구
+            <div class="data-tag">
+                연령별 인구
             </div>
 
         </div>
@@ -710,7 +694,7 @@ with st.container(key="people_page"):
             분석 항목
         </div>
 
-        <div class="section-sub">
+        <div class="section-description">
             분석할 인구 데이터셋을 선택하세요.
         </div>
         """
@@ -721,69 +705,78 @@ with st.container(key="people_page"):
     # CARDS
     # ========================================================
 
-    left_space, card1, gap, card2, right_space = st.columns(
+    left, right = st.columns(
         [
-            0.15,
             1,
-            0.10,
-            1,
-            0.15,
+            1
         ],
         gap="large"
     )
 
 
     # ========================================================
-    # CARD 1
-    # 지역별 인구 현황
+    # LEFT CARD
     # ========================================================
 
-    with card1:
+    with left:
 
-        if st.button(
-            "🗺️\n\n지역별 인구 현황",
-            key="local_population_card",
-            use_container_width=True
+        with st.container(
+            key="local_population_card"
         ):
 
-            st.switch_page(
-                "pages/people/local_population.py"
-            )
+            if st.button(
+                "🗺️\n\n지역별 인구 현황",
+                key="local_population_click",
+                use_container_width=True
+            ):
+
+                go_local_population()
 
 
         st.html(
             """
-            <div class="card-description">
-                연도별·지역별 인구 규모와<br>
+            <div class="card-desc">
+
+                연도별·지역별 인구 규모와
+
+                <br>
+
                 지역 간 인구 분포 비교 분석
+
             </div>
             """
         )
 
 
     # ========================================================
-    # CARD 2
-    # 주민등록 인구 및 세대 현황
+    # RIGHT CARD
     # ========================================================
 
-    with card2:
+    with right:
 
-        if st.button(
-            "👥\n\n주민등록 인구 및 세대 현황 (월간)",
-            key="resident_population_card",
-            use_container_width=True
+        with st.container(
+            key="age_population_card"
         ):
 
-            st.switch_page(
-                "pages/people/resident_population_monthly.py"
-            )
+            if st.button(
+                "👥\n\n연령별 인구 현황",
+                key="age_population_click",
+                use_container_width=True
+            ):
+
+                go_age_population()
 
 
         st.html(
             """
-            <div class="card-description">
-                월별 주민등록 인구 변화와<br>
-                지역별 인구·세대 변화 추이 분석
+            <div class="card-desc">
+
+                지역·성별·연령대별 인구 구조와
+
+                <br>
+
+                60세 이상 인구 비율 분석
+
             </div>
             """
         )
@@ -795,19 +788,20 @@ with st.container(key="people_page"):
 
     st.html(
         """
-        <div class="people-info">
+        <div class="info-box">
 
-            <div class="people-info-title">
-                👥 인구 데이터 분석
+            <div class="info-title">
+                SAFER 인구 분석
             </div>
 
-            <b>지역별 인구 현황</b>에서는
-            연도별 시도 인구 규모와 지역 간 인구 분포를 비교합니다.
+            지역별 인구 현황에서는
+            전국 시도의 인구 규모와 인구 분포를 비교합니다.
+
             <br>
 
-            <b>주민등록 인구 및 세대 현황(월간)</b>에서는
-            월별 주민등록 인구 변화를 통해 최근 인구 변화 흐름을
-            확인할 수 있습니다.
+            연령별 인구 현황에서는
+            지역·성별·연령대별 인구 구조를 확인하고,
+            지역별 60세 이상 인구 규모와 비율을 비교합니다.
 
         </div>
         """

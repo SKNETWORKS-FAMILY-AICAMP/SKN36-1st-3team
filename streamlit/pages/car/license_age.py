@@ -892,54 +892,80 @@ div[data-baseweb="select"] span {
 }
 
 
+
 /* ==========================================================
-   EXPANDER
+   DETAIL TOGGLE BUTTON
 ========================================================== */
 
-[data-testid="stExpander"] {
+.st-key-age_detail_toggle button {
 
-    background:
-        #182035;
+    width: 100% !important;
 
-    border:
-        1px solid
-        #394560;
+    min-height: 52px !important;
 
-    border-radius:
-        14px;
+    background: #182035 !important;
+
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
 }
 
 
-[data-testid="stExpander"] summary {
+.st-key-age_detail_toggle button * {
 
-    color:
-        #E7EAF0
-        !important;
+    color: #E7EAF0 !important;
 
-    font-size:
-        14px
-        !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
 
-    font-weight:
-        600
-        !important;
+    opacity: 1 !important;
+}
+
+
+.st-key-age_detail_toggle button:hover {
+
+    background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
+}
+
+
+.st-key-age_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+
+    -webkit-text-fill-color: #F1C66A !important;
 }
 
 
 /* ==========================================================
-   DATAFRAME
+   DETAIL TABLE PANEL
 ========================================================== */
 
-[data-testid="stDataFrame"] {
+.st-key-age_detail_panel {
 
-    border-radius:
-        12px;
+    background: #182035;
 
-    overflow:
-        hidden;
+    border: 1px solid #394560;
 
-    font-size:
-        13px;
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
 }
 
 
@@ -1893,6 +1919,7 @@ with st.container(
             )
 
 
+
     # ========================================================
     # DETAIL DATA
     # ========================================================
@@ -1900,87 +1927,321 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "연령별 데이터 상세 보기"
+    # --------------------------------------------------------
+    # DETAIL STATE
+    # --------------------------------------------------------
+
+    if "show_license_age_detail" not in st.session_state:
+
+        st.session_state[
+            "show_license_age_detail"
+        ] = False
+
+
+    # --------------------------------------------------------
+    # DETAIL TOGGLE
+    # --------------------------------------------------------
+
+    with st.container(
+        key="age_detail_toggle"
     ):
 
-        if chart_df.empty:
+        detail_open = st.session_state[
+            "show_license_age_detail"
+        ]
 
-            st.info(
-                "표시할 데이터가 없습니다."
+
+        detail_button_label = (
+            "▲ 연령별 운전면허 소지자 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 운전면허 소지자 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_button_label,
+            key="license_age_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_license_age_detail"
+            ] = (
+                not detail_open
             )
 
-        else:
+            st.rerun()
 
-            table_df = chart_df[
-                [
-                    age_col,
-                    count_col,
+
+    # --------------------------------------------------------
+    # DETAIL CONTENT
+    # --------------------------------------------------------
+
+    if st.session_state[
+        "show_license_age_detail"
+    ]:
+
+        with st.container(
+            key="age_detail_panel"
+        ):
+
+            if chart_df.empty:
+
+                st.info(
+                    "표시할 데이터가 없습니다."
+                )
+
+            else:
+
+                table_df = (
+                    chart_df[
+                        [
+                            age_col,
+                            count_col,
+                        ]
+                    ]
+                    .copy()
+                )
+
+
+                table_df[
+                    "구분"
+                ] = (
+                    chart_df[
+                        "is_senior"
+                    ]
+                    .map(
+                        {
+                            True: "65세 이상",
+                            False: "65세 미만",
+                        }
+                    )
+                )
+
+
+                table_df[
+                    age_col
+                ] = (
+                    table_df[
+                        age_col
+                    ]
+                    .apply(
+                        format_age
+                    )
+                )
+
+
+                table_df[
+                    count_col
+                ] = (
+                    table_df[
+                        count_col
+                    ]
+                    .astype(int)
+                )
+
+
+                table_df.columns = [
+                    "연령",
+                    "면허 소지자 수",
+                    "구분",
                 ]
-            ].copy()
 
 
-            table_df[
-                "구분"
-            ] = chart_df[
-                "is_senior"
-            ].map(
-                {
-                    True: "65세 이상",
-                    False: "65세 미만",
-                }
-            )
+                display_df = (
+                    table_df
+                    .copy()
+                )
 
 
-            table_df[
-                age_col
-            ] = table_df[
-                age_col
-            ].apply(
-                format_age
-            )
+                display_df[
+                    "면허 소지자 수"
+                ] = (
+                    display_df[
+                        "면허 소지자 수"
+                    ]
+                    .map(
+                        lambda value:
+                            f"{int(value):,}명"
+                    )
+                )
 
 
-            table_df[
-                count_col
-            ] = table_df[
-                count_col
-            ].astype(
-                int
-            )
+                table_rows = ""
 
 
-            table_df.columns = [
-                "연령",
-                "면허 소지자 수",
-                "구분",
-            ]
+                for _, row in display_df.iterrows():
+
+                    row_class = (
+                        "senior-row"
+                        if row[
+                            "구분"
+                        ] == "65세 이상"
+                        else ""
+                    )
+
+                    table_rows += f"""
+                        <tr class="{row_class}">
+
+                            <td>
+                                {row["연령"]}
+                            </td>
+
+                            <td>
+                                {row["면허 소지자 수"]}
+                            </td>
+
+                            <td>
+                                {row["구분"]}
+                            </td>
+
+                        </tr>
+                    """
 
 
-            st.dataframe(
-                table_df,
-                use_container_width=True,
-                hide_index=True,
+                st.html(
+                    f"""
+                    <style>
 
-                column_config={
+                    .age-dark-table-wrap {{
 
-                    "연령":
-                        st.column_config.TextColumn(
-                            "연령",
-                            width="small",
-                        ),
+                        width: 100%;
 
-                    "면허 소지자 수":
-                        st.column_config.NumberColumn(
-                            "면허 소지자 수",
-                            format="%d명",
-                        ),
+                        max-height: 560px;
 
-                    "구분":
-                        st.column_config.TextColumn(
-                            "구분",
-                            width="medium",
-                        ),
-                },
-            )
+                        overflow-y: auto;
 
+                        overflow-x: auto;
+
+                        background: #182035;
+
+                        border: 1px solid #3A4662;
+
+                        border-radius: 12px;
+                    }}
+
+
+                    .age-dark-table {{
+
+                        width: 100%;
+
+                        border-collapse: collapse;
+
+                        background: #182035;
+
+                        color: #E7EAF0;
+
+                        font-size: 13px;
+                    }}
+
+
+                    .age-dark-table thead {{
+
+                        position: sticky;
+
+                        top: 0;
+
+                        z-index: 2;
+                    }}
+
+
+                    .age-dark-table th {{
+
+                        background: #202A42;
+
+                        color: #D6A348;
+
+                        font-weight: 900;
+
+                        text-align: center;
+
+                        padding: 14px 16px;
+
+                        border-bottom: 1px solid #4A5670;
+
+                        white-space: nowrap;
+                    }}
+
+
+                    .age-dark-table td {{
+
+                        background: #182035;
+
+                        color: #E7EAF0;
+
+                        font-weight: 600;
+
+                        text-align: center;
+
+                        padding: 12px 16px;
+
+                        border-bottom: 1px solid #303B55;
+
+                        white-space: nowrap;
+                    }}
+
+
+                    .age-dark-table tbody tr:nth-child(even) td {{
+
+                        background: #1B243A;
+                    }}
+
+
+                    .age-dark-table tbody tr.senior-row td {{
+
+                        color: #F1C66A;
+                    }}
+
+
+                    .age-dark-table tbody tr:hover td {{
+
+                        background: #222D47;
+
+                        color: #FFFFFF;
+                    }}
+
+
+                    .age-dark-table tbody tr:last-child td {{
+
+                        border-bottom: none;
+                    }}
+
+                    </style>
+
+
+                    <div class="age-dark-table-wrap">
+
+                        <table class="age-dark-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        연령
+                                    </th>
+
+                                    <th>
+                                        면허 소지자 수
+                                    </th>
+
+                                    <th>
+                                        구분
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {table_rows}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                    """
+                )

@@ -837,39 +837,81 @@ div[data-baseweb="select"] span {
 }
 
 
+
 /* ==========================================================
-   EXPANDER
+   DETAIL TOGGLE BUTTON
 ========================================================== */
 
-[data-testid="stExpander"] {
+.st-key-gender_detail_toggle button {
 
-    background:
-        #182035;
+    width: 100% !important;
 
-    border:
-        1px solid
-        #394560;
+    min-height: 52px !important;
 
-    border-radius:
-        14px;
+    background: #182035 !important;
+
+    color: #E7EAF0 !important;
+
+    border: 1px solid #394560 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow: none !important;
+
+    justify-content: flex-start !important;
+
+    padding-left: 18px !important;
+
+    font-size: 14px !important;
+
+    font-weight: 800 !important;
 }
 
 
-[data-testid="stExpander"] summary {
+.st-key-gender_detail_toggle button * {
 
-    color:
-        #E7EAF0
-        !important;
+    color: #E7EAF0 !important;
 
-    font-size:
-        14px
-        !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
 
-    font-weight:
-        600
-        !important;
+    opacity: 1 !important;
 }
 
+
+.st-key-gender_detail_toggle button:hover {
+
+    background: #202A42 !important;
+
+    border-color: #D6A348 !important;
+
+    color: #F1C66A !important;
+}
+
+
+.st-key-gender_detail_toggle button:hover * {
+
+    color: #F1C66A !important;
+
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+
+/* ==========================================================
+   DETAIL TABLE PANEL
+========================================================== */
+
+.st-key-gender_detail_panel {
+
+    background: #182035;
+
+    border: 1px solid #394560;
+
+    border-radius: 14px;
+
+    padding: 18px 18px 20px 18px;
+
+    margin-top: 10px;
+}
 
 /* ==========================================================
    RESPONSIVE
@@ -1825,92 +1867,315 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "성별 데이터 상세 보기"
+    # --------------------------------------------------------
+    # DETAIL STATE
+    # --------------------------------------------------------
+
+    if "show_license_gender_detail" not in st.session_state:
+
+        st.session_state[
+            "show_license_gender_detail"
+        ] = False
+
+
+    # --------------------------------------------------------
+    # DETAIL TOGGLE
+    # --------------------------------------------------------
+
+    with st.container(
+        key="gender_detail_toggle"
     ):
 
-        table_df = gender_df[
-            [
-                "gender_name",
-                count_col,
-            ]
-        ].copy()
+        detail_open = st.session_state[
+            "show_license_gender_detail"
+        ]
 
 
-        # 상세표에서는 비율을 남겨둠
-        # KPI에서만 제거한 것
-        if total_count > 0:
+        detail_button_label = (
+            "▲ 성별 운전면허 소지자 데이터 닫기"
+            if detail_open
+            else "▼ 성별 운전면허 소지자 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_button_label,
+            key="license_gender_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_license_gender_detail"
+            ] = (
+                not detail_open
+            )
+
+            st.rerun()
+
+
+    # --------------------------------------------------------
+    # DETAIL CONTENT
+    # --------------------------------------------------------
+
+    if st.session_state[
+        "show_license_gender_detail"
+    ]:
+
+        with st.container(
+            key="gender_detail_panel"
+        ):
+
+            table_df = (
+                gender_df[
+                    [
+                        "gender_name",
+                        count_col,
+                    ]
+                ]
+                .copy()
+            )
+
+
+            # ====================================================
+            # RATIO
+            # ====================================================
+
+            if total_count > 0:
+
+                table_df[
+                    "ratio"
+                ] = (
+                    table_df[
+                        count_col
+                    ]
+                    / total_count
+                    * 100
+                )
+
+            else:
+
+                table_df[
+                    "ratio"
+                ] = 0
+
+
+            # ====================================================
+            # FORMAT
+            # ====================================================
+
+            table_df[
+                count_col
+            ] = (
+                table_df[
+                    count_col
+                ]
+                .round()
+                .astype(int)
+            )
+
 
             table_df[
                 "ratio"
             ] = (
                 table_df[
-                    count_col
+                    "ratio"
                 ]
-                / total_count
-                * 100
+                .round(1)
             )
 
-        else:
 
-            table_df[
-                "ratio"
-            ] = 0
-
-
-        table_df[
-            count_col
-        ] = (
-            table_df[
-                count_col
+            table_df.columns = [
+                "성별",
+                "면허 소지자 수",
+                "전체 비중",
             ]
-            .round()
-            .astype(int)
-        )
 
 
-        table_df[
-            "ratio"
-        ] = (
-            table_df[
-                "ratio"
-            ]
-            .round(1)
-        )
+            display_df = (
+                table_df
+                .copy()
+            )
 
 
-        table_df.columns = [
-            "성별",
-            "면허 소지자 수",
-            "전체 비중",
-        ]
+            display_df[
+                "면허 소지자 수"
+            ] = (
+                display_df[
+                    "면허 소지자 수"
+                ]
+                .map(
+                    lambda value:
+                        f"{int(value):,}명"
+                )
+            )
 
 
-        st.dataframe(
-            table_df,
+            display_df[
+                "전체 비중"
+            ] = (
+                display_df[
+                    "전체 비중"
+                ]
+                .map(
+                    lambda value:
+                        f"{value:.1f}%"
+                )
+            )
 
-            use_container_width=True,
 
-            hide_index=True,
+            table_rows = ""
 
-            column_config={
 
-                "성별":
-                    st.column_config.TextColumn(
-                        "성별",
-                    ),
+            for _, row in display_df.iterrows():
 
-                "면허 소지자 수":
-                    st.column_config.NumberColumn(
-                        "면허 소지자 수",
-                        format="%d명",
-                    ),
+                table_rows += f"""
+                    <tr>
 
-                "전체 비중":
-                    st.column_config.NumberColumn(
-                        "전체 비중",
-                        format="%.1f%%",
-                    ),
-            },
-        )
+                        <td>
+                            {row["성별"]}
+                        </td>
 
+                        <td>
+                            {row["면허 소지자 수"]}
+                        </td>
+
+                        <td>
+                            {row["전체 비중"]}
+                        </td>
+
+                    </tr>
+                """
+
+
+            st.html(
+                f"""
+                <style>
+
+                .gender-dark-table-wrap {{
+
+                    width: 100%;
+
+                    overflow-x: auto;
+
+                    background: #182035;
+
+                    border: 1px solid #3A4662;
+
+                    border-radius: 12px;
+                }}
+
+
+                .gender-dark-table {{
+
+                    width: 100%;
+
+                    border-collapse: collapse;
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-size: 13px;
+                }}
+
+
+                .gender-dark-table thead {{
+
+                    background: #202A42;
+                }}
+
+
+                .gender-dark-table th {{
+
+                    background: #202A42;
+
+                    color: #D6A348;
+
+                    font-weight: 900;
+
+                    text-align: center;
+
+                    padding: 14px 16px;
+
+                    border-bottom: 1px solid #4A5670;
+
+                    white-space: nowrap;
+                }}
+
+
+                .gender-dark-table td {{
+
+                    background: #182035;
+
+                    color: #E7EAF0;
+
+                    font-weight: 600;
+
+                    text-align: center;
+
+                    padding: 13px 16px;
+
+                    border-bottom: 1px solid #303B55;
+
+                    white-space: nowrap;
+                }}
+
+
+                .gender-dark-table tbody tr:nth-child(even) td {{
+
+                    background: #1B243A;
+                }}
+
+
+                .gender-dark-table tbody tr:hover td {{
+
+                    background: #222D47;
+
+                    color: #FFFFFF;
+                }}
+
+
+                .gender-dark-table tbody tr:last-child td {{
+
+                    border-bottom: none;
+                }}
+
+                </style>
+
+
+                <div class="gender-dark-table-wrap">
+
+                    <table class="gender-dark-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    성별
+                                </th>
+
+                                <th>
+                                    면허 소지자 수
+                                </th>
+
+                                <th>
+                                    전체 비중
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {table_rows}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                """
+            )

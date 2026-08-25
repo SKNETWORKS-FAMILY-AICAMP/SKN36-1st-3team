@@ -1,4 +1,5 @@
 import sys
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -16,11 +17,6 @@ ROOT_DIR = Path(__file__).resolve().parents[3]
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
-
-
-# ============================================================
-# PROJECT MODULE
-# ============================================================
 
 from database.connection import get_engine
 
@@ -54,11 +50,11 @@ def go_faq():
 
 
 # ============================================================
-# MYSQL LOAD
+# DB LOAD
 # ============================================================
 
 @st.cache_data(ttl=600)
-def load_monthly_population():
+def load_population_data():
 
     engine = get_engine()
 
@@ -66,35 +62,49 @@ def load_monthly_population():
         """
         SELECT
             id,
-            month,
             region,
+            year,
+            gender,
+            age_group,
             population
-        FROM resident_population_monthly
-        ORDER BY month, region
+        FROM age_population
+        ORDER BY
+            year,
+            region,
+            gender,
+            age_group
         """
     )
 
     with engine.connect() as conn:
-        df = pd.read_sql(
-            query,
-            conn
-        )
-
-    return df
+        return pd.read_sql(query, conn)
 
 
 # ============================================================
-# LOAD
+# LOAD DATA
 # ============================================================
 
 try:
 
-    df = load_monthly_population()
+    df = load_population_data()
 
 except Exception as e:
 
     st.error(
-        f"MySQL 데이터 조회 실패\n\n{e}"
+        f"MySQL 연령별 인구 데이터 조회 실패\n\n{e}"
+    )
+
+    st.stop()
+
+
+# ============================================================
+# EMPTY CHECK
+# ============================================================
+
+if df.empty:
+
+    st.warning(
+        "조회된 연령별 인구 데이터가 없습니다."
     )
 
     st.stop()
@@ -104,19 +114,33 @@ except Exception as e:
 # BASIC CLEAN
 # ============================================================
 
-df["month"] = (
-    df["month"]
+df["region"] = (
+    df["region"]
     .fillna("")
     .astype(str)
     .str.strip()
 )
 
 
-df["region"] = (
-    df["region"]
+df["gender"] = (
+    df["gender"]
     .fillna("")
     .astype(str)
     .str.strip()
+)
+
+
+df["age_group"] = (
+    df["age_group"]
+    .fillna("")
+    .astype(str)
+    .str.strip()
+)
+
+
+df["year"] = pd.to_numeric(
+    df["year"],
+    errors="coerce"
 )
 
 
@@ -126,170 +150,510 @@ df["population"] = pd.to_numeric(
 ).fillna(0)
 
 
+df = (
+    df
+    .dropna(
+        subset=["year"]
+    )
+    .copy()
+)
+
+
+df["year"] = (
+    df["year"]
+    .astype(int)
+)
+
+
+df["population"] = (
+    df["population"]
+    .astype(int)
+)
+
+
 # ============================================================
-# REGION CODE REMOVE
-#
-# 강원도 (4200000000) -> 강원도
-# 서울특별시 (1100000000) -> 서울특별시
+# REGION CLEAN
 # ============================================================
 
-df["region"] = (
-    df["region"]
-    .str.replace(
-        r"\s*\(\d+\)\s*$",
+def clean_region_text(region):
+
+    region = str(region).strip()
+
+    # 행정구역 코드 제거
+    # ex) 서울특별시 (1100000000)
+    region = re.sub(
+        r"\(\s*\d+\s*\)",
         "",
-        regex=True
+        region
     )
-    .str.strip()
-)
+
+    # 남아있는 숫자 제거
+    region = re.sub(
+        r"\d+",
+        "",
+        region
+    )
+
+    # 공백 제거
+    region = re.sub(
+        r"\s+",
+        "",
+        region
+    )
+
+    region = region.strip(
+        "-_/.,()[]{}"
+    )
+
+    return region
 
 
 # ============================================================
 # REGION NORMALIZATION
 # ============================================================
 
-REGION_MAP = {
+def normalize_region(region):
 
-    "전국": "전국",
+    region = clean_region_text(region)
 
-    "서울특별시": "서울",
-    "서울": "서울",
+    # --------------------------------------------------------
+    # 서울
+    # --------------------------------------------------------
 
-    "부산광역시": "부산",
-    "부산": "부산",
-
-    "대구광역시": "대구",
-    "대구": "대구",
-
-    "인천광역시": "인천",
-    "인천": "인천",
-
-    "광주광역시": "광주",
-    "광주": "광주",
-
-    "대전광역시": "대전",
-    "대전": "대전",
-
-    "울산광역시": "울산",
-    "울산": "울산",
-
-    "세종특별자치시": "세종",
-    "세종": "세종",
-
-    "경기도": "경기",
-    "경기": "경기",
-
-    "강원도": "강원",
-    "강원": "강원",
-
-    "충청북도": "충북",
-    "충북": "충북",
-
-    "충청남도": "충남",
-    "충남": "충남",
-
-    "전라북도": "전북",
-    "전북": "전북",
-
-    "전라남도": "전남",
-    "전남": "전남",
-
-    "경상북도": "경북",
-    "경북": "경북",
-
-    "경상남도": "경남",
-    "경남": "경남",
-
-    "제주특별자치도": "제주",
-    "제주": "제주",
-}
+    if region in [
+        "서울",
+        "서울특별시",
+    ]:
+        return "서울특별시"
 
 
-def normalize_region(value):
+    # --------------------------------------------------------
+    # 부산
+    # --------------------------------------------------------
 
-    value = str(value).strip()
+    if region in [
+        "부산",
+        "부산광역시",
+    ]:
+        return "부산광역시"
 
-    return REGION_MAP.get(
-        value,
-        value
-    )
+
+    # --------------------------------------------------------
+    # 대구
+    # --------------------------------------------------------
+
+    if region in [
+        "대구",
+        "대구광역시",
+    ]:
+        return "대구광역시"
 
 
-df["region_name"] = (
+    # --------------------------------------------------------
+    # 인천
+    # --------------------------------------------------------
+
+    if region in [
+        "인천",
+        "인천광역시",
+    ]:
+        return "인천광역시"
+
+
+    # --------------------------------------------------------
+    # 광주
+    # --------------------------------------------------------
+
+    if region in [
+        "광주",
+        "광주광역시",
+    ]:
+        return "광주광역시"
+
+
+    # --------------------------------------------------------
+    # 대전
+    # --------------------------------------------------------
+
+    if region in [
+        "대전",
+        "대전광역시",
+    ]:
+        return "대전광역시"
+
+
+    # --------------------------------------------------------
+    # 울산
+    # --------------------------------------------------------
+
+    if region in [
+        "울산",
+        "울산광역시",
+    ]:
+        return "울산광역시"
+
+
+    # --------------------------------------------------------
+    # 세종
+    # --------------------------------------------------------
+
+    if region in [
+        "세종",
+        "세종특별자치시",
+    ]:
+        return "세종특별자치시"
+
+
+    # --------------------------------------------------------
+    # 경기
+    # --------------------------------------------------------
+
+    if region in [
+        "경기",
+        "경기도",
+    ]:
+        return "경기도"
+
+
+    # --------------------------------------------------------
+    # 강원
+    # --------------------------------------------------------
+
+    if region in [
+        "강원",
+        "강원도",
+        "강원특별자치도",
+    ]:
+        return "강원특별자치도"
+
+
+    # --------------------------------------------------------
+    # 충북
+    # --------------------------------------------------------
+
+    if region in [
+        "충북",
+        "충청북도",
+    ]:
+        return "충청북도"
+
+
+    # --------------------------------------------------------
+    # 충남
+    # --------------------------------------------------------
+
+    if region in [
+        "충남",
+        "충청남도",
+    ]:
+        return "충청남도"
+
+
+    # --------------------------------------------------------
+    # 전북
+    # --------------------------------------------------------
+
+    if region in [
+        "전북",
+        "전라북도",
+        "전북특별자치도",
+    ]:
+        return "전북특별자치도"
+
+
+    # --------------------------------------------------------
+    # 전남
+    #
+    # 데이터에 이상한 지역명이 들어가더라도
+    # 내부적으로 전라남도로 통일
+    # --------------------------------------------------------
+
+    if region in [
+        "전남",
+        "전라남도",
+        "전남특별시",
+        "전남특별자치도",
+        "전남광주통합특별시",
+        "전남광주통합특별자치도",
+        "광주전남통합특별시",
+        "광주전남통합특별자치도",
+    ]:
+        return "전라남도"
+
+
+    # 전남으로 시작하면서
+    # 통합/특별 명칭이 붙어있는 경우도 처리
+    if (
+        region.startswith("전남")
+        and (
+            "특별" in region
+            or "통합" in region
+        )
+    ):
+        return "전라남도"
+
+
+    # 광주전남 통합 명칭
+    if (
+        "광주" in region
+        and "전남" in region
+        and "통합" in region
+    ):
+        return "전라남도"
+
+
+    # --------------------------------------------------------
+    # 경북
+    # --------------------------------------------------------
+
+    if region in [
+        "경북",
+        "경상북도",
+    ]:
+        return "경상북도"
+
+
+    # --------------------------------------------------------
+    # 경남
+    # --------------------------------------------------------
+
+    if region in [
+        "경남",
+        "경상남도",
+    ]:
+        return "경상남도"
+
+
+    # --------------------------------------------------------
+    # 제주
+    # --------------------------------------------------------
+
+    if region in [
+        "제주",
+        "제주도",
+        "제주특별자치도",
+    ]:
+        return "제주특별자치도"
+
+
+    return region
+
+
+# ============================================================
+# APPLY REGION NORMALIZATION
+# ============================================================
+
+df["region"] = (
     df["region"]
-    .apply(
-        normalize_region
-    )
+    .apply(normalize_region)
 )
 
 
 # ============================================================
-# INVALID REGION
+# EMPTY REGION REMOVE
 # ============================================================
 
-INVALID_REGIONS = [
-    "",
-    "계",
-    "합계",
-    "총계",
-    "미상",
-    "불명",
-]
-
-
-df = df[
-    ~df["region_name"].isin(
-        INVALID_REGIONS
-    )
-].copy()
-
-
-# ============================================================
-# MONTH DATETIME
-# ============================================================
-
-df["month_dt"] = pd.to_datetime(
-    df["month"],
-    format="%Y-%m",
-    errors="coerce"
+df = (
+    df[
+        df["region"].str.strip() != ""
+    ]
+    .copy()
 )
 
 
-df = df[
-    df["month_dt"].notna()
-].copy()
-
-
 # ============================================================
-# DUPLICATE CLEAN
+# SAME REGION MERGE
 #
-# 같은 월 + 같은 지역 데이터가 여러 행일 경우
-# population 최대값 1개만 사용
+# 전남 관련 명칭이 여러 개 있었다면
+# 정규화 후 동일 지역으로 다시 합산
 # ============================================================
 
 df = (
     df
     .groupby(
         [
-            "month",
-            "month_dt",
-            "region_name",
+            "year",
+            "region",
+            "gender",
+            "age_group",
         ],
         as_index=False
     )["population"]
-    .max()
+    .sum()
 )
 
 
-df = (
-    df
-    .sort_values(
-        "month_dt"
+# ============================================================
+# DISPLAY REGION
+# ============================================================
+
+DISPLAY_REGION_MAP = {
+
+    "서울특별시": "서울",
+    "부산광역시": "부산",
+    "대구광역시": "대구",
+    "인천광역시": "인천",
+    "광주광역시": "광주",
+
+    "대전광역시": "대전",
+    "울산광역시": "울산",
+    "세종특별자치시": "세종",
+
+    "경기도": "경기",
+
+    "강원특별자치도": "강원",
+
+    "충청북도": "충북",
+    "충청남도": "충남",
+
+    "전북특별자치도": "전북",
+
+    # 중요
+    "전라남도": "전남",
+    "전남특별시": "전남",
+    "전남특별자치도": "전남",
+    "전남광주통합특별시": "전남",
+    "전남광주통합특별자치도": "전남",
+    "광주전남통합특별시": "전남",
+
+    "경상북도": "경북",
+    "경상남도": "경남",
+
+    "제주특별자치도": "제주",
+}
+
+
+def display_region(region):
+
+    region = str(region).strip()
+
+    # 혹시 정규화를 뚫고 이상한 전남 이름이 들어와도
+    # 화면에서는 무조건 전남
+    if (
+        region.startswith("전남")
+        or (
+            "전남" in region
+            and "광주" in region
+        )
+    ):
+        return "전남"
+
+    return DISPLAY_REGION_MAP.get(
+        region,
+        region
     )
-    .reset_index(
-        drop=True
+
+
+# ============================================================
+# AGE SORT
+# ============================================================
+
+def age_sort_key(age_group):
+
+    age_group = str(age_group)
+
+    numbers = re.findall(
+        r"\d+",
+        age_group
     )
-)
+
+    if numbers:
+
+        return int(
+            numbers[0]
+        )
+
+    return 999
+
+
+# ============================================================
+# KOREAN NUMBER
+# ============================================================
+
+def korean_number(value):
+
+    if pd.isna(value):
+
+        return "-"
+
+    value = int(
+        round(value)
+    )
+
+    eok = (
+        value
+        // 100_000_000
+    )
+
+    remain = (
+        value
+        % 100_000_000
+    )
+
+    man = (
+        remain
+        // 10_000
+    )
+
+    remain = (
+        remain
+        % 10_000
+    )
+
+    cheon = (
+        remain
+        // 1_000
+    )
+
+    result = []
+
+    if eok > 0:
+
+        result.append(
+            f"{eok}억"
+        )
+
+
+    if man > 0:
+
+        result.append(
+            f"{man:,}만"
+        )
+
+
+    if (
+        eok == 0
+        and man == 0
+        and cheon > 0
+    ):
+
+        result.append(
+            f"{cheon}천"
+        )
+
+
+    if not result:
+
+        return f"{value:,}"
+
+
+    return " ".join(
+        result
+    )
+
+
+# ============================================================
+# SENIOR AGE GROUP
+# ============================================================
+
+SENIOR_GROUPS = [
+
+    "60~69세",
+    "70~79세",
+    "80~89세",
+    "90~99세",
+    "100세 이상",
+]
 
 
 # ============================================================
@@ -336,7 +700,7 @@ footer {
     padding-top: 14px;
     padding-left: 30px;
     padding-right: 30px;
-    padding-bottom: 50px;
+    padding-bottom: 55px;
 }
 
 
@@ -346,100 +710,63 @@ footer {
 
 .st-key-top_nav {
 
-    background:
-        rgba(255,255,255,.98);
+    background: rgba(255,255,255,.98);
 
     border-radius: 16px;
 
-    padding:
-        10px 20px;
+    padding: 10px 20px;
 
-    margin-bottom:
-        20px;
-
-    box-shadow:
-        0 5px 20px
-        rgba(0,0,0,.10);
+    margin-bottom: 20px;
 }
 
 
 .st-key-top_nav button {
 
-    background:
-        transparent !important;
+    background: transparent !important;
 
-    color:
-        #30384D !important;
+    color: #30384D !important;
 
-    border:
-        none !important;
+    border: none !important;
 
-    box-shadow:
-        none !important;
+    box-shadow: none !important;
 
-    font-size:
-        16px !important;
+    font-size: 18px !important;
 
-    font-weight:
-        500 !important;
+    font-weight: 500 !important;
 
-    min-height:
-        44px !important;
-
-    white-space:
-        nowrap !important;
-}
-
-
-.st-key-top_nav button:hover {
-
-    color:
-        #D6A348 !important;
+    min-height: 44px !important;
 }
 
 
 .st-key-nav_logo button {
 
-    color:
-        #27314C !important;
+    color: #27314C !important;
 
-    font-size:
-        31px !important;
+    font-size: 33px !important;
 
-    font-weight:
-        900 !important;
+    font-weight: 900 !important;
 
-    justify-content:
-        flex-start !important;
+    justify-content: flex-start !important;
 
-    padding-left:
-        0 !important;
+    padding-left: 0 !important;
 }
 
 
 .st-key-nav_people button {
 
-    color:
-        #D6A348 !important;
+    color: #D6A348 !important;
 
-    font-weight:
-        800 !important;
+    font-weight: 900 !important;
 }
 
 
 .st-key-nav_future button {
 
-    background:
-        #D9A64A !important;
+    background: #D9A64A !important;
 
-    color:
-        #172035 !important;
+    color: #172035 !important;
 
-    font-weight:
-        800 !important;
-
-    border-radius:
-        2px !important;
+    font-weight: 800 !important;
 }
 
 
@@ -447,24 +774,15 @@ footer {
    PAGE
 ========================================================== */
 
-.st-key-monthly_people_page {
+.st-key-resident_page {
 
-    background:
-        #101625;
+    background: #101625;
 
-    border:
-        1px solid
-        #34405A;
+    border: 1px solid #34405A;
 
-    border-radius:
-        20px;
+    border-radius: 20px;
 
-    padding:
-        34px 36px 44px 36px;
-
-    box-shadow:
-        0 12px 36px
-        rgba(0,0,0,.18);
+    padding: 34px 36px 48px 36px;
 }
 
 
@@ -474,125 +792,71 @@ footer {
 
 .page-path {
 
-    color:
-        #D6A348;
+    color: #D6A348;
 
-    font-size:
-        13px;
+    font-size: 15px;
 
-    font-weight:
-        800;
+    font-weight: 800;
 
-    letter-spacing:
-        1.4px;
-
-    margin-bottom:
-        10px;
+    margin-bottom: 10px;
 }
 
 
 .page-title {
 
-    color:
-        #FFFFFF;
+    color: #FFFFFF;
 
-    font-size:
-        42px;
+    font-size: 44px;
 
-    font-weight:
-        900;
+    font-weight: 900;
 
-    letter-spacing:
-        -2px;
-
-    line-height:
-        1.15;
-
-    margin-bottom:
-        12px;
+    margin-bottom: 12px;
 }
 
 
 .page-sub {
 
-    color:
-        #B4BCCB;
+    color: #C3CBD8;
 
-    font-size:
-        15px;
+    font-size: 17px;
 
-    line-height:
-        1.7;
+    line-height: 1.75;
 
-    margin-bottom:
-        26px;
+    margin-bottom: 25px;
 }
 
 
 /* ==========================================================
-   BACK
-========================================================== */
-
-.st-key-back_people button {
-
-    background:
-        #192136 !important;
-
-    color:
-        #D1D6E0 !important;
-
-    border:
-        1px solid
-        #39445D !important;
-
-    border-radius:
-        11px !important;
-
-    min-height:
-        44px !important;
-}
-
-
-/* ==========================================================
-   FILTER
+   SELECT
 ========================================================== */
 
 label[data-testid="stWidgetLabel"] p {
 
-    color:
-        #C2C8D3 !important;
+    color: #FFFFFF !important;
 
-    font-size:
-        13px !important;
+    font-size: 15px !important;
 
-    font-weight:
-        600 !important;
+    font-weight: 800 !important;
 }
 
 
 div[data-baseweb="select"] > div {
 
-    background:
-        #F4F5F8 !important;
+    background: #F5F6F8 !important;
 
-    color:
-        #1C2435 !important;
+    color: #1C2435 !important;
 
-    min-height:
-        46px !important;
+    min-height: 48px !important;
 
-    border-radius:
-        8px !important;
+    border-radius: 8px !important;
 }
 
 
 div[data-baseweb="select"] span {
 
-    color:
-        #273149 !important;
+    color: #273149 !important;
 
-    font-size:
-        14px !important;
+    font-size: 15px !important;
 }
 
 
@@ -602,170 +866,123 @@ div[data-baseweb="select"] span {
 
 .kpi {
 
-    min-height:
-        112px;
+    min-height: 118px;
 
-    background:
-        #192136;
+    background: #192136;
 
-    border:
-        1px solid
-        #394560;
+    border: 1px solid #394560;
 
-    border-radius:
-        17px;
+    border-radius: 17px;
 
-    padding:
-        18px 20px;
+    padding: 20px 22px;
 }
 
 
 .kpi-label {
 
-    color:
-        #A8B0C0;
+    color: #C4CCD9;
 
-    font-size:
-        12px;
+    font-size: 14px;
 
-    margin-bottom:
-        15px;
+    margin-bottom: 15px;
 }
 
 
 .kpi-value {
 
-    color:
-        #FFFFFF;
+    color: #FFFFFF;
 
-    font-size:
-        25px;
+    font-size: 27px;
 
-    font-weight:
-        800;
-
-    line-height:
-        1.2;
-}
-
-
-.positive {
-
-    color:
-        #79C5A2;
-}
-
-
-.negative {
-
-    color:
-        #E17663;
+    font-weight: 900;
 }
 
 
 /* ==========================================================
-   PANEL
+   CHART PANEL
 ========================================================== */
 
-.st-key-month_trend_panel,
 .st-key-region_panel,
-.st-key-pie_panel {
+.st-key-share_panel,
+.st-key-trend_panel {
 
-    background:
-        #182035;
+    background: #182035;
 
-    border:
-        1px solid
-        #3A4662;
+    border: 1px solid #3A4662;
 
-    border-radius:
-        28px;
+    border-radius: 28px;
 
-    padding:
-        24px 26px 20px 26px;
+    padding: 24px 26px;
 
-    margin-top:
-        24px;
+    margin-top: 24px;
 }
 
 
 .panel-title {
 
-    color:
-        #FFFFFF;
+    color: #FFFFFF;
 
-    font-size:
-        21px;
+    font-size: 23px;
 
-    font-weight:
-        800;
+    font-weight: 900;
 
-    margin-bottom:
-        7px;
+    margin-bottom: 8px;
 }
 
 
 .panel-sub {
 
-    color:
-        #B8C0CF;
+    color: #C8D0DC;
 
-    font-size:
-        13px;
+    font-size: 15px;
 
-    line-height:
-        1.6;
+    line-height: 1.75;
 
-    margin-bottom:
-        10px;
+    margin-bottom: 12px;
 }
 
 
 /* ==========================================================
-   INFO
+   ANALYSIS
 ========================================================== */
 
-.info-box {
+.analysis-box {
 
-    background:
-        #131B2E;
+    background: #121A2B;
 
-    border-left:
-        3px solid
-        #D6A348;
+    border: 1px solid #35415C;
 
-    padding:
-        15px 17px;
+    border-left: 4px solid #D6A348;
 
-    margin-top:
-        22px;
+    border-radius: 7px 15px 15px 7px;
 
-    color:
-        #B5BDCB;
+    padding: 22px 24px;
 
-    font-size:
-        13px;
+    margin-top: 20px;
 
-    line-height:
-        1.8;
+    color: #E5EAF2;
+
+    font-size: 15px;
+
+    line-height: 1.95;
 }
 
 
-/* ==========================================================
-   EXPANDER
-========================================================== */
+.analysis-title {
 
-[data-testid="stExpander"] {
+    color: #F3C867;
 
-    background:
-        #182035;
+    font-size: 18px;
 
-    border:
-        1px solid
-        #394560;
+    font-weight: 900;
 
-    border-radius:
-        14px;
+    margin-bottom: 10px;
+}
+
+
+.analysis-box b {
+
+    color: #FFFFFF;
 }
 
 </style>
@@ -774,7 +991,7 @@ div[data-baseweb="select"] span {
 
 
 # ============================================================
-# TOP NAV
+# NAV
 # ============================================================
 
 with st.container(
@@ -791,8 +1008,7 @@ with st.container(
             .65,
             1.9,
         ],
-        vertical_alignment="center",
-        gap="small"
+        vertical_alignment="center"
     )
 
 
@@ -802,6 +1018,7 @@ with st.container(
             "SAFER",
             key="nav_logo"
         ):
+
             go_main()
 
 
@@ -812,6 +1029,7 @@ with st.container(
             key="nav_people",
             use_container_width=True
         ):
+
             go_people()
 
 
@@ -822,6 +1040,7 @@ with st.container(
             key="nav_car",
             use_container_width=True
         ):
+
             go_car()
 
 
@@ -832,6 +1051,7 @@ with st.container(
             key="nav_accident",
             use_container_width=True
         ):
+
             go_accident()
 
 
@@ -842,6 +1062,7 @@ with st.container(
             key="nav_policy",
             use_container_width=True
         ):
+
             go_policy()
 
 
@@ -852,6 +1073,7 @@ with st.container(
             key="nav_faq",
             use_container_width=True
         ):
+
             go_faq()
 
 
@@ -874,494 +1096,296 @@ with st.container(
 # ============================================================
 
 with st.container(
-    key="monthly_people_page"
+    key="resident_page"
 ):
 
     # ========================================================
     # HEADER
     # ========================================================
 
-    head_left, head_right = st.columns(
-        [
-            5,
-            1,
-        ],
-        vertical_alignment="center"
+    st.html(
+        """
+        <div class="page-path">
+            인구 &gt; 연령별 인구 현황
+        </div>
+
+        <div class="page-title">
+            지역별 연령 인구 현황
+        </div>
+
+        <div class="page-sub">
+            지역과 성별을 선택하여 연령대별 인구 구조를 비교하고,
+            지역별 60세 이상 인구 비율을 확인합니다.
+            데이터는 7월 기준입니다.
+        </div>
+        """
     )
 
 
-    with head_left:
+    # ========================================================
+    # FILTER OPTIONS
+    # ========================================================
 
-        st.html(
-            """
-            <div class="page-path">
-                인구 &gt; 주민등록 인구
-            </div>
+    years = sorted(
+        df["year"]
+        .dropna()
+        .unique()
+        .tolist(),
+        reverse=True
+    )
 
-            <div class="page-title">
-                주민등록 인구 현황
-            </div>
 
-            <div class="page-sub">
-                월별 주민등록 인구 데이터를 통해
-                최근 지역별 인구 규모와 변화 흐름을 확인합니다.
-            </div>
-            """
+    if not years:
+
+        st.warning(
+            "조회 가능한 연도 데이터가 없습니다."
         )
 
-
-    with head_right:
-
-        with st.container(
-            key="back_people"
-        ):
-
-            if st.button(
-                "← 인구 분석",
-                use_container_width=True
-            ):
-
-                go_people()
+        st.stop()
 
 
-    # ========================================================
-    # OPTIONS
-    # ========================================================
+    regions = sorted(
+        df["region"]
+        .dropna()
+        .unique()
+        .tolist(),
+        key=lambda x: display_region(x)
+    )
 
-    month_options = (
-        df[
-            [
-                "month",
-                "month_dt",
-            ]
-        ]
-        .drop_duplicates()
-        .sort_values(
-            "month_dt",
-            ascending=False
-        )[
-            "month"
-        ]
+
+    available_genders = (
+        df["gender"]
+        .dropna()
+        .unique()
         .tolist()
     )
 
 
-    region_options = (
-        ["전체"]
-        + sorted(
-            [
-                region
-                for region
-                in df[
-                    "region_name"
-                ]
-                .dropna()
-                .unique()
-                .tolist()
-                if region != "전국"
-            ]
+    genders = [
+        gender
+        for gender in [
+            "계",
+            "남",
+            "여",
+        ]
+        if gender in available_genders
+    ]
+
+
+    if not genders:
+
+        st.warning(
+            "조회 가능한 성별 데이터가 없습니다."
         )
-    )
+
+        st.stop()
 
 
     # ========================================================
     # FILTER
     # ========================================================
 
-    f1, f2, empty = st.columns(
+    f1, f2, f3, empty = st.columns(
         [
             1,
+            1.3,
             1,
-            3,
+            2.5
         ]
     )
 
 
     with f1:
 
-        selected_month = st.selectbox(
-            "기준 월",
-            month_options,
-            key="monthly_population_month"
+        selected_year = st.selectbox(
+            "연도 선택",
+            years,
+            key="resident_year"
         )
 
 
     with f2:
 
         selected_region = st.selectbox(
-            "지역",
-            region_options,
-            key="monthly_population_region"
+            "지역 선택",
+            ["전국"] + regions,
+            format_func=lambda x: (
+                x
+                if x == "전국"
+                else display_region(x)
+            ),
+            key="resident_region"
+        )
+
+
+    with f3:
+
+        selected_gender = st.selectbox(
+            "성별 선택",
+            genders,
+            key="resident_gender"
         )
 
 
     # ========================================================
-    # SELECTED MONTH DATA
+    # BASE DATA
     # ========================================================
 
-    selected_month_df = (
+    base_df = (
         df[
-            df[
-                "month"
-            ] == selected_month
+            (df["year"] == selected_year)
+            &
+            (df["gender"] == selected_gender)
         ]
         .copy()
     )
 
 
-    national_month_row = (
-        selected_month_df[
-            selected_month_df[
-                "region_name"
-            ] == "전국"
-        ]
-        .copy()
-    )
+    if base_df.empty:
 
-
-    regional_month_df = (
-        selected_month_df[
-            selected_month_df[
-                "region_name"
-            ] != "전국"
-        ]
-        .copy()
-    )
-
-
-    # ========================================================
-    # NATIONAL POPULATION
-    # ========================================================
-
-    if not national_month_row.empty:
-
-        national_population = int(
-            national_month_row.iloc[0][
-                "population"
-            ]
+        st.warning(
+            "선택한 조건에 해당하는 데이터가 없습니다."
         )
+
+        st.stop()
+
+
+    # ========================================================
+    # SELECTED REGION DATA
+    # ========================================================
+
+    if selected_region == "전국":
+
+        selected_df = (
+            base_df
+            .groupby(
+                "age_group",
+                as_index=False
+            )["population"]
+            .sum()
+        )
+
+        current_region_label = "전국"
 
     else:
 
-        national_population = int(
-            regional_month_df[
-                "population"
-            ].sum()
+        selected_df = (
+            base_df[
+                base_df["region"]
+                == selected_region
+            ]
+            .groupby(
+                "age_group",
+                as_index=False
+            )["population"]
+            .sum()
+        )
+
+        current_region_label = (
+            display_region(
+                selected_region
+            )
         )
 
 
     # ========================================================
-    # ANALYSIS SCOPE
+    # AGE SORT
     # ========================================================
 
-    analysis_scope = (
-        "전국"
-        if selected_region == "전체"
-        else selected_region
+    selected_df["age_order"] = (
+        selected_df["age_group"]
+        .apply(age_sort_key)
     )
 
 
-    # ========================================================
-    # TREND DATA
-    # ========================================================
-
-    if selected_region == "전체":
-
-        national_rows = (
-            df[
-                df[
-                    "region_name"
-                ] == "전국"
-            ][
-                [
-                    "month",
-                    "month_dt",
-                    "population",
-                ]
-            ]
-            .copy()
-        )
-
-
-        if not national_rows.empty:
-
-            trend_df = (
-                national_rows
-                .sort_values(
-                    "month_dt"
-                )
-                .reset_index(
-                    drop=True
-                )
-            )
-
-        else:
-
-            trend_df = (
-                df[
-                    df[
-                        "region_name"
-                    ] != "전국"
-                ]
-                .groupby(
-                    [
-                        "month",
-                        "month_dt",
-                    ],
-                    as_index=False
-                )["population"]
-                .sum()
-                .sort_values(
-                    "month_dt"
-                )
-                .reset_index(
-                    drop=True
-                )
-            )
-
-    else:
-
-        trend_df = (
-            df[
-                df[
-                    "region_name"
-                ] == selected_region
-            ][
-                [
-                    "month",
-                    "month_dt",
-                    "population",
-                ]
-            ]
-            .sort_values(
-                "month_dt"
-            )
-            .reset_index(
-                drop=True
-            )
-        )
-
-
-    # ========================================================
-    # CURRENT POPULATION
-    # ========================================================
-
-    if selected_region == "전체":
-
-        current_population = (
-            national_population
-        )
-
-    else:
-
-        current_region_row = (
-            selected_month_df[
-                selected_month_df[
-                    "region_name"
-                ] == selected_region
-            ]
-        )
-
-
-        if not current_region_row.empty:
-
-            current_population = int(
-                current_region_row.iloc[0][
-                    "population"
-                ]
-            )
-
-        else:
-
-            current_population = 0
-
-
-    # ========================================================
-    # PREVIOUS MONTH
-    # ========================================================
-
-    current_month_dt = pd.to_datetime(
-        selected_month,
-        format="%Y-%m",
-        errors="coerce"
-    )
-
-
-    previous_rows = (
-        trend_df[
-            trend_df[
-                "month_dt"
-            ] < current_month_dt
-        ]
-    )
-
-
-    if not previous_rows.empty:
-
-        previous_row = (
-            previous_rows
-            .sort_values(
-                "month_dt"
-            )
-            .iloc[-1]
-        )
-
-
-        previous_month = str(
-            previous_row[
-                "month"
-            ]
-        )
-
-
-        previous_population = int(
-            previous_row[
-                "population"
-            ]
-        )
-
-
-        month_change = (
-            current_population
-            - previous_population
-        )
-
-
-        month_change_rate = (
-            month_change
-            / previous_population
-            * 100
-            if previous_population > 0
-            else 0
-        )
-
-    else:
-
-        previous_month = "-"
-        previous_population = 0
-        month_change = 0
-        month_change_rate = 0
-
-
-    # ========================================================
-    # REGION SUMMARY
-    # ========================================================
-
-    region_summary = (
-        regional_month_df[
-            [
-                "region_name",
-                "population",
-            ]
-        ]
+    selected_df = (
+        selected_df
         .sort_values(
-            "population",
-            ascending=False
+            "age_order"
         )
-        .reset_index(
-            drop=True
+        .drop(
+            columns=["age_order"]
         )
-    )
-
-
-    # 0 값은 그래프에서 제외
-    region_summary = (
-        region_summary[
-            region_summary[
-                "population"
-            ] > 0
-        ]
-        .copy()
+        .reset_index(drop=True)
     )
 
 
     # ========================================================
-    # TOP REGION
+    # TOTAL POPULATION
     # ========================================================
 
-    if not region_summary.empty:
+    total_population = int(
+        selected_df[
+            "population"
+        ].sum()
+    )
 
-        top_region_row = (
-            region_summary.iloc[0]
+
+    # ========================================================
+    # 60+ POPULATION
+    # ========================================================
+
+    senior_population = int(
+        selected_df.loc[
+            selected_df[
+                "age_group"
+            ].isin(
+                SENIOR_GROUPS
+            ),
+            "population"
+        ].sum()
+    )
+
+
+    senior_share = (
+        senior_population
+        / total_population
+        * 100
+
+        if total_population > 0
+
+        else 0
+    )
+
+
+    # ========================================================
+    # MAX AGE GROUP
+    # ========================================================
+
+    if not selected_df.empty:
+
+        max_age_row = (
+            selected_df
+            .sort_values(
+                "population",
+                ascending=False
+            )
+            .iloc[0]
         )
 
-
-        top_region = str(
-            top_region_row[
-                "region_name"
+        max_age_group = (
+            max_age_row[
+                "age_group"
             ]
         )
 
-
-        top_region_population = int(
-            top_region_row[
+        max_age_population = int(
+            max_age_row[
                 "population"
             ]
         )
 
     else:
 
-        top_region = "-"
-        top_region_population = 0
-
-
-    # ========================================================
-    # SHARE
-    # ========================================================
-
-    if selected_region == "전체":
-
-        selected_share = (
-            top_region_population
-            / national_population
-            * 100
-            if national_population > 0
-            else 0
-        )
-
-    else:
-
-        selected_share = (
-            current_population
-            / national_population
-            * 100
-            if national_population > 0
-            else 0
-        )
-
-
-    # ========================================================
-    # KPI STYLE
-    # ========================================================
-
-    change_class = (
-        "positive"
-        if month_change >= 0
-        else "negative"
-    )
-
-
-    change_symbol = (
-        "▲"
-        if month_change > 0
-
-        else "▼"
-        if month_change < 0
-
-        else "－"
-    )
+        max_age_group = "-"
+        max_age_population = 0
 
 
     # ========================================================
     # KPI
     # ========================================================
 
-    st.write("")
-
-
-    k1, k2, k3, k4 = st.columns(
-        4
-    )
+    k1, k2, k3, k4 = st.columns(4)
 
 
     with k1:
@@ -1371,11 +1395,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    {selected_month} {analysis_scope} 주민등록 인구
+                    선택 지역
                 </div>
 
                 <div class="kpi-value">
-                    {current_population:,}명
+                    {current_region_label}
                 </div>
 
             </div>
@@ -1390,11 +1414,11 @@ with st.container(
             <div class="kpi">
 
                 <div class="kpi-label">
-                    전월 대비 인구 변화
+                    전체 인구
                 </div>
 
-                <div class="kpi-value {change_class}">
-                    {change_symbol} {abs(month_change):,}명
+                <div class="kpi-value">
+                    {korean_number(total_population)}
                 </div>
 
             </div>
@@ -1404,37 +1428,16 @@ with st.container(
 
     with k3:
 
-        if selected_region == "전체":
-
-            third_label = (
-                "주민등록 인구 최다 지역"
-            )
-
-            third_value = (
-                top_region
-            )
-
-        else:
-
-            third_label = (
-                "전월 대비 증감률"
-            )
-
-            third_value = (
-                f"{month_change_rate:+.3f}%"
-            )
-
-
         st.html(
             f"""
             <div class="kpi">
 
                 <div class="kpi-label">
-                    {third_label}
+                    60세 이상 인구
                 </div>
 
                 <div class="kpi-value">
-                    {third_value}
+                    {korean_number(senior_population)}
                 </div>
 
             </div>
@@ -1444,29 +1447,16 @@ with st.container(
 
     with k4:
 
-        if selected_region == "전체":
-
-            fourth_label = (
-                f"{top_region} 전국 비중"
-            )
-
-        else:
-
-            fourth_label = (
-                f"전국 대비 {selected_region} 비중"
-            )
-
-
         st.html(
             f"""
             <div class="kpi">
 
                 <div class="kpi-label">
-                    {fourth_label}
+                    60세 이상 인구 비율
                 </div>
 
                 <div class="kpi-value">
-                    {selected_share:.1f}%
+                    {senior_share:.1f}%
                 </div>
 
             </div>
@@ -1475,236 +1465,23 @@ with st.container(
 
 
     # ========================================================
-    # MONTH TREND
+    # CHART AREA
     # ========================================================
 
-    with st.container(
-        key="month_trend_panel"
-    ):
-
-        st.html(
-            f"""
-            <div class="panel-title">
-                {analysis_scope} 월별 주민등록 인구 추이
-            </div>
-
-            <div class="panel-sub">
-                X축: 월 · Y축: 주민등록 인구(명) ·
-                최근 인구 증가·감소 흐름을 확인합니다.
-            </div>
-            """
-        )
-
-
-        if trend_df.empty:
-
-            st.warning(
-                "월별 주민등록 인구 데이터가 없습니다."
-            )
-
-        else:
-
-            min_pop = float(
-                trend_df[
-                    "population"
-                ].min()
-            )
-
-
-            max_pop = float(
-                trend_df[
-                    "population"
-                ].max()
-            )
-
-
-            pop_range = (
-                max_pop
-                - min_pop
-            )
-
-
-            padding = max(
-                pop_range * .20,
-                max_pop * .002,
-                10000,
-            )
-
-
-            fig_trend = go.Figure(
-                go.Scatter(
-
-                    x=trend_df[
-                        "month"
-                    ],
-
-                    y=trend_df[
-                        "population"
-                    ],
-
-                    mode="lines+markers",
-
-                    line=dict(
-                        color="#79C5A2",
-                        width=4,
-                    ),
-
-                    marker=dict(
-
-                        size=7,
-
-                        color="#D9A64A",
-
-                        line=dict(
-                            color="#182035",
-                            width=1.5,
-                        ),
-                    ),
-
-                    hovertemplate=(
-                        "<b>%{x}</b>"
-                        "<br>"
-                        "주민등록 인구: %{y:,}명"
-                        "<extra></extra>"
-                    ),
-                )
-            )
-
-
-            if current_population > 0:
-
-                fig_trend.add_trace(
-                    go.Scatter(
-
-                        x=[
-                            selected_month
-                        ],
-
-                        y=[
-                            current_population
-                        ],
-
-                        mode="markers+text",
-
-                        marker=dict(
-                            size=15,
-                            color="#E17663",
-                        ),
-
-                        text=[
-                            f"{current_population:,}명"
-                        ],
-
-                        textposition="top center",
-
-                        textfont=dict(
-                            color="#FFFFFF",
-                            size=12,
-                        ),
-
-                        showlegend=False,
-
-                        hoverinfo="skip",
-                    )
-                )
-
-
-            fig_trend.update_layout(
-
-                height=500,
-
-                margin=dict(
-                    l=100,
-                    r=55,
-                    t=55,
-                    b=95,
-                ),
-
-                paper_bgcolor="#182035",
-
-                plot_bgcolor="#182035",
-
-                showlegend=False,
-
-                hovermode="x unified",
-
-                font=dict(
-                    color="#E7EAF0",
-                    size=13,
-                ),
-
-                xaxis=dict(
-
-                    title="월",
-
-                    showgrid=False,
-
-                    tickangle=-45,
-
-                    tickfont=dict(
-                        color="#D5DAE4",
-                        size=11,
-                    ),
-                ),
-
-                yaxis=dict(
-
-                    title="주민등록 인구(명)",
-
-                    showgrid=True,
-
-                    gridcolor="#35405A",
-
-                    zeroline=False,
-
-                    tickformat=",",
-
-                    range=[
-                        max(
-                            0,
-                            min_pop - padding
-                        ),
-                        max_pop + padding,
-                    ],
-
-                    tickfont=dict(
-                        color="#D5DAE4",
-                        size=11,
-                    ),
-                ),
-            )
-
-
-            st.plotly_chart(
-
-                fig_trend,
-
-                use_container_width=True,
-
-                config={
-                    "displayModeBar": False,
-                }
-            )
-
-
-    # ========================================================
-    # REGION + DONUT
-    # ========================================================
-
-    left, right = st.columns(
+    chart_left, chart_right = st.columns(
         [
-            1.25,
-            1,
+            1.15,
+            1
         ],
         gap="medium"
     )
 
 
     # ========================================================
-    # LEFT - REGION BAR
+    # LEFT : AGE POPULATION
     # ========================================================
 
-    with left:
+    with chart_left:
 
         with st.container(
             key="region_panel"
@@ -1713,316 +1490,220 @@ with st.container(
             st.html(
                 f"""
                 <div class="panel-title">
-                    {selected_month} 지역별 주민등록 인구
+                    {current_region_label} 연령대별 인구
                 </div>
 
                 <div class="panel-sub">
-                    전국을 제외한 시도별 주민등록 인구 규모를 비교합니다.
+                    {selected_year}년 7월 기준
+                    {selected_gender} 인구의 연령대별 규모를 비교합니다.
                 </div>
                 """
             )
 
 
-            region_chart_df = (
-                region_summary
-
-                .sort_values(
-                    "population",
-                    ascending=True
-                )
-
+            plot_df = (
+                selected_df
                 .copy()
             )
 
 
-            if region_chart_df.empty:
+            if plot_df.empty:
 
-                st.warning(
-                    "지역별 주민등록 인구 데이터가 없습니다."
+                st.info(
+                    "연령대별 데이터가 없습니다."
                 )
 
             else:
 
-                max_population = float(
-                    region_chart_df[
-                        "population"
-                    ].max()
+                plot_max = max(
+                    float(
+                        plot_df[
+                            "population"
+                        ].max()
+                    ),
+                    1
                 )
 
 
-                if max_population <= 0:
-                    max_population = 1
-
-
-                bar_colors = []
-
-
-                for _, row in region_chart_df.iterrows():
-
-                    if (
-                        selected_region != "전체"
-                        and row[
-                            "region_name"
-                        ] == selected_region
-                    ):
-
-                        color = "#E17663"
-
-
-                    elif (
-                        row[
-                            "region_name"
-                        ] == top_region
-                    ):
-
-                        color = "#D9A64A"
-
-
-                    else:
-
-                        color = "#79B69B"
-
-
-                    bar_colors.append(
-                        color
-                    )
-
-
-                fig_region = go.Figure(
+                fig_age = go.Figure(
                     go.Bar(
 
-                        x=region_chart_df[
+                        x=plot_df[
+                            "age_group"
+                        ],
+
+                        y=plot_df[
                             "population"
                         ],
 
-                        y=region_chart_df[
-                            "region_name"
+                        marker_color=[
+                            "#D9A64A"
+                            if age in SENIOR_GROUPS
+                            else "#79B69B"
+
+                            for age
+                            in plot_df[
+                                "age_group"
+                            ]
                         ],
 
-                        orientation="h",
-
-                        marker_color=bar_colors,
-
                         text=[
-                            f"{int(value):,}"
+                            korean_number(
+                                value
+                            )
                             for value
-                            in region_chart_df[
+                            in plot_df[
                                 "population"
                             ]
                         ],
 
-                        textposition="outside",
-
                         textfont=dict(
-                            color="#F2F4F8",
-                            size=11,
+                            size=12,
+                            color="#FFFFFF"
                         ),
+
+                        textposition="outside",
 
                         cliponaxis=False,
 
                         hovertemplate=(
-                            "<b>%{y}</b>"
+                            "<b>%{x}</b>"
                             "<br>"
-                            "주민등록 인구: %{x:,}명"
+                            "인구: %{y:,.0f}명"
                             "<extra></extra>"
-                        ),
+                        )
                     )
                 )
 
 
-                fig_region.update_layout(
+                fig_age.update_layout(
 
                     height=610,
 
                     margin=dict(
-                        l=85,
-                        r=135,
-                        t=25,
-                        b=65,
+                        l=80,
+                        r=45,
+                        t=45,
+                        b=90
                     ),
 
                     paper_bgcolor="#182035",
 
                     plot_bgcolor="#182035",
 
-                    showlegend=False,
-
-                    bargap=.28,
-
                     font=dict(
-                        color="#E7EAF0",
-                        size=13,
+                        color="#E8EDF5",
+                        size=14
                     ),
 
+                    showlegend=False,
+
                     xaxis=dict(
-
-                        title="주민등록 인구(명)",
-
-                        showgrid=True,
-
-                        gridcolor="#35405A",
-
-                        zeroline=False,
-
-                        tickformat=",",
-
-                        range=[
-                            0,
-                            max_population * 1.22
-                        ],
+                        title="연령대",
+                        showgrid=False
                     ),
 
                     yaxis=dict(
 
-                        title=None,
+                        title="인구(명)",
 
-                        showgrid=False,
+                        tickformat=",",
 
-                        automargin=True,
+                        gridcolor="#35405A",
 
-                        tickfont=dict(
-                            color="#F0F2F6",
-                            size=12,
-                        ),
-                    ),
+                        range=[
+                            0,
+                            plot_max * 1.2
+                        ]
+                    )
                 )
 
 
                 st.plotly_chart(
-
-                    fig_region,
-
+                    fig_age,
                     use_container_width=True,
-
                     config={
-                        "displayModeBar": False,
+                        "displayModeBar": False
                     }
                 )
 
 
     # ========================================================
-    # RIGHT - DONUT
+    # RIGHT : AGE SHARE
     # ========================================================
 
-    with right:
+    with chart_right:
 
         with st.container(
-            key="pie_panel"
+            key="share_panel"
         ):
 
             st.html(
                 f"""
                 <div class="panel-title">
-                    {selected_month} 지역별 주민등록 인구 비중
+                    연령대별 인구 비중
                 </div>
 
                 <div class="panel-sub">
-                    각 지역의 주민등록 인구가 전국 시도 인구에서
-                    차지하는 비중을 확인합니다.
+                    {current_region_label} 전체 인구에서
+                    각 연령대가 차지하는 비율을 확인합니다.
                 </div>
                 """
             )
 
 
-            pie_df = (
-                region_summary
+            share_df = (
+                selected_df
                 .copy()
-                .sort_values(
-                    "population",
-                    ascending=False
-                )
             )
 
 
-            if pie_df.empty:
+            pie_colors = [
+                "#D9B45C",
+                "#91B99F",
+                "#91A8CE",
+                "#9B83C1",
+                "#BC8265",
+                "#D9C165",
+                "#8EB2BA",
+                "#B18E89",
+                "#A3B47A",
+                "#839BB5",
+                "#9582AB",
+            ]
 
-                st.warning(
-                    "지역별 주민등록 인구 데이터가 없습니다."
+
+            if share_df.empty:
+
+                st.info(
+                    "연령대 비중 데이터가 없습니다."
                 )
 
             else:
 
-                regional_total = float(
-                    pie_df[
-                        "population"
-                    ].sum()
-                )
-
-
-                # --------------------------------------------
-                # 선택 지역 강조
-                # --------------------------------------------
-
-                pull_values = []
-
-
-                for region in pie_df[
-                    "region_name"
-                ]:
-
-                    if (
-                        selected_region != "전체"
-                        and region == selected_region
-                    ):
-
-                        pull_values.append(
-                            0.08
-                        )
-
-                    else:
-
-                        pull_values.append(
-                            0
-                        )
-
-
-                # --------------------------------------------
-                # COLORS
-                # --------------------------------------------
-
-                pie_colors = [
-                    "#D9A64A",
-                    "#79B69B",
-                    "#88A8CF",
-                    "#A58AC8",
-                    "#C57B5E",
-                    "#E2BA58",
-                    "#83B39E",
-                    "#85AEB8",
-                    "#B78A8A",
-                    "#9EA96D",
-                    "#6E8FA5",
-                    "#927FAB",
-                    "#B58C68",
-                    "#718D77",
-                    "#7F809E",
-                    "#9E766F",
-                    "#657C8A",
-                ]
-
-
-                # --------------------------------------------
-                # DONUT
-                # --------------------------------------------
-
-                fig_pie = go.Figure(
+                fig_share = go.Figure(
                     go.Pie(
 
-                        labels=pie_df[
-                            "region_name"
+                        labels=share_df[
+                            "age_group"
                         ],
 
-                        values=pie_df[
+                        values=share_df[
                             "population"
                         ],
 
-                        hole=.58,
-
-                        pull=pull_values,
+                        hole=.55,
 
                         sort=False,
 
-                        direction="clockwise",
+                        textinfo="label+percent",
+
+                        textposition="outside",
+
+                        textfont=dict(
+                            color="#FFFFFF",
+                            size=12
+                        ),
 
                         marker=dict(
 
@@ -2030,62 +1711,51 @@ with st.container(
 
                             line=dict(
                                 color="#182035",
-                                width=2,
-                            ),
-                        ),
-
-                        textinfo="label+percent",
-
-                        textposition="outside",
-
-                        textfont=dict(
-                            color="#F2F4F8",
-                            size=10,
+                                width=2
+                            )
                         ),
 
                         hovertemplate=(
                             "<b>%{label}</b>"
                             "<br>"
-                            "주민등록 인구: %{value:,}명"
+                            "인구: %{value:,.0f}명"
                             "<br>"
-                            "비중: %{percent}"
+                            "비율: %{percent}"
                             "<extra></extra>"
-                        ),
+                        )
                     )
                 )
 
 
-                fig_pie.add_annotation(
+                fig_share.add_annotation(
 
                     x=.5,
-                    y=.52,
-
-                    text=(
-                        "<b>시도 합계</b>"
-                        "<br>"
-                        f"{int(regional_total):,}명"
-                    ),
+                    y=.5,
 
                     showarrow=False,
 
-                    font=dict(
-                        color="#FFFFFF",
-                        size=15,
+                    text=(
+                        "<b>전체 인구</b>"
+                        "<br>"
+                        f"{korean_number(total_population)}"
                     ),
 
-                    align="center",
+                    font=dict(
+                        color="#FFFFFF",
+                        size=18
+                    )
                 )
 
 
-                fig_pie.update_layout(
+                fig_share.update_layout(
 
                     height=610,
 
                     margin=dict(
-                        l=70,
-                        r=70,
-                        t=35,
-                        b=60,
+                        l=80,
+                        r=80,
+                        t=45,
+                        b=45
                     ),
 
                     paper_bgcolor="#182035",
@@ -2095,184 +1765,412 @@ with st.container(
                     showlegend=False,
 
                     font=dict(
-                        color="#E7EAF0",
-                        size=11,
-                    ),
-
-                    uniformtext_minsize=9,
-
-                    uniformtext_mode="hide",
+                        color="#FFFFFF",
+                        size=14
+                    )
                 )
 
 
                 st.plotly_chart(
-
-                    fig_pie,
-
+                    fig_share,
                     use_container_width=True,
-
                     config={
-                        "displayModeBar": False,
+                        "displayModeBar": False
                     }
                 )
 
 
     # ========================================================
-    # SUMMARY
+    # REGION SENIOR COMPARISON
     # ========================================================
 
-    if selected_region == "전체":
-
-        summary_text = f"""
-            {selected_month} 기준 전국 주민등록 인구는
-            <b>{current_population:,}명</b>입니다.
-            <br>
-
-            직전 월인 <b>{previous_month}</b>과 비교하면
-            <b>{month_change:+,}명</b> 변화했으며,
-            증감률은
-            <b>{month_change_rate:+.3f}%</b>입니다.
-            <br>
-
-            주민등록 인구가 가장 많은 지역은
-            <b>{top_region}</b>으로
-            <b>{top_region_population:,}명</b>입니다.
-            <br>
-
-            {top_region}은 전국 주민등록 인구의
-            약 <b>{selected_share:.1f}%</b>를 차지합니다.
-        """
-
-    else:
-
-        summary_text = f"""
-            {selected_month} 기준
-            <b>{selected_region}</b> 주민등록 인구는
-            <b>{current_population:,}명</b>입니다.
-            <br>
-
-            직전 월인 <b>{previous_month}</b>과 비교하면
-            <b>{month_change:+,}명</b> 변화했으며,
-            증감률은
-            <b>{month_change_rate:+.3f}%</b>입니다.
-            <br>
-
-            전국 주민등록 인구에서
-            {selected_region}이 차지하는 비중은
-            약 <b>{selected_share:.1f}%</b>입니다.
-        """
-
-
-    st.html(
-        f"""
-        <div class="info-box">
-
-            <b>주민등록 인구 현황 요약</b>
-            <br><br>
-
-            {summary_text}
-
-        </div>
-        """
-    )
-
-
-    # ========================================================
-    # DETAIL
-    # ========================================================
-
-    st.write("")
-
-
-    with st.expander(
-        "월별 주민등록 인구 데이터 상세 보기"
+    with st.container(
+        key="trend_panel"
     ):
 
-        detail_df = (
+        st.html(
+            f"""
+            <div class="panel-title">
+                지역별 60세 이상 인구 비율
+            </div>
+
+            <div class="panel-sub">
+                {selected_year}년 7월 기준
+                각 지역 전체 인구에서 60세 이상 인구가
+                차지하는 비율을 비교합니다.
+            </div>
+            """
+        )
+
+
+        compare_source = (
             df[
-                [
-                    "month",
-                    "region_name",
-                    "population",
-                ]
+                (df["year"] == selected_year)
+                &
+                (df["gender"] == selected_gender)
             ]
             .copy()
         )
 
 
-        if selected_region != "전체":
-
-            detail_df = (
-                detail_df[
-                    detail_df[
-                        "region_name"
-                    ] == selected_region
-                ]
-            )
-
-
-        detail_df = (
-            detail_df
-
-            .sort_values(
-                [
-                    "month",
-                    "population",
-                ],
-                ascending=[
-                    False,
-                    False,
-                ]
-            )
-
-            .reset_index(
-                drop=True
+        # 지역별 전체 인구
+        total_region_df = (
+            compare_source
+            .groupby(
+                "region",
+                as_index=False
+            )["population"]
+            .sum()
+            .rename(
+                columns={
+                    "population":
+                        "total_population"
+                }
             )
         )
 
 
-        detail_df[
-            "population"
-        ] = (
-            detail_df[
-                "population"
+        # 지역별 60세 이상 인구
+        senior_region_df = (
+            compare_source[
+                compare_source[
+                    "age_group"
+                ].isin(
+                    SENIOR_GROUPS
+                )
             ]
-            .round()
-            .astype(int)
+            .groupby(
+                "region",
+                as_index=False
+            )["population"]
+            .sum()
+            .rename(
+                columns={
+                    "population":
+                        "senior_population"
+                }
+            )
         )
 
 
-        detail_df.columns = [
-            "월",
-            "지역",
-            "주민등록 인구",
-        ]
-
-
-        st.dataframe(
-
-            detail_df,
-
-            use_container_width=True,
-
-            hide_index=True,
-
-            column_config={
-
-                "월":
-                    st.column_config.TextColumn(
-                        "월"
-                    ),
-
-                "지역":
-                    st.column_config.TextColumn(
-                        "지역"
-                    ),
-
-                "주민등록 인구":
-                    st.column_config.NumberColumn(
-                        "주민등록 인구",
-                        format="%d명"
-                    ),
-            },
+        compare_df = (
+            total_region_df
+            .merge(
+                senior_region_df,
+                on="region",
+                how="left"
+            )
         )
+
+
+        compare_df[
+            "senior_population"
+        ] = (
+            compare_df[
+                "senior_population"
+            ]
+            .fillna(0)
+        )
+
+
+        compare_df[
+            "senior_share"
+        ] = (
+            compare_df[
+                "senior_population"
+            ]
+            /
+            compare_df[
+                "total_population"
+            ]
+            *
+            100
+        )
+
+
+        compare_df[
+            "region_label"
+        ] = (
+            compare_df[
+                "region"
+            ]
+            .apply(
+                display_region
+            )
+        )
+
+
+        compare_df = (
+            compare_df
+            .sort_values(
+                "senior_share",
+                ascending=True
+            )
+            .reset_index(drop=True)
+        )
+
+
+        if compare_df.empty:
+
+            st.info(
+                "지역별 비교 데이터가 없습니다."
+            )
+
+        else:
+
+            max_share = max(
+                float(
+                    compare_df[
+                        "senior_share"
+                    ].max()
+                ),
+                1
+            )
+
+
+            fig_compare = go.Figure(
+                go.Bar(
+
+                    x=compare_df[
+                        "senior_share"
+                    ],
+
+                    y=compare_df[
+                        "region_label"
+                    ],
+
+                    orientation="h",
+
+                    marker_color=[
+                        "#D9A64A"
+                        if (
+                            selected_region != "전국"
+                            and region == selected_region
+                        )
+                        else "#79B69B"
+
+                        for region
+                        in compare_df[
+                            "region"
+                        ]
+                    ],
+
+                    text=[
+                        f"{value:.1f}%"
+                        for value
+                        in compare_df[
+                            "senior_share"
+                        ]
+                    ],
+
+                    textposition="outside",
+
+                    cliponaxis=False,
+
+                    hovertemplate=(
+                        "<b>%{y}</b>"
+                        "<br>"
+                        "60세 이상 비율: %{x:.1f}%"
+                        "<extra></extra>"
+                    )
+                )
+            )
+
+
+            fig_compare.update_layout(
+
+                height=650,
+
+                margin=dict(
+                    l=100,
+                    r=90,
+                    t=40,
+                    b=65
+                ),
+
+                paper_bgcolor="#182035",
+
+                plot_bgcolor="#182035",
+
+                font=dict(
+                    color="#E8EDF5",
+                    size=14
+                ),
+
+                showlegend=False,
+
+                xaxis=dict(
+
+                    title="60세 이상 인구 비율(%)",
+
+                    gridcolor="#35405A",
+
+                    range=[
+                        0,
+                        max_share * 1.15
+                    ],
+
+                    ticksuffix="%"
+                ),
+
+                yaxis=dict(
+                    title=None
+                )
+            )
+
+
+            st.plotly_chart(
+                fig_compare,
+                use_container_width=True,
+                config={
+                    "displayModeBar": False
+                }
+            )
+
+
+    # ========================================================
+    # REGION RANK
+    # ========================================================
+
+    if not compare_df.empty:
+
+        rank_desc = (
+            compare_df
+            .sort_values(
+                "senior_share",
+                ascending=False
+            )
+            .reset_index(drop=True)
+        )
+
+
+        top_region = (
+            rank_desc
+            .iloc[0][
+                "region_label"
+            ]
+        )
+
+
+        top_share = float(
+            rank_desc
+            .iloc[0][
+                "senior_share"
+            ]
+        )
+
+    else:
+
+        top_region = "-"
+        top_share = 0
+
+
+    # ========================================================
+    # SELECTED REGION RANK
+    # ========================================================
+
+    selected_rank_text = ""
+
+
+    if (
+        selected_region != "전국"
+        and not compare_df.empty
+    ):
+
+        rank_desc = (
+            compare_df
+            .sort_values(
+                "senior_share",
+                ascending=False
+            )
+            .reset_index(drop=True)
+        )
+
+
+        rank_match = (
+            rank_desc[
+                rank_desc[
+                    "region"
+                ]
+                == selected_region
+            ]
+        )
+
+
+        if not rank_match.empty:
+
+            selected_rank = (
+                rank_match.index[0]
+                + 1
+            )
+
+
+            selected_rank_text = f"""
+            <br>
+
+            <b>{current_region_label}</b>의
+            60세 이상 인구 비율은
+            전국 지역 중
+            <b>{selected_rank}위</b> 수준입니다.
+            """
+
+
+    # ========================================================
+    # ANALYSIS
+    # ========================================================
+
+    st.html(
+        f"""
+        <div class="analysis-box">
+
+            <div class="analysis-title">
+                {selected_year}년 7월
+                {current_region_label} 인구 분석
+            </div>
+
+            선택한 조건은
+            <b>{selected_gender}</b> 기준이며,
+            전체 인구는
+            <b>{total_population:,}명</b>입니다.
+
+            <br>
+
+            이 중 60세 이상 인구는
+            <b>{senior_population:,}명</b>으로,
+            전체 인구의 약
+            <b>{senior_share:.1f}%</b>를 차지합니다.
+
+            <br>
+
+            인구가 가장 많은 연령대는
+            <b>{max_age_group}</b>이며,
+            해당 연령대의 인구는
+            <b>{max_age_population:,}명</b>입니다.
+
+            <br>
+
+            지역별 비교에서
+            60세 이상 인구 비율이 가장 높은 지역은
+            <b>{top_region}</b>으로,
+            약
+            <b>{top_share:.1f}%</b>입니다.
+
+            {selected_rank_text}
+
+            <br><br>
+
+            본 데이터는
+            <b>{selected_year}년 7월 기준 연령별 인구 현황</b>을
+            기반으로 분석합니다.
+
+            <br>
+
+            원자료의 연령 구간이
+            <b>10세 단위</b>로 제공되므로,
+            현재 화면에서는
+            <b>60세 이상</b>을 기준으로
+            고연령 인구 비중을 비교합니다.
+
+        </div>
+        """
+    )

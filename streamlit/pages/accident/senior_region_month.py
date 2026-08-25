@@ -911,40 +911,6 @@ div[role="radiogroup"] label p {
 
 
 /* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background: #182035 !important;
-
-    border: 1px solid #46536F !important;
-
-    border-radius: 14px !important;
-
-    overflow: hidden !important;
-
-    margin-top: 12px !important;
-}
-
-
-[data-testid="stExpander"] summary * {
-
-    color: #FFFFFF !important;
-
-    opacity: 1 !important;
-}
-
-
-[data-testid="stExpander"] summary svg {
-
-    color: #D6A348 !important;
-
-    fill: #D6A348 !important;
-}
-
-
-/* ==========================================================
    PLOT
 ========================================================== */
 
@@ -977,6 +943,67 @@ div[role="radiogroup"] label p {
     height: 27px;
     border-radius: 4px;
     background: #D9A64A;
+}
+
+
+/* ==========================================================
+   ANALYSIS / PREDICTION DIVIDER
+========================================================== */
+
+.section-divider {
+    height: 1px;
+    margin: 46px 0 8px 0;
+    background: linear-gradient(
+        90deg,
+        rgba(217,166,74,0),
+        rgba(217,166,74,.95) 18%,
+        rgba(85,101,134,.9) 82%,
+        rgba(85,101,134,0)
+    );
+}
+
+
+/* ==========================================================
+   DETAIL TOGGLE BUTTON
+========================================================== */
+
+.st-key-senior_region_detail_toggle button {
+    width: 100% !important;
+    min-height: 52px !important;
+    background: #182035 !important;
+    color: #E7EAF0 !important;
+    border: 1px solid #394560 !important;
+    border-radius: 14px !important;
+    box-shadow: none !important;
+    justify-content: flex-start !important;
+    padding-left: 18px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+.st-key-senior_region_detail_toggle button * {
+    color: #E7EAF0 !important;
+    -webkit-text-fill-color: #E7EAF0 !important;
+    opacity: 1 !important;
+}
+
+.st-key-senior_region_detail_toggle button:hover {
+    background: #202A42 !important;
+    border-color: #D6A348 !important;
+    color: #F1C66A !important;
+}
+
+.st-key-senior_region_detail_toggle button:hover * {
+    color: #F1C66A !important;
+    -webkit-text-fill-color: #F1C66A !important;
+}
+
+.st-key-senior_region_detail_panel {
+    background: #182035;
+    border: 1px solid #394560;
+    border-radius: 14px;
+    padding: 18px 18px 20px 18px;
+    margin-top: 10px;
 }
 
 </style>
@@ -1129,6 +1156,13 @@ with st.container(
             ):
 
                 go_accident()
+
+
+    st.html(
+        """
+        <div class="section-heading">분석</div>
+        """
+    )
 
 
     # ========================================================
@@ -1510,13 +1544,6 @@ with st.container(
     )
 
 
-    st.html(
-        """
-        <div class="section-heading">분석</div>
-        """
-    )
-
-
     # ========================================================
     # MAP
     # ========================================================
@@ -1648,21 +1675,36 @@ with st.container(
 
                 fig_map.update_geos(
 
-                    fitbounds="locations",
-
                     visible=False,
 
-                    bgcolor="#182035"
+                    bgcolor="#182035",
+
+                    projection_type="mercator",
+
+                    center=dict(
+                        lat=35.8,
+                        lon=127.8
+                    ),
+
+                    lataxis_range=[
+                        32.5,
+                        39.5
+                    ],
+
+                    lonaxis_range=[
+                        124.0,
+                        132.0
+                    ]
                 )
 
 
                 fig_map.update_layout(
 
-                    height=610,
+                    height=680,
 
                     margin=dict(
                         l=10,
-                        r=75,
+                        r=55,
                         t=10,
                         b=10
                     ),
@@ -1673,7 +1715,11 @@ with st.container(
 
                     font=dict(
                         color="#FFFFFF"
-                    )
+                    ),
+
+                    dragmode=False,
+
+                    uirevision="korea-map-fixed"
                 )
 
 
@@ -1684,7 +1730,9 @@ with st.container(
                     use_container_width=True,
 
                     config={
-                        "displayModeBar": False
+                        "displayModeBar": False,
+                        "scrollZoom": False,
+                        "doubleClick": False
                     }
                 )
 
@@ -1797,7 +1845,7 @@ with st.container(
 
             fig_rank.update_layout(
 
-                height=610,
+                height=680,
 
                 margin=dict(
                     l=75,
@@ -2271,6 +2319,7 @@ with st.container(
 
     st.html(
         """
+        <div class="section-divider"></div>
         <div class="section-heading">예측</div>
         """
     )
@@ -3700,96 +3749,205 @@ with st.container(
     st.write("")
 
 
-    with st.expander(
-        "고령운전자 지역별·월별 사고 데이터 상세 보기"
+    if "show_senior_region_detail" not in st.session_state:
+
+        st.session_state[
+            "show_senior_region_detail"
+        ] = False
+
+
+    with st.container(
+        key="senior_region_detail_toggle"
     ):
 
-        detail_df = (
-            df[
-                [
-                    "year",
-                    "month",
-                    "sido_name",
-                    "sigungu",
-                    "accidents"
-                ]
-            ]
-            .copy()
-            .sort_values(
-                [
-                    "year",
-                    "month",
-                    "sido_name",
-                    "sigungu"
-                ],
-                ascending=[
-                    False,
-                    True,
-                    True,
-                    True
-                ]
-            )
-        )
-
-
-        detail_df.columns = [
-            "연도",
-            "월",
-            "시도",
-            "시군구",
-            "사고건수"
+        detail_open = st.session_state[
+            "show_senior_region_detail"
         ]
 
 
-        detail_df[
-            "사고건수"
-        ] = (
-            detail_df[
-                "사고건수"
+        detail_button_label = (
+            "▲ 연령별 교통사고 데이터 닫기"
+            if detail_open
+            else "▼ 연령별 교통사고 데이터 상세 보기"
+        )
+
+
+        if st.button(
+            detail_button_label,
+            key="senior_region_detail_button",
+            use_container_width=True
+        ):
+
+            st.session_state[
+                "show_senior_region_detail"
+            ] = not detail_open
+
+            st.rerun()
+
+
+    if st.session_state[
+        "show_senior_region_detail"
+    ]:
+
+        with st.container(
+            key="senior_region_detail_panel"
+        ):
+
+            detail_df = (
+                df[
+                    [
+                        "year",
+                        "month",
+                        "sido_name",
+                        "sigungu",
+                        "accidents",
+                    ]
+                ]
+                .copy()
+                .sort_values(
+                    [
+                        "year",
+                        "month",
+                        "sido_name",
+                        "sigungu",
+                    ],
+                    ascending=[
+                        False,
+                        True,
+                        True,
+                        True,
+                    ]
+                )
+                .reset_index(drop=True)
+            )
+
+
+            detail_df.columns = [
+                "연도",
+                "월",
+                "시도",
+                "시군구",
+                "사고건수",
             ]
-            .round()
-            .astype(int)
-        )
 
 
-        st.dataframe(
+            detail_df["연도"] = (
+                detail_df["연도"]
+                .astype(int)
+                .astype(str)
+                + "년"
+            )
 
-            detail_df,
 
-            use_container_width=True,
+            detail_df["월"] = (
+                detail_df["월"]
+                .astype(int)
+                .astype(str)
+                + "월"
+            )
 
-            hide_index=True,
 
-            height=460,
+            detail_df["사고건수"] = (
+                detail_df["사고건수"]
+                .round()
+                .astype(int)
+                .map(
+                    lambda value:
+                        f"{value:,}건"
+                )
+            )
 
-            column_config={
 
-                "연도":
-                    st.column_config.NumberColumn(
-                        "연도",
-                        format="%d년"
-                    ),
+            table_rows = ""
 
-                "월":
-                    st.column_config.NumberColumn(
-                        "월",
-                        format="%d월"
-                    ),
 
-                "시도":
-                    st.column_config.TextColumn(
-                        "시도"
-                    ),
+            for _, row in detail_df.iterrows():
 
-                "시군구":
-                    st.column_config.TextColumn(
-                        "시군구"
-                    ),
+                table_rows += f"""
+                    <tr>
+                        <td>{row["연도"]}</td>
+                        <td>{row["월"]}</td>
+                        <td>{row["시도"]}</td>
+                        <td>{row["시군구"]}</td>
+                        <td>{row["사고건수"]}</td>
+                    </tr>
+                """
 
-                "사고건수":
-                    st.column_config.NumberColumn(
-                        "사고건수",
-                        format="%d건"
-                    ),
-            }
-        )
+
+            st.html(
+                f"""
+                <style>
+
+                .senior-region-dark-table-wrap {{
+                    width: 100%;
+                    max-height: 560px;
+                    overflow-y: auto;
+                    overflow-x: auto;
+                    background: #182035;
+                    border: 1px solid #3A4662;
+                    border-radius: 12px;
+                }}
+
+                .senior-region-dark-table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: #182035;
+                    color: #E7EAF0;
+                    font-size: 13px;
+                }}
+
+                .senior-region-dark-table thead {{
+                    position: sticky;
+                    top: 0;
+                    z-index: 2;
+                }}
+
+                .senior-region-dark-table th {{
+                    background: #202A42;
+                    color: #D6A348;
+                    font-weight: 900;
+                    text-align: center;
+                    padding: 14px 16px;
+                    border-bottom: 1px solid #4A5670;
+                    white-space: nowrap;
+                }}
+
+                .senior-region-dark-table td {{
+                    background: #182035;
+                    color: #E7EAF0;
+                    font-weight: 600;
+                    text-align: center;
+                    padding: 12px 16px;
+                    border-bottom: 1px solid #303B55;
+                    white-space: nowrap;
+                }}
+
+                .senior-region-dark-table tbody tr:nth-child(even) td {{
+                    background: #1B243A;
+                }}
+
+                .senior-region-dark-table tbody tr:hover td {{
+                    background: #222D47;
+                    color: #FFFFFF;
+                }}
+
+                </style>
+
+                <div class="senior-region-dark-table-wrap">
+                    <table class="senior-region-dark-table">
+                        <thead>
+                            <tr>
+                                <th>연도</th>
+                                <th>월</th>
+                                <th>시도</th>
+                                <th>시군구</th>
+                                <th>사고건수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {table_rows}
+                        </tbody>
+                    </table>
+                </div>
+                """
+            )

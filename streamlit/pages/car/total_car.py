@@ -805,8 +805,7 @@ div[data-baseweb="select"] span {
 .st-key-type_bar_panel,
 .st-key-type_pie_panel,
 .st-key-region_map_panel,
-.st-key-region_panel,
-.st-key-usage_panel {
+.st-key-region_panel {
 
     background:
         #182035;
@@ -859,6 +858,26 @@ div[data-baseweb="select"] span {
 
 
 /* ==========================================================
+   MID SECTION TITLE
+========================================================== */
+
+.analysis-title {
+    color: #FFFFFF;
+    font-size: 23px;
+    font-weight: 800;
+    margin-top: 34px;
+    margin-bottom: 6px;
+}
+
+.analysis-description {
+    color: #AEB8C9;
+    font-size: 15px;
+    line-height: 1.7;
+    margin-bottom: 12px;
+}
+
+
+/* ==========================================================
    INFO
 ========================================================== */
 
@@ -887,23 +906,6 @@ div[data-baseweb="select"] span {
         1.8;
 }
 
-
-/* ==========================================================
-   EXPANDER
-========================================================== */
-
-[data-testid="stExpander"] {
-
-    background:
-        #182035;
-
-    border:
-        1px solid
-        #394560;
-
-    border-radius:
-        14px;
-}
 
 </style>
 """
@@ -1061,152 +1063,100 @@ with st.container(
 
 
     # ========================================================
-    # FILTER
+    # FILTER STATE / OPTIONS
+    # 실제 필터 UI는 지도·지역 현황 아래에 렌더링합니다.
     # ========================================================
 
-    f1, f2, f3, f4, empty = st.columns(
-        [
-            1,
-            1,
-            1,
-            1,
-            1.5,
-        ]
+    if year_col is not None:
+        year_options = sorted(
+            df[year_col]
+            .dropna()
+            .astype(int)
+            .unique()
+            .tolist(),
+            reverse=True
+        )
+    else:
+        year_options = []
+
+    region_options = (
+        ["전체"]
+        + sorted(
+            df["short_region"]
+            .dropna()
+            .astype(str)
+            .unique()
+            .tolist()
+        )
     )
 
-
-    # ========================================================
-    # YEAR
-    # ========================================================
-
-    with f1:
-
-        if year_col is not None:
-
-            year_options = sorted(
-                df[
-                    year_col
-                ]
-                .dropna()
-                .astype(int)
-                .unique()
-                .tolist(),
-                reverse=True
-            )
-
-
-            selected_year = st.selectbox(
-                "연도",
-                year_options,
-                key="total_car_year"
-            )
-
-        else:
-
-            selected_year = None
-
-
-    # ========================================================
-    # REGION
-    # ========================================================
-
-    with f2:
-
-        region_options = (
-            ["전체"]
-            + sorted(
-                df[
-                    "short_region"
-                ]
+    if car_type_col is not None:
+        type_values = sorted(
+            [
+                value
+                for value in df[car_type_col]
                 .dropna()
                 .astype(str)
                 .unique()
                 .tolist()
-            )
+                if value not in TOTAL_LABELS
+                and value != ""
+            ]
+        )
+    else:
+        type_values = []
+
+    if usage_col is not None:
+        usage_values = sorted(
+            [
+                value
+                for value in df[usage_col]
+                .dropna()
+                .astype(str)
+                .unique()
+                .tolist()
+                if value not in TOTAL_LABELS
+                and value != ""
+            ]
+        )
+    else:
+        usage_values = []
+
+    # 첫 진입 시 기본값 지정
+    if "total_car_year" not in st.session_state:
+        st.session_state["total_car_year"] = (
+            year_options[0] if year_options else None
         )
 
+    if "total_car_region" not in st.session_state:
+        st.session_state["total_car_region"] = "전체"
 
-        selected_region = st.selectbox(
-            "지역",
-            region_options,
-            key="total_car_region"
-        )
+    if "total_car_type" not in st.session_state:
+        st.session_state["total_car_type"] = "전체"
 
+    if "total_car_usage" not in st.session_state:
+        st.session_state["total_car_usage"] = "전체"
 
-    # ========================================================
-    # TYPE
-    # ========================================================
+    # 옵션 변경/데이터 변경 시 잘못된 세션값 보정
+    if (
+        year_options
+        and st.session_state.get("total_car_year") not in year_options
+    ):
+        st.session_state["total_car_year"] = year_options[0]
 
-    with f3:
+    if st.session_state.get("total_car_region") not in region_options:
+        st.session_state["total_car_region"] = "전체"
 
-        if car_type_col is not None:
+    if st.session_state.get("total_car_type") not in (["전체"] + type_values):
+        st.session_state["total_car_type"] = "전체"
 
-            type_values = sorted(
-                [
-                    value
-                    for value
-                    in df[
-                        car_type_col
-                    ]
-                    .dropna()
-                    .astype(str)
-                    .unique()
-                    .tolist()
-                    if value not in TOTAL_LABELS
-                    and value != ""
-                ]
-            )
+    if st.session_state.get("total_car_usage") not in (["전체"] + usage_values):
+        st.session_state["total_car_usage"] = "전체"
 
-
-            selected_type = st.selectbox(
-                "차종",
-                [
-                    "전체"
-                ] + type_values,
-                key="total_car_type"
-            )
-
-        else:
-
-            selected_type = "전체"
-
-
-    # ========================================================
-    # USAGE
-    # ========================================================
-
-    with f4:
-
-        if usage_col is not None:
-
-            usage_values = sorted(
-                [
-                    value
-                    for value
-                    in df[
-                        usage_col
-                    ]
-                    .dropna()
-                    .astype(str)
-                    .unique()
-                    .tolist()
-                    if value not in TOTAL_LABELS
-                    and value != ""
-                ]
-            )
-
-
-            selected_usage = st.selectbox(
-                "용도",
-                [
-                    "전체"
-                ] + usage_values,
-                key="total_car_usage"
-            )
-
-        else:
-
-            selected_usage = "전체"
+    selected_year = st.session_state.get("total_car_year")
+    selected_region = st.session_state.get("total_car_region", "전체")
+    selected_type = st.session_state.get("total_car_type", "전체")
+    selected_usage = st.session_state.get("total_car_usage", "전체")
 
 
     # ========================================================
@@ -1707,133 +1657,625 @@ with st.container(
 
 
     # ========================================================
+    # MAP DATA
+    #
+    # 지도와 지역 순위는 전국 데이터 사용
+    # ========================================================
+
+    map_region_df = (
+        national_region_df.copy()
+    )
+
+
+    map_region_df[
+        "map_region"
+    ] = (
+        map_region_df[
+            "short_region"
+        ]
+        .apply(
+            map_region_name
+        )
+    )
+
+
+    # ========================================================
+    # MAP + REGION
+    # ========================================================
+
+    region_left, region_right = st.columns(
+        [
+            1.08,
+            1,
+        ],
+        gap="medium"
+    )
+
+
+    # ========================================================
+    # MAP
+    # ========================================================
+
+    with region_left:
+
+        with st.container(
+            key="region_map_panel"
+        ):
+
+            st.html(
+                """
+                <div class="panel-title">
+                    대한민국 지역별 자동차 등록 분포
+                </div>
+
+                <div class="panel-sub">
+                    전국 지역별 자동차 등록 규모를 지도에서 비교합니다.
+                </div>
+                """
+            )
+
+
+            try:
+
+                korea_geojson = (
+                    load_korea_geojson()
+                )
+
+
+                geo_region_names = {
+
+                    str(
+                        feature
+                        .get(
+                            "properties",
+                            {}
+                        )
+                        .get(
+                            "name",
+                            ""
+                        )
+                    ).strip()
+
+                    for feature
+                    in korea_geojson[
+                        "features"
+                    ]
+                }
+
+
+                map_region_df[
+                    "matched"
+                ] = (
+                    map_region_df[
+                        "map_region"
+                    ]
+                    .isin(
+                        geo_region_names
+                    )
+                )
+
+
+                matched_df = (
+                    map_region_df[
+                        map_region_df[
+                            "matched"
+                        ]
+                    ]
+                    .copy()
+                )
+
+
+                if not matched_df.empty:
+
+                    matched_df[
+                        "color_rank"
+                    ] = (
+                        matched_df[
+                            count_col
+                        ]
+                        .rank(
+                            method="average",
+                            pct=True
+                        )
+                    )
+
+
+                    # 선택 지역 강조용
+                    matched_df[
+                        "selected"
+                    ] = (
+                        matched_df[
+                            "short_region"
+                        ]
+                        == selected_region
+                    )
+
+
+                    border_colors = [
+
+                        "#FFFFFF"
+                        if selected_region != "전체"
+                        and selected
+
+                        else "#D1D6DF"
+
+                        for selected
+                        in matched_df[
+                            "selected"
+                        ]
+                    ]
+
+
+                    border_widths = [
+
+                        3
+                        if selected_region != "전체"
+                        and selected
+
+                        else 1
+
+                        for selected
+                        in matched_df[
+                            "selected"
+                        ]
+                    ]
+
+
+                    fig_map = go.Figure(
+                        go.Choropleth(
+
+                            geojson=korea_geojson,
+
+                            locations=matched_df[
+                                "map_region"
+                            ],
+
+                            z=matched_df[
+                                "color_rank"
+                            ],
+
+                            featureidkey="properties.name",
+
+                            customdata=matched_df[
+                                count_col
+                            ],
+
+                            colorscale=[
+
+                                [0.00, "#172338"],
+                                [0.12, "#213A56"],
+                                [0.25, "#2E5D73"],
+                                [0.38, "#397E82"],
+                                [0.50, "#56A18A"],
+                                [0.62, "#8CB875"],
+                                [0.73, "#C7B458"],
+                                [0.83, "#E5A33E"],
+                                [0.91, "#E9783F"],
+                                [1.00, "#C94444"],
+                            ],
+
+                            zmin=0,
+                            zmax=1,
+
+                            marker=dict(
+
+                                line=dict(
+                                    color=border_colors,
+                                    width=border_widths,
+                                )
+                            ),
+
+                            hovertemplate=(
+                                "<b>%{location}</b>"
+                                "<br>"
+                                "자동차 등록대수: "
+                                "%{customdata:,}대"
+                                "<extra></extra>"
+                            ),
+
+                            colorbar=dict(
+
+                                title=dict(
+                                    text=(
+                                        "자동차 등록"
+                                        "<br>"
+                                        "상대 수준"
+                                    )
+                                ),
+
+                                tickmode="array",
+
+                                tickvals=[
+                                    .1,
+                                    .3,
+                                    .5,
+                                    .7,
+                                    .9,
+                                ],
+
+                                ticktext=[
+                                    "낮음",
+                                    "↓",
+                                    "중간",
+                                    "↑",
+                                    "높음",
+                                ],
+
+                                thickness=16,
+
+                                len=.68,
+
+                                outlinewidth=0,
+                            ),
+                        )
+                    )
+
+
+                    # 대한민국 전체 영역이 한 화면에 들어오도록
+                    # 수동 확대값을 제거하고 GeoJSON 경계에 자동 맞춤합니다.
+                    fig_map.update_geos(
+
+                        projection_type="mercator",
+
+                        fitbounds="locations",
+
+                        visible=False,
+
+                        showcoastlines=False,
+
+                        showcountries=False,
+
+                        showland=False,
+
+                        bgcolor="#182035",
+                    )
+
+
+                    fig_map.update_layout(
+
+                        height=610,
+
+                        margin=dict(
+                            l=0,
+                            r=55,
+                            t=10,
+                            b=0,
+                        ),
+
+                        paper_bgcolor="#182035",
+
+                        plot_bgcolor="#182035",
+
+                        font=dict(
+                            color="#E7EAF0"
+                        ),
+
+                        # 드래그 확대/이동 비활성화
+                        dragmode=False,
+                    )
+
+
+                    st.plotly_chart(
+
+                        fig_map,
+
+                        use_container_width=True,
+
+                        config={
+                            "displayModeBar": False,
+                            "scrollZoom": False,
+                            "doubleClick": False
+                        }
+                    )
+
+
+            except Exception as e:
+
+                st.error(
+                    "지도 표시 중 오류가 발생했습니다."
+                )
+
+                st.code(
+                    str(e)
+                )
+
+
+    # ========================================================
+    # REGION BAR
+    # ========================================================
+
+    with region_right:
+
+        with st.container(
+            key="region_panel"
+        ):
+
+            st.html(
+                """
+                <div class="panel-title">
+                    지역별 자동차 등록 현황
+                </div>
+
+                <div class="panel-sub">
+                    전국 지역별 자동차 등록 규모를 순위로 비교합니다.
+                </div>
+                """
+            )
+
+
+            region_chart_df = (
+                national_region_df
+
+                .sort_values(
+                    count_col,
+                    ascending=True
+                )
+
+                .copy()
+            )
+
+
+            if not region_chart_df.empty:
+
+                max_region_value = float(
+                    region_chart_df[
+                        count_col
+                    ].max()
+                )
+
+
+                if max_region_value <= 0:
+                    max_region_value = 1
+
+
+                region_colors = []
+
+
+                for _, row in region_chart_df.iterrows():
+
+                    if (
+                        selected_region != "전체"
+                        and row[
+                            "short_region"
+                        ] == selected_region
+                    ):
+
+                        color = "#E9783F"
+
+                    elif (
+                        row[
+                            "short_region"
+                        ] == top_region
+                    ):
+
+                        color = "#D9A64A"
+
+                    else:
+
+                        color = "#78927E"
+
+
+                    region_colors.append(
+                        color
+                    )
+
+
+                fig_region = go.Figure(
+                    go.Bar(
+
+                        x=region_chart_df[
+                            count_col
+                        ],
+
+                        y=region_chart_df[
+                            "short_region"
+                        ],
+
+                        orientation="h",
+
+                        marker_color=region_colors,
+
+                        text=[
+                            f"{int(value):,}"
+                            for value
+                            in region_chart_df[
+                                count_col
+                            ]
+                        ],
+
+                        textposition="outside",
+
+                        cliponaxis=False,
+
+                        hovertemplate=(
+                            "<b>%{y}</b>"
+                            "<br>"
+                            "%{x:,}대"
+                            "<extra></extra>"
+                        ),
+                    )
+                )
+
+
+                fig_region.update_layout(
+
+                    height=610,
+
+                    margin=dict(
+                        l=70,
+                        r=115,
+                        t=25,
+                        b=65,
+                    ),
+
+                    paper_bgcolor="#182035",
+
+                    plot_bgcolor="#182035",
+
+                    showlegend=False,
+
+                    font=dict(
+                        color="#E7EAF0"
+                    ),
+
+                    xaxis=dict(
+
+                        title="자동차 등록대수(대)",
+
+                        gridcolor="#35405A",
+
+                        tickformat=",",
+
+                        range=[
+                            0,
+                            max_region_value * 1.22,
+                        ],
+                    ),
+
+                    yaxis=dict(
+                        title=None
+                    ),
+                )
+
+
+                st.plotly_chart(
+
+                    fig_region,
+
+                    use_container_width=True,
+
+                    config={
+                        "displayModeBar": False
+                    }
+                )
+
+
+
+
+    # ========================================================
+    # REGION / TYPE / USAGE FILTER
+    # 지도 및 지역별 등록 현황 다음에 배치
+    # ========================================================
+
+    st.html(
+        """
+        <div class="analysis-title" style="margin-top:34px;">
+            지역별 자동차 등록 현황
+        </div>
+
+        <div class="analysis-description">
+            지역·차종·용도를 선택하여 자동차 등록 현황을 상세하게 확인합니다.
+        </div>
+        """
+    )
+
+    # 지역 → 차종 → 용도 순서로 왼쪽 정렬
+    # 연도 선택은 사용하지 않습니다.
+    selected_year = None
+
+    f1, f2, f3, spacer = st.columns([1, 1, 1, 1.8], gap="medium")
+
+    with f1:
+        selected_region = st.selectbox(
+            "지역 선택",
+            region_options,
+            key="total_car_region"
+        )
+
+    with f2:
+        selected_type = st.selectbox(
+            "차종 선택",
+            ["전체"] + type_values,
+            key="total_car_type"
+        )
+
+    with f3:
+        selected_usage = st.selectbox(
+            "용도 선택",
+            ["전체"] + usage_values,
+            key="total_car_usage"
+        )
+
+
+    # ========================================================
     # KPI
     # ========================================================
 
     st.write("")
 
+    k1, k2, k3, k4 = st.columns(4)
 
-    k1, k2, k3, k4 = st.columns(
-        4
-    )
-
+    # 첫 번째 KPI는 선택 지역 기준으로 표시
+    if selected_region == "전체":
+        first_kpi_label = "전국 자동차 등록대수"
+        first_kpi_value = national_total_count
+    else:
+        first_kpi_label = f"{selected_region} 자동차 등록대수"
+        first_kpi_value = total_count
 
     with k1:
-
         st.html(
             f"""
             <div class="kpi">
-
                 <div class="kpi-label">
-                    {analysis_scope} 자동차 등록대수
+                    {first_kpi_label}
                 </div>
-
                 <div class="kpi-value">
-                    {total_count:,}대
+                    {first_kpi_value:,}대
                 </div>
-
             </div>
             """
         )
-
-
-    # ========================================================
-    # KPI #2
-    # ========================================================
-
-    if selected_region == "전체":
-
-        second_label = "등록대수 최다 지역"
-        second_value = top_region
-
-    else:
-
-        second_label = f"{selected_region} 최다 차종"
-        second_value = top_type
-
 
     with k2:
-
         st.html(
             f"""
             <div class="kpi">
-
                 <div class="kpi-label">
-                    {second_label}
+                    등록대수 최다 지역
                 </div>
-
                 <div class="kpi-value">
-                    {second_value}
+                    {top_region}
                 </div>
-
             </div>
             """
         )
-
-
-    # ========================================================
-    # KPI #3
-    # ========================================================
-
-    if selected_region == "전체":
-
-        third_label = "등록대수 최다 차종"
-        third_value = top_type
-
-    else:
-
-        third_label = f"{selected_region} 최다 용도"
-        third_value = top_usage
-
 
     with k3:
-
         st.html(
             f"""
             <div class="kpi">
-
                 <div class="kpi-label">
-                    {third_label}
+                    등록대수 최다 차종
                 </div>
-
                 <div class="kpi-value">
-                    {third_value}
+                    {top_type}
                 </div>
-
             </div>
             """
         )
 
-
-    # ========================================================
-    # KPI #4
-    # ========================================================
-
     if selected_region == "전체":
-
-        fourth_label = f"{top_region} 전국 비중"
-        fourth_value = f"{selected_region_share:.1f}%"
-
+        share_region_label = top_region
+        share_region_value = (
+            top_region_count / national_total_count * 100
+            if national_total_count > 0
+            else 0
+        )
     else:
-
-        fourth_label = f"전국 대비 {selected_region} 비중"
-        fourth_value = f"{selected_region_share:.1f}%"
-
+        share_region_label = selected_region
+        share_region_value = selected_region_share
 
     with k4:
-
         st.html(
             f"""
             <div class="kpi">
-
                 <div class="kpi-label">
-                    {fourth_label}
+                    {share_region_label} 전국 비중
                 </div>
-
                 <div class="kpi-value">
-                    {fourth_value}
+                    {share_region_value:.1f}%
                 </div>
-
             </div>
             """
         )
@@ -1841,6 +2283,7 @@ with st.container(
 
     # ========================================================
     # TYPE CHART
+    # 지역 지도/지역별 등록 현황 다음으로 이동
     # ========================================================
 
     type_left, type_right = st.columns(
@@ -2112,616 +2555,6 @@ with st.container(
                 )
 
 
-    # ========================================================
-    # MAP DATA
-    #
-    # 지도와 지역 순위는 전국 데이터 사용
-    # ========================================================
-
-    map_region_df = (
-        national_region_df.copy()
-    )
-
-
-    map_region_df[
-        "map_region"
-    ] = (
-        map_region_df[
-            "short_region"
-        ]
-        .apply(
-            map_region_name
-        )
-    )
-
-
-    # ========================================================
-    # MAP + REGION
-    # ========================================================
-
-    region_left, region_right = st.columns(
-        [
-            1.08,
-            1,
-        ],
-        gap="medium"
-    )
-
-
-    # ========================================================
-    # MAP
-    # ========================================================
-
-    with region_left:
-
-        with st.container(
-            key="region_map_panel"
-        ):
-
-            st.html(
-                """
-                <div class="panel-title">
-                    대한민국 지역별 자동차 등록 분포
-                </div>
-
-                <div class="panel-sub">
-                    전국 지역별 자동차 등록 규모를 지도에서 비교합니다.
-                </div>
-                """
-            )
-
-
-            try:
-
-                korea_geojson = (
-                    load_korea_geojson()
-                )
-
-
-                geo_region_names = {
-
-                    str(
-                        feature
-                        .get(
-                            "properties",
-                            {}
-                        )
-                        .get(
-                            "name",
-                            ""
-                        )
-                    ).strip()
-
-                    for feature
-                    in korea_geojson[
-                        "features"
-                    ]
-                }
-
-
-                map_region_df[
-                    "matched"
-                ] = (
-                    map_region_df[
-                        "map_region"
-                    ]
-                    .isin(
-                        geo_region_names
-                    )
-                )
-
-
-                matched_df = (
-                    map_region_df[
-                        map_region_df[
-                            "matched"
-                        ]
-                    ]
-                    .copy()
-                )
-
-
-                if not matched_df.empty:
-
-                    matched_df[
-                        "color_rank"
-                    ] = (
-                        matched_df[
-                            count_col
-                        ]
-                        .rank(
-                            method="average",
-                            pct=True
-                        )
-                    )
-
-
-                    # 선택 지역 강조용
-                    matched_df[
-                        "selected"
-                    ] = (
-                        matched_df[
-                            "short_region"
-                        ]
-                        == selected_region
-                    )
-
-
-                    border_colors = [
-
-                        "#FFFFFF"
-                        if selected_region != "전체"
-                        and selected
-
-                        else "#D1D6DF"
-
-                        for selected
-                        in matched_df[
-                            "selected"
-                        ]
-                    ]
-
-
-                    border_widths = [
-
-                        3
-                        if selected_region != "전체"
-                        and selected
-
-                        else 1
-
-                        for selected
-                        in matched_df[
-                            "selected"
-                        ]
-                    ]
-
-
-                    fig_map = go.Figure(
-                        go.Choropleth(
-
-                            geojson=korea_geojson,
-
-                            locations=matched_df[
-                                "map_region"
-                            ],
-
-                            z=matched_df[
-                                "color_rank"
-                            ],
-
-                            featureidkey="properties.name",
-
-                            customdata=matched_df[
-                                count_col
-                            ],
-
-                            colorscale=[
-
-                                [0.00, "#172338"],
-                                [0.12, "#213A56"],
-                                [0.25, "#2E5D73"],
-                                [0.38, "#397E82"],
-                                [0.50, "#56A18A"],
-                                [0.62, "#8CB875"],
-                                [0.73, "#C7B458"],
-                                [0.83, "#E5A33E"],
-                                [0.91, "#E9783F"],
-                                [1.00, "#C94444"],
-                            ],
-
-                            zmin=0,
-                            zmax=1,
-
-                            marker=dict(
-
-                                line=dict(
-                                    color=border_colors,
-                                    width=border_widths,
-                                )
-                            ),
-
-                            hovertemplate=(
-                                "<b>%{location}</b>"
-                                "<br>"
-                                "자동차 등록대수: "
-                                "%{customdata:,}대"
-                                "<extra></extra>"
-                            ),
-
-                            colorbar=dict(
-
-                                title=dict(
-                                    text=(
-                                        "자동차 등록"
-                                        "<br>"
-                                        "상대 수준"
-                                    )
-                                ),
-
-                                tickmode="array",
-
-                                tickvals=[
-                                    .1,
-                                    .3,
-                                    .5,
-                                    .7,
-                                    .9,
-                                ],
-
-                                ticktext=[
-                                    "낮음",
-                                    "↓",
-                                    "중간",
-                                    "↑",
-                                    "높음",
-                                ],
-
-                                thickness=16,
-
-                                len=.68,
-
-                                outlinewidth=0,
-                            ),
-                        )
-                    )
-
-
-                    fig_map.update_geos(
-
-                        projection_type="mercator",
-
-                        center=dict(
-                            lat=36.15,
-                            lon=127.85
-                        ),
-
-                        projection_scale=5.8,
-
-                        lataxis_range=[
-                            32.8,
-                            38.8
-                        ],
-
-                        lonaxis_range=[
-                            124.5,
-                            131.2
-                        ],
-
-                        visible=False,
-
-                        showcoastlines=False,
-
-                        showcountries=False,
-
-                        showland=False,
-
-                        bgcolor="#182035",
-                    )
-
-
-                    fig_map.update_layout(
-
-                        height=610,
-
-                        margin=dict(
-                            l=0,
-                            r=55,
-                            t=10,
-                            b=0,
-                        ),
-
-                        paper_bgcolor="#182035",
-
-                        plot_bgcolor="#182035",
-
-                        font=dict(
-                            color="#E7EAF0"
-                        ),
-                    )
-
-
-                    st.plotly_chart(
-
-                        fig_map,
-
-                        use_container_width=True,
-
-                        config={
-                            "displayModeBar": False
-                        }
-                    )
-
-
-            except Exception as e:
-
-                st.error(
-                    "지도 표시 중 오류가 발생했습니다."
-                )
-
-                st.code(
-                    str(e)
-                )
-
-
-    # ========================================================
-    # REGION BAR
-    # ========================================================
-
-    with region_right:
-
-        with st.container(
-            key="region_panel"
-        ):
-
-            st.html(
-                """
-                <div class="panel-title">
-                    지역별 자동차 등록대수
-                </div>
-
-                <div class="panel-sub">
-                    전국 지역별 자동차 등록 규모를 순위로 비교합니다.
-                </div>
-                """
-            )
-
-
-            region_chart_df = (
-                national_region_df
-
-                .sort_values(
-                    count_col,
-                    ascending=True
-                )
-
-                .copy()
-            )
-
-
-            if not region_chart_df.empty:
-
-                max_region_value = float(
-                    region_chart_df[
-                        count_col
-                    ].max()
-                )
-
-
-                if max_region_value <= 0:
-                    max_region_value = 1
-
-
-                region_colors = []
-
-
-                for _, row in region_chart_df.iterrows():
-
-                    if (
-                        selected_region != "전체"
-                        and row[
-                            "short_region"
-                        ] == selected_region
-                    ):
-
-                        color = "#E9783F"
-
-                    elif (
-                        row[
-                            "short_region"
-                        ] == top_region
-                    ):
-
-                        color = "#D9A64A"
-
-                    else:
-
-                        color = "#78927E"
-
-
-                    region_colors.append(
-                        color
-                    )
-
-
-                fig_region = go.Figure(
-                    go.Bar(
-
-                        x=region_chart_df[
-                            count_col
-                        ],
-
-                        y=region_chart_df[
-                            "short_region"
-                        ],
-
-                        orientation="h",
-
-                        marker_color=region_colors,
-
-                        text=[
-                            f"{int(value):,}"
-                            for value
-                            in region_chart_df[
-                                count_col
-                            ]
-                        ],
-
-                        textposition="outside",
-
-                        cliponaxis=False,
-
-                        hovertemplate=(
-                            "<b>%{y}</b>"
-                            "<br>"
-                            "%{x:,}대"
-                            "<extra></extra>"
-                        ),
-                    )
-                )
-
-
-                fig_region.update_layout(
-
-                    height=610,
-
-                    margin=dict(
-                        l=70,
-                        r=115,
-                        t=25,
-                        b=65,
-                    ),
-
-                    paper_bgcolor="#182035",
-
-                    plot_bgcolor="#182035",
-
-                    showlegend=False,
-
-                    font=dict(
-                        color="#E7EAF0"
-                    ),
-
-                    xaxis=dict(
-
-                        title="자동차 등록대수(대)",
-
-                        gridcolor="#35405A",
-
-                        tickformat=",",
-
-                        range=[
-                            0,
-                            max_region_value * 1.22,
-                        ],
-                    ),
-
-                    yaxis=dict(
-                        title=None
-                    ),
-                )
-
-
-                st.plotly_chart(
-
-                    fig_region,
-
-                    use_container_width=True,
-
-                    config={
-                        "displayModeBar": False
-                    }
-                )
-
-
-    # ========================================================
-    # USAGE
-    # ========================================================
-
-    with st.container(
-        key="usage_panel"
-    ):
-
-        st.html(
-            f"""
-            <div class="panel-title">
-                {analysis_scope} 용도별 자동차 등록 현황
-            </div>
-
-            <div class="panel-sub">
-                선택한 지역에서 차량 용도별 등록 규모를 비교합니다.
-            </div>
-            """
-        )
-
-
-        if usage_df.empty:
-
-            st.info(
-                "용도별 데이터가 없습니다."
-            )
-
-        else:
-
-            fig_usage = go.Figure(
-                go.Bar(
-
-                    x=usage_df[
-                        usage_col
-                    ],
-
-                    y=usage_df[
-                        count_col
-                    ],
-
-                    marker_color="#79B69B",
-
-                    text=[
-                        f"{int(value):,}대"
-                        for value
-                        in usage_df[
-                            count_col
-                        ]
-                    ],
-
-                    textposition="outside",
-
-                    hovertemplate=(
-                        "<b>%{x}</b>"
-                        "<br>"
-                        "%{y:,}대"
-                        "<extra></extra>"
-                    ),
-                )
-            )
-
-
-            fig_usage.update_layout(
-
-                height=400,
-
-                margin=dict(
-                    l=80,
-                    r=45,
-                    t=25,
-                    b=70,
-                ),
-
-                paper_bgcolor="#182035",
-
-                plot_bgcolor="#182035",
-
-                showlegend=False,
-
-                font=dict(
-                    color="#E7EAF0"
-                ),
-
-                xaxis=dict(
-                    title="용도"
-                ),
-
-                yaxis=dict(
-
-                    title="자동차 등록대수(대)",
-
-                    gridcolor="#35405A",
-
-                    tickformat=",",
-                ),
-            )
-
-
-            st.plotly_chart(
-
-                fig_usage,
-
-                use_container_width=True,
-
-                config={
-                    "displayModeBar": False
-                }
-            )
 
 
     # ========================================================
@@ -2771,113 +2604,3 @@ with st.container(
         </div>
         """
     )
-
-
-    # ========================================================
-    # DETAIL
-    # ========================================================
-
-    st.write("")
-
-
-    with st.expander(
-        "자동차 등록 데이터 상세 보기"
-    ):
-
-        detail_columns = [
-            region_col
-        ]
-
-
-        if year_col is not None:
-
-            detail_columns.append(
-                year_col
-            )
-
-
-        if car_type_col is not None:
-
-            detail_columns.append(
-                car_type_col
-            )
-
-
-        if usage_col is not None:
-
-            detail_columns.append(
-                usage_col
-            )
-
-
-        detail_columns.append(
-            count_col
-        )
-
-
-        detail_df = (
-            filtered[
-                detail_columns
-            ]
-            .copy()
-        )
-
-
-        detail_df[
-            count_col
-        ] = (
-            detail_df[
-                count_col
-            ]
-            .round()
-            .astype(int)
-        )
-
-
-        rename_map = {
-
-            region_col:
-                "지역",
-
-            count_col:
-                "자동차 등록대수",
-        }
-
-
-        if year_col is not None:
-
-            rename_map[
-                year_col
-            ] = "연도"
-
-
-        if car_type_col is not None:
-
-            rename_map[
-                car_type_col
-            ] = "차종"
-
-
-        if usage_col is not None:
-
-            rename_map[
-                usage_col
-            ] = "용도"
-
-
-        detail_df = (
-            detail_df
-            .rename(
-                columns=rename_map
-            )
-        )
-
-
-        st.dataframe(
-
-            detail_df,
-
-            use_container_width=True,
-
-            hide_index=True,
-        )

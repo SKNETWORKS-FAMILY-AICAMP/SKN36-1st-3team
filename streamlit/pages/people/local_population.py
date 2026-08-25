@@ -415,7 +415,7 @@ footer {
         none !important;
 
     font-size:
-        16px !important;
+        18px !important;
 
     font-weight:
         500 !important;
@@ -441,7 +441,7 @@ footer {
         #27314C !important;
 
     font-size:
-        31px !important;
+        33px !important;
 
     font-weight:
         900 !important;
@@ -515,7 +515,7 @@ footer {
         #D6A348;
 
     font-size:
-        13px;
+        15px;
 
     font-weight:
         800;
@@ -534,7 +534,7 @@ footer {
         #FFFFFF;
 
     font-size:
-        42px;
+        44px;
 
     font-weight:
         900;
@@ -556,7 +556,7 @@ footer {
         #B4BCCB;
 
     font-size:
-        15px;
+        17px;
 
     line-height:
         1.7;
@@ -600,7 +600,7 @@ label[data-testid="stWidgetLabel"] p {
         #C2C8D3 !important;
 
     font-size:
-        13px !important;
+        15px !important;
 
     font-weight:
         600 !important;
@@ -629,7 +629,7 @@ div[data-baseweb="select"] span {
         #273149 !important;
 
     font-size:
-        14px !important;
+        16px !important;
 }
 
 
@@ -663,7 +663,7 @@ div[data-baseweb="select"] span {
         #A8B0C0;
 
     font-size:
-        12px;
+        14px;
 
     margin-bottom:
         15px;
@@ -676,7 +676,7 @@ div[data-baseweb="select"] span {
         #FFFFFF;
 
     font-size:
-        25px;
+        27px;
 
     font-weight:
         800;
@@ -718,7 +718,7 @@ div[data-baseweb="select"] span {
         #FFFFFF;
 
     font-size:
-        21px;
+        23px;
 
     font-weight:
         800;
@@ -734,7 +734,7 @@ div[data-baseweb="select"] span {
         #B8C0CF;
 
     font-size:
-        13px;
+        15px;
 
     line-height:
         1.6;
@@ -743,6 +743,166 @@ div[data-baseweb="select"] span {
         10px;
 }
 
+
+/* ==========================================================
+   STREAMLIT DATAFRAME - SAFER STYLE
+========================================================== */
+
+.st-key-table_panel [data-testid="stDataFrame"] {
+
+    margin-top: 18px;
+
+    border: 1px solid #46536F !important;
+
+    border-radius: 16px !important;
+
+    overflow: hidden !important;
+
+    background: #131B2E !important;
+
+    box-shadow:
+        0 10px 26px
+        rgba(0,0,0,.16);
+}
+
+.st-key-table_panel [data-testid="stDataFrame"] > div {
+
+    border-radius: 16px !important;
+}
+
+.st-key-table_panel [data-testid="stDataFrame"] button {
+
+    color: #DCE3ED !important;
+}
+
+.st-key-table_panel [data-testid="stDataFrame"] svg {
+
+    color: #AEB8C9 !important;
+}
+
+
+/* ==========================================================
+   SAFER DARK DETAIL TABLE
+========================================================== */
+
+.safer-table {
+    margin-top: 20px;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #3E4B67;
+    border-radius: 18px;
+    background: #121A2B;
+    box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+
+.safer-table-header,
+.safer-table-row {
+    display: grid;
+    grid-template-columns: .55fr 1fr 1.7fr 2fr;
+    align-items: center;
+}
+
+.safer-table-header {
+    min-height: 52px;
+    padding: 0 18px;
+    background: #263149;
+    border-bottom: 1px solid #46536F;
+    color: #F2C86B;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.safer-table-row {
+    min-height: 54px;
+    padding: 0 18px;
+    background: #151E31;
+    border-bottom: 1px solid rgba(78,91,119,.52);
+    color: #E8EDF5;
+    font-size: 15px;
+    transition: background .15s ease, transform .15s ease;
+}
+
+.safer-table-row:nth-child(odd) {
+    background: #172136;
+}
+
+.safer-table-row:last-child {
+    border-bottom: none;
+}
+
+.safer-table-row:hover {
+    background: #202C45;
+}
+
+.safer-cell {
+    padding: 13px 8px;
+}
+
+.safer-rank {
+    color: #C7D0DE;
+    font-weight: 800;
+}
+
+.safer-rank.rank-top {
+    color: #F3C867;
+}
+
+.safer-region {
+    color: #FFFFFF;
+    font-weight: 800;
+}
+
+.safer-population {
+    color: #E9EDF4;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    padding-right: 28px;
+}
+
+.safer-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.safer-progress-track {
+    flex: 1;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #2C354A;
+    border: 1px solid #3D4861;
+}
+
+.safer-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #B8862F 0%, #D9A64A 55%, #F1C96D 100%);
+    box-shadow: 0 0 10px rgba(217,166,74,.22);
+}
+
+.safer-share-value {
+    width: 72px;
+    color: #F4D487;
+    font-weight: 800;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+    .safer-table-header,
+    .safer-table-row {
+        grid-template-columns: .55fr .9fr 1.35fr 1.7fr;
+    }
+
+    .safer-table-header {
+        font-size: 14px;
+    }
+
+    .safer-table-row {
+        font-size: 14px;
+    }
+}
 
 /* ==========================================================
    SUMMARY
@@ -767,7 +927,7 @@ div[data-baseweb="select"] span {
         #B5BDCB;
 
     font-size:
-        13px;
+        15px;
 
     line-height:
         1.8;
@@ -1386,7 +1546,7 @@ with st.container(
 
                         textfont=dict(
                             color="#F2F4F8",
-                            size=11,
+                            size=13,
                         ),
 
                         cliponaxis=False,
@@ -1452,7 +1612,7 @@ with st.container(
 
                     font=dict(
                         color="#E7EAF0",
-                        size=13,
+                        size=15,
                     ),
 
                     xaxis=dict(
@@ -1478,7 +1638,7 @@ with st.container(
 
                         tickfont=dict(
                             color="#C8CFDB",
-                            size=11,
+                            size=13,
                         ),
                     ),
 
@@ -1492,7 +1652,7 @@ with st.container(
 
                         tickfont=dict(
                             color="#F0F2F6",
-                            size=12,
+                            size=14,
                         ),
                     ),
                 )
@@ -1619,7 +1779,7 @@ with st.container(
 
                         textfont=dict(
                             color="#F2F4F8",
-                            size=10,
+                            size=12,
                         ),
 
                         hovertemplate=(
@@ -1649,7 +1809,7 @@ with st.container(
 
                     font=dict(
                         color="#FFFFFF",
-                        size=16,
+                        size=18,
                     ),
 
                     align="center",
@@ -1675,10 +1835,10 @@ with st.container(
 
                     font=dict(
                         color="#E7EAF0",
-                        size=11,
+                        size=13,
                     ),
 
-                    uniformtext_minsize=9,
+                    uniformtext_minsize=11,
 
                     uniformtext_mode="hide",
                 )
@@ -1712,7 +1872,7 @@ with st.container(
 
             <div class="panel-sub">
                 지역별 인구수와 전국 대비 비중,
-                인구 규모 순위를 확인합니다.
+                인구 규모 순위를 한눈에 비교합니다.
             </div>
             """
         )
@@ -1793,44 +1953,71 @@ with st.container(
         )
 
 
-        st.dataframe(
-
-            table_df,
-
-            use_container_width=True,
-
-            hide_index=True,
-
-            column_config={
-
-                "순위":
-                    st.column_config.NumberColumn(
-                        "순위",
-                        format="%d위",
-                        width="small",
-                    ),
-
-                "지역":
-                    st.column_config.TextColumn(
-                        "지역",
-                        width="medium",
-                    ),
-
-                "인구수":
-                    st.column_config.NumberColumn(
-                        "인구수",
-                        format="%d명",
-                        width="large",
-                    ),
-
-                "전국 대비(%)":
-                    st.column_config.NumberColumn(
-                        "전국 대비(%)",
-                        format="%.2f%%",
-                        width="medium",
-                    ),
-            },
+        max_share_for_bar = (
+            max(
+                float(
+                    table_df[
+                        "전국 대비(%)"
+                    ].max()
+                ),
+                1.0
+            )
+            if not table_df.empty
+            else 1.0
         )
+
+
+        # ====================================================
+        # SAFER DARK HTML TABLE
+        # ====================================================
+
+        if table_df.empty:
+            st.info("표시할 지역별 인구 데이터가 없습니다.")
+        else:
+            max_share = max(float(table_df["전국 대비(%)"].max()), 1.0)
+
+            rows_html = []
+
+            for _, row in table_df.sort_values("순위").iterrows():
+                rank = int(row["순위"])
+                region = str(row["지역"])
+                population = int(row["인구수"])
+                share = float(row["전국 대비(%)"])
+                bar_width = max(0.0, min(100.0, share / max_share * 100))
+
+                rank_class = " rank-top" if rank <= 3 else ""
+
+                rows_html.append(
+                    f"""
+                    <div class="safer-table-row">
+                        <div class="safer-cell safer-rank{rank_class}">{rank}위</div>
+                        <div class="safer-cell safer-region">{region}</div>
+                        <div class="safer-cell safer-population">{population:,}명</div>
+                        <div class="safer-cell safer-share">
+                            <div class="safer-progress-wrap">
+                                <div class="safer-progress-track">
+                                    <div class="safer-progress-fill" style="width:{bar_width:.2f}%"></div>
+                                </div>
+                                <span class="safer-share-value">{share:.2f}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    """
+                )
+
+            st.html(
+                f"""
+                <div class="safer-table">
+                    <div class="safer-table-header">
+                        <div>순위</div>
+                        <div>지역</div>
+                        <div>인구수</div>
+                        <div>전국 대비 비중</div>
+                    </div>
+                    {''.join(rows_html)}
+                </div>
+                """
+            )
 
 
     # ========================================================
